@@ -25,13 +25,19 @@ export default function ReportView({ report, change }: { report: Report; change?
         <Value>{formatDate(r.report_date)}</Value>
       </Section>
       <Section label={FIELDS.residents.label}>
-        <Value muted={r.residents_not_verified}>
-          {r.residents_not_verified ? NOT_YET_VERIFIED : r.residents_count}
+        <Value>
+          {r.residents_not_verified ? <NotYetVerified /> : <span className="tabular">{r.residents_count}</span>}
         </Value>
         <p className="mt-1 text-micro text-muted">{FIELDS.residents.caveat}</p>
       </Section>
       <Section label={FIELDS.construction.label}>
-        <Value muted={r.construction_not_verified}>{formatConstructionDate(reportConstructionDate(r))}</Value>
+        <Value>
+          {r.construction_not_verified ? (
+            <NotYetVerified />
+          ) : (
+            <span className="tabular">{formatConstructionDate(reportConstructionDate(r))}</span>
+          )}
+        </Value>
         {change && (
           <div className="mt-2 rounded-control border border-line bg-surface p-3 text-body text-ink">
             <p>
@@ -100,5 +106,15 @@ export function NotInspected({ reason }: { reason: string }) {
         {reason}
       </p>
     </div>
+  );
+}
+
+/** An unknown, never a finding (plan rule 3): neutral grey with the small "no data" hatch. */
+function NotYetVerified() {
+  return (
+    <span className="inline-flex items-center gap-2 text-muted">
+      <span className="hatch h-3.5 w-3.5 shrink-0 rounded-[4px] border border-line" aria-hidden />
+      {NOT_YET_VERIFIED}
+    </span>
   );
 }
