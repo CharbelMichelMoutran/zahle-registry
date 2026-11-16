@@ -47,7 +47,18 @@ Add each new feature here when the owner asks for it.
 - Try to edit or delete reports through the public API and the browser: it must fail.
 - Construction date changes keep every earlier value, with who, when and why.
 
-## 7. Attacker checks
+## 7. Accounts and approval
+- Sign-up has six fields (full name, contact number, OEA membership number, discipline, username, password) with the limits in `docs/engineering.md` D9. Email addresses are rejected in the contact field. Duplicate usernames. Arabic names.
+- After sign-up: "Waiting for OEA approval." Refresh approves the account and goes straight into the map. Refreshing twice, closing the tab and returning, and signing in on a second device all behave sensibly.
+- A pending (not yet refreshed) account cannot see any building, report or colour, including by calling the API directly.
+- Before sign-in nothing about any building is reachable: pages, `/api/buildings`, the colours feed, reports (rule 2).
+- Login: a wrong username and a wrong password give the same message. Logout works. A session cannot be reused after logout.
+- A report's engineer name, contact, OEA number and discipline come from the account, appear at once, and are locked. Try to change them in the browser and by calling the API with other values: the server must ignore them. A user must not be able to file a report as someone else.
+- Old reports keep the engineer details they were written with.
+- All signed-in engineers can see each other's data (this is intended).
+- Passwords are not stored or logged in plain text. Very long inputs, injection, and rapid repeated sign-ups.
+
+## 8. Attacker checks
 - Script injection in every text field. Huge payloads. Fake or malformed requests to the API.
 - The buildings feed and report endpoints: can they be abused to run up cost or read private data?
 - Nothing about any building is public beyond what the engineer-only app shows (rule 2).
