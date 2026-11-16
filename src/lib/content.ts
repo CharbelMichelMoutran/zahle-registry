@@ -124,27 +124,31 @@ export const COLOUR_FIELD = {
   locked: "Complete all four observations to choose a colour.",
   warningTitle: "Choose carefully.",
   warning:
-    "After an earthquake, these colours are used to decide which buildings are checked first and who may enter. Green means no restriction on use at the time of your visit. It does not mean the building is earthquake-resistant. Choose the colour your observations support. A saved report cannot be changed. If something changes later, add a new report.",
+    "After an earthquake, these colours are used to decide which buildings are checked first and who may enter. Good condition means no restriction on use at the time of your visit. It does not mean the building is earthquake-resistant. Choose the colour your observations support. A saved report cannot be changed. If something changes later, add a new report.",
   warningShort:
     "After an earthquake these colours are used for triage. Choose carefully. Your observations are always shown with the colour. A saved report cannot be changed.",
 };
 
+/**
+ * Ratings are labelled by meaning, never by colour name (owner decision A1).
+ * Data values stay green / yellow / red; the colour and arch icon show beside the label.
+ */
 export const COLOUR_CONTENT: Record<Colour, { word: string; label: string; description: string }> = {
   green: {
-    word: "Green",
-    label: "Green: Good condition",
+    word: "Good condition",
+    label: "Good condition",
     description:
       "No serious defect found in the parts you inspected. No restriction on use at the time of your visit.",
   },
   yellow: {
-    word: "Yellow",
-    label: "Yellow: Needs some work (restricted use)",
+    word: "Needs some work",
+    label: "Needs some work (restricted use)",
     description:
       "Defects found. Work is needed. Parts of the building may be used only under the conditions in your observations.",
   },
   red: {
-    word: "Red",
-    label: "Red: Imminent risk (unsafe, do not enter)",
+    word: "Imminent risk",
+    label: "Imminent risk (unsafe, do not enter)",
     description:
       "Serious danger found. People should not enter or stay, unless the engineer or authority allows it. This is not a demolition order.",
   },
