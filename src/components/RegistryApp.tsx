@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { approvedMessage, LOGIN_TEXT, type Engineer } from "@/lib/account";
+import type { Engineer } from "@/lib/account";
+import { approvedMessage, LOGIN_TEXT } from "@/lib/content";
 import { apiFetch, LOGGED_OUT_EVENT } from "@/lib/client-fetch";
 import { WELCOME_KEY } from "./auth/WaitingPanel";
 import MapView from "./MapView";

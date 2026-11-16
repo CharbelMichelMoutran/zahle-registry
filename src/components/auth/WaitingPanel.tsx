@@ -2,11 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { DEMO_NOTICE, WAITING } from "@/lib/account";
+import { WAITING } from "@/lib/content";
 
 export const WELCOME_KEY = "zr:welcome";
 
-/** D9.3. Refresh approves the account (simulated) and goes straight to the map. */
+/** D9.3. Refresh approves the account and goes straight to the map. */
 export default function WaitingPanel() {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -50,7 +50,6 @@ export default function WaitingPanel() {
       >
         {busy ? "Refreshing…" : "Refresh"}
       </button>
-      <p className="text-center text-[13px] text-slate-500">{DEMO_NOTICE.short}</p>
       <LogoutLink onDone={() => router.replace("/login")} />
     </div>
   );

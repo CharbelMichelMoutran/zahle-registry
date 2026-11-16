@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { LOGIN_TEXT, PASSWORD_MAX } from "@/lib/account";
+import { PASSWORD_MAX } from "@/lib/account";
+import { LOGIN_TEXT } from "@/lib/content";
 import { createSession, verifyPassword } from "@/lib/session";
 import { createServerSupabase } from "@/lib/supabase-server";
 

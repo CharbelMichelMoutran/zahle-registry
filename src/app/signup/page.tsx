@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Create account · Zahle Building Reg
 
 export default function SignupPage() {
   return (
-    <AuthShell notice>
+    <AuthShell>
       <SignupForm />
     </AuthShell>
   );

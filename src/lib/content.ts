@@ -154,3 +154,65 @@ export const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
+
+// ---------------------------------------------------------------------------
+// Accounts: sign-up, waiting, login (docs/engineering.md D9). No "demo" wording
+// anywhere in the app (owner decision, DESIGN.md section 7).
+// ---------------------------------------------------------------------------
+
+export const SIGNUP_FIELDS = {
+  fullName: {
+    label: "Full name",
+    help: "Your name as it will appear on every report you write. It cannot be changed later.",
+  },
+  discipline: {
+    label: "Discipline",
+    help: "Your profession, as you are registered with the OEA. It is shown next to your name on every report you write and cannot be changed later.",
+  },
+  contact: {
+    label: "Contact number",
+    help: "A phone or messaging number. It is shown on your reports to every signed-in engineer, so the next engineer can call you about a building.",
+  },
+  oeaNumber: {
+    label: "OEA membership number",
+    help: "Your Order of Engineers and Architects membership number. It is shown on your reports to every signed-in engineer.",
+  },
+  username: {
+    label: "Username",
+    help: "You will use this to log in. It is not shown on reports. Letters, numbers, dot, dash and underscore only.",
+  },
+  password: {
+    label: "Password",
+    help: "At least 8 characters. Do not use a password from anywhere else. If you forget it there is no reset; create a new account.",
+  },
+} as const;
+
+export const SIGNUP_ERRORS = {
+  missing: "Please fill this in.",
+  fullName: "Please enter your full name.",
+  discipline: "Choose your discipline.",
+  contactEmail: "Enter a phone number. Email addresses are not used.",
+  contact: "Enter a phone number: 7 to 20 digits, spaces, plus sign or dashes.",
+  oeaNumber: "Use 5 to 12 letters, numbers or dashes.",
+  username: "Use 3 to 30 letters, numbers, dots, dashes or underscores.",
+  passwordShort: "Use at least 8 characters.",
+  passwordLong: (max: number) => `Use at most ${max} characters.`,
+};
+
+export const WAITING = {
+  title: "Waiting for OEA approval.",
+  body: [
+    "Your account has been created. The Order of Engineers and Architects confirms your membership before you can write reports.",
+  ],
+};
+
+export const LOGIN_TEXT = {
+  wrong: "Username or password is not correct.",
+  failed: "Something went wrong. Please try again.",
+  missing: "Enter your username and password.",
+  forgot: "Forgot your password? There is no reset. Create a new account.",
+  loggedOut: "You have been logged out. Please log in again.",
+  draftLost: "Your draft was not saved.",
+};
+
+export const approvedMessage = (name: string) => `Account approved. Welcome, ${name}.`;

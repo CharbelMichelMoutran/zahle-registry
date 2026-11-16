@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { LOGIN_TEXT } from "@/lib/account";
+import { LOGIN_TEXT } from "@/lib/content";
 import { authInputClass } from "./AuthShell";
 import { PasswordInput } from "./PasswordInput";
 

@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
-import { DISCIPLINE_LABEL, DISCIPLINES, SIGNUP_FIELDS, validateSignup, type SignupInput } from "@/lib/account";
+import { DISCIPLINE_LABEL, DISCIPLINES, validateSignup, type SignupInput } from "@/lib/account";
+import { SIGNUP_FIELDS } from "@/lib/content";
 import { authInputClass } from "./AuthShell";
 import { PasswordInput } from "./PasswordInput";
 
@@ -113,7 +114,7 @@ export default function SignupForm() {
       </fieldset>
 
       {field("contact", { type: "tel", inputMode: "tel", autoComplete: "tel", maxLength: 30, placeholder: "+961 00 000 000" })}
-      {field("oeaNumber", { autoComplete: "off", autoCapitalize: "characters", maxLength: 20, placeholder: "DEMO-12345" })}
+      {field("oeaNumber", { autoComplete: "off", autoCapitalize: "characters", maxLength: 20 })}
       {field("username", { autoComplete: "username", autoCapitalize: "none", spellCheck: false, maxLength: 40 })}
 
       <div>
