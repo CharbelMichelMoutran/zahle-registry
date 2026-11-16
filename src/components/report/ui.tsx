@@ -14,27 +14,34 @@ export function Section({
   const Label = htmlFor ? "label" : "h3";
   return (
     <section>
-      <Label htmlFor={htmlFor} className="block text-sm font-semibold text-slate-900">
+      <Label htmlFor={htmlFor} className="block text-body font-semibold text-ink">
         {label}
       </Label>
-      {help && <p className="mt-0.5 mb-2 text-[13px] leading-snug text-slate-500">{help}</p>}
+      {help && <p className="mt-0.5 mb-2 text-micro text-muted">{help}</p>}
       <div className={help ? "" : "mt-1.5"}>{children}</div>
     </section>
   );
 }
 
-export function DraftBanner({ text }: { text: string }) {
+/** A group of fields inside the tray: micro-label above, dashed hairline between groups. */
+export function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <p className="rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-[13px] text-slate-600">
-      {text}
-    </p>
+    <div className="space-y-5 border-t border-dashed border-line pt-5 first:border-t-0 first:pt-0">
+      <p className="micro-label">{label}</p>
+      {children}
+    </div>
   );
 }
 
+export function DraftBanner({ text }: { text: string }) {
+  return <p className="rounded-control bg-surface-soft px-3 py-2 text-micro text-muted">{text}</p>;
+}
+
+/** Field messages say what to do, never that the engineer did something wrong. */
 export function FieldError({ id, message }: { id?: string; message?: string }) {
   if (!message) return null;
   return (
-    <p id={id} className="mt-1.5 text-[13px] text-red-700">
+    <p id={id} className="mt-1.5 text-micro text-attention">
       {message}
     </p>
   );
@@ -52,22 +59,23 @@ export function Checkbox({
   help?: string;
 }) {
   return (
-    <label className="flex cursor-pointer items-start gap-2.5 py-1 text-sm text-slate-800">
+    <label className="flex min-h-11 cursor-pointer items-start gap-3 py-2 text-body text-ink">
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-0.5 h-[18px] w-[18px] shrink-0 accent-slate-900"
+        className="mt-0.5 h-5 w-5 shrink-0 rounded-[6px] accent-accent"
       />
       <span>
         {label}
-        {help && <span className="block text-[13px] text-slate-500">{help}</span>}
+        {help && <span className="block text-micro text-muted">{help}</span>}
       </span>
     </label>
   );
 }
 
+/** Inputs are 17px so iOS does not zoom in on focus. */
 export const inputClass =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 placeholder:text-slate-400 " +
-  "focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 disabled:bg-slate-100 disabled:text-slate-400 " +
-  "aria-[invalid=true]:border-red-600";
+  "min-h-11 w-full rounded-control border border-line bg-surface px-3 py-2 text-lead text-ink placeholder:text-muted/70 " +
+  "transition-[border-color,box-shadow] focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent-soft " +
+  "disabled:bg-surface-soft disabled:text-muted aria-[invalid=true]:border-attention";
