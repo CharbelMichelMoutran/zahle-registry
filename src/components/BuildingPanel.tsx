@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { forwardRef, useEffect, useLayoutEffect, useRef } from "react";
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DISCIPLINE_LABEL, DISCIPLINE_SHORT, SHOW_DISCIPLINE_IN_HISTORY, type Engineer } from "@/lib/account";
 import { NOT_INSPECTED } from "@/lib/content";
 import { firstLine, formatDate } from "@/lib/format";
@@ -11,7 +11,7 @@ import { ColourBadge, NotYetInspectedBadge } from "./report/ColourBadge";
 import ReportForm from "./report/ReportForm";
 import ReportView from "./report/ReportView";
 import { ArchHandle, ArchMark } from "./ui/Arch";
-import { Button, IconButton } from "./ui/Button";
+import { Button, IconButton, Spinner } from "./ui/Button";
 
 export type Level = "preview" | "full";
 export type Tab = "history" | "create";
@@ -77,6 +77,8 @@ const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(prop
   }, [full, onClose, onMinimize]);
 
   const reports = data.status === "ready" ? data.reports : [];
+  const [progress, setProgress] = useState(0);
+  const showProgress = full && props.tab === "create" && data.status === "ready" && !!props.draft;
 
   return (
     <motion.aside
@@ -125,6 +127,12 @@ const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(prop
           </svg>
         </IconButton>
       </motion.header>
+      {/* Pinned under the tab bar; the form scrolls beneath it, never behind text. */}
+      {full && (
+        <div className="mx-4 h-0.5 shrink-0 overflow-hidden rounded-full bg-line" aria-hidden={!showProgress}>
+          {showProgress && <Progress value={progress} />}
+        </div>
+      )}
 
       <div
         ref={scrollRef}
@@ -154,7 +162,11 @@ const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(prop
               </div>
             )}
             {data.status === "ready" &&
-              (full ? <FullView {...props} data={data} /> : <Preview {...props} reports={reports} />)}
+              (full ? (
+                <FullView {...props} data={data} onProgress={setProgress} />
+              ) : (
+                <Preview {...props} reports={reports} />
+              ))}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -261,7 +273,9 @@ function Celebration() {
   );
 }
 
-function FullView(props: Props & { data: Extract<BuildingData, { status: "ready" }> }) {
+function FullView(
+  props: Props & { data: Extract<BuildingData, { status: "ready" }>; onProgress: (v: number) => void },
+) {
   const { data, tab, openReportId, onOpenReport, draft } = props;
   const opened = openReportId ? data.reports.find((r) => r.id === openReportId) : undefined;
 
@@ -276,6 +290,7 @@ function FullView(props: Props & { data: Extract<BuildingData, { status: "ready"
         latest={data.reports[0] ?? null}
         onSaved={props.onSaved}
         onStale={props.onStale}
+        onProgress={props.onProgress}
       />
     );
   }
@@ -347,13 +362,46 @@ function FullView(props: Props & { data: Extract<BuildingData, { status: "ready"
   );
 }
 
-/** Skeleton rows; static under reduced motion. */
+/**
+ * Loading (DESIGN.md section 7): nothing for the first 100ms, a small spinner
+ * up to 1s, skeleton rows after that. Static under reduced motion.
+ */
 function Loading() {
+  const [stage, setStage] = useState<"none" | "spinner" | "skeleton">("none");
+  useEffect(() => {
+    const a = setTimeout(() => setStage("spinner"), 100);
+    const b = setTimeout(() => setStage("skeleton"), 1000);
+    return () => {
+      clearTimeout(a);
+      clearTimeout(b);
+    };
+  }, []);
+  if (stage === "none") return <div className="h-11" aria-busy="true" />;
+  if (stage === "spinner")
+    return (
+      <div className="flex h-11 items-center gap-2 text-micro text-muted" aria-busy="true">
+        <Spinner /> Loading
+      </div>
+    );
   return (
     <div className="space-y-3 py-1" aria-busy="true" aria-label="Loading">
       <div className="motion-safe-only h-6 w-1/2 animate-pulse rounded-control bg-surface-soft" />
       <div className="motion-safe-only h-5 w-4/5 animate-pulse rounded-control bg-surface-soft" />
       <div className="motion-safe-only h-11 w-full animate-pulse rounded-control bg-surface-soft" />
     </div>
+  );
+}
+
+function Progress({ value }: { value: number }) {
+  return (
+    <div
+      role="progressbar"
+      aria-label="Report completion"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(value * 100)}
+      className="h-full origin-left bg-accent transition-transform duration-300 ease-out"
+      style={{ transform: `scaleX(${value})` }}
+    />
   );
 }
