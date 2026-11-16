@@ -66,7 +66,7 @@ Files that carry the work: `plan.md` (decisions, scope), `DESIGN.md` (look and m
 ## Waiting on the owner
 
 1. **Connect Vercel to GitHub** (vercel.com/account → Connections → GitHub). Until then, deploys go by a workaround (deploying a clean copy of the committed files), because Vercel cannot match the commit email.
-2. **Arch icons:** keep "more filled = more concern" (green 1, amber 2, orange 3)? The coder chose it. The orchestrator recommends keeping it.
+2. **Arch icons:** keep "more filled = more concern" (green 1, amber 2, red 3)? The coder chose it. The orchestrator recommends keeping it.
 3. **Waiting-screen text:** the civil-engineer's true version ("Your account has been created. Press Refresh to check.") is in use. The coder's alternative claimed the OEA confirms membership, which the app does not do.
 4. **Send the OEA questions** (questions 1 to 15 at the end of `docs/engineering.md`) to the owner's senior OEA contact.
 5. **Set up the Anthropic Console** (sign up, add $50, set a $50 hard limit, create a key). The AI features cannot start without it. The owner signs in; Claude does the rest from the command line.
