@@ -69,13 +69,13 @@ export default function RegistryApp() {
 
       <main className="relative flex flex-1 flex-col overflow-hidden">
         {welcome && (
-          <div className="pointer-events-none absolute inset-x-0 top-3 z-[1300] flex justify-center px-4">
+          <div className="pointer-events-none absolute inset-x-0 top-3 z-[1050] flex justify-center px-4">
             <p
               role="status"
               className="animate-[fadeout_5s_ease-in_forwards] pointer-events-auto flex items-center gap-3 rounded-full bg-slate-900 px-4 py-2 text-sm text-white shadow-lg"
             >
               <bdi dir="auto">{welcome}</bdi>
-              <button type="button" aria-label="Close" onClick={() => setWelcome(null)} className="text-white/70 hover:text-white">
+              <button type="button" aria-label="Dismiss" onClick={() => setWelcome(null)} className="text-white/70 hover:text-white">
                 ×
               </button>
             </p>
