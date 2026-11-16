@@ -13,6 +13,24 @@ Family's springy, friendly trays and Raycast's crisp precision, in light and war
 | **Family** (main reference) | Trays that slide up and change height smoothly. Springy, physical motion. Buttons that feel good to press. Friendly, bright colour. Calm, human wording. | Crypto and wallet content. |
 | **Raycast** | Crisp, precise layout. A command bar for fast search. Clean list rows. Keyboard shortcuts. Fine borders and soft depth. | The dark, black, gloomy theme. Red accents. |
 
+### Heavy inspiration: the Beirut Urban Lab family (owner, 16 Nov 2026)
+
+The owner wants these relied on heavily: the **Beirut Built Environment Database**, **Precarious Homes**, and the **Beirut Urban Lab** home page (the lab behind the post-blast damage maps). They are Lebanese, built by researchers and engineers, and they take buildings seriously. Reviewed in a browser on 16 Nov 2026. What they teach us:
+
+| Seen on | What we take | What we leave |
+|---|---|---|
+| **Beirut Urban Lab home** | The **bilingual stacked wordmark**: Latin on the left, Arabic on the right, same weight, tightly set. Small **uppercase, letter-spaced labels** in a condensed sans for navigation and section names. **Dashed hairlines** as dividers. A **diagonal hatch** as a quiet fill. Dense, confident editorial layout, with the date on the card. | The coral-red accent (no red). Long scrolling grid pages. |
+| **Beirut Built Environment Database** | Every building is a **coloured footprint**, and place names sit quietly on the map. A bold white title over the map, with one calm line of explanation. The map is the hero. | The dark map (no dark themes). Six unrelated footprint colours: we have four. |
+| **Precarious Homes** | **Serif display type** for titles and one-line statements: it feels human, serious and literary. Plain, honest, human wording about housing. Full-bleed photography. | Dark top bar. We have no photography in the demo. |
+
+How they change this design:
+1. **Wordmark.** Stacked and bilingual like the lab's logo: "zahle / building / registry" on the left in Inter Tight 600 lower-case, **زحلة** on the right in IBM Plex Sans Arabic, large. Use it on the login, sign-up and waiting screens, and small (one line) in the top bar.
+2. **Display serif.** Add one serif for display moments only: **Source Serif 4**, weight 500. Use it for the sign-up and waiting screen titles, the empty-state line, and the preview tray's building heading. Everything else stays Inter. This is where the "City of Poetry" voice lives.
+3. **Micro-labels.** Section and field-group labels use 13px uppercase, letter-spacing 0.08em, weight 600, in `text-muted`: "HISTORY", "BUILDING", "OBSERVATIONS". This is our Raycast-meets-lab detail.
+4. **Dashed hairline** (`1px dashed border`) divides sections inside a tray. Solid `border` stays for panels and rows.
+5. **Hatch means unknown.** A fine diagonal hatch in `border` colour is the fill for **"Not yet inspected"** buildings and for any "Not yet verified" value. It is a functional use: it tells colour-blind users "no data", and it echoes the lab's hatch. It appears **nowhere else**. No other textures or patterns.
+6. **Map as the hero.** Buildings are footprints coloured by status (section 3), with quiet place names. The tray has one calm line of explanation, never a wall of text.
+
 ## 2. Zahle: the theme (hard rule)
 
 The design must feel like Zahle, not like a generic map app. Zahle is the "City of Wine and Poetry", on the Berdawni river, at the foot of Mount Sannine, in the Bekaa valley, with stone houses, arched windows and red-tile roofs. These details come from general knowledge. **The owner corrects anything wrong or missing.**
@@ -30,7 +48,7 @@ How Zahle shows up. Each item is small, and each one has a job:
 | **Arabic name** | The wordmark shows "Zahle Building Registry" with **زحلة** beside it in IBM Plex Sans Arabic, in the top-left. |
 | **Poetry** | Short, human lines in empty states and the "Waiting for OEA approval" screen. Two or three lines in the whole app, never decoration. |
 
-Rules for the Zahle theme: no stock "Lebanese" clichés (no cedar tree, no flag colours, no ornament patterns, no illustrations of people or buildings). No textures or patterns on surfaces. If a Zahle idea does not carry meaning, leave it out.
+Rules for the Zahle theme: no stock "Lebanese" clichés (no cedar tree, no flag colours, no ornament patterns, no illustrations of people or buildings). No textures or patterns on surfaces, except the one functional hatch for "not yet inspected" (section 1). If a Zahle idea does not carry meaning, leave it out.
 
 ## 3. Colours
 
@@ -50,16 +68,16 @@ Light and warm. Dark text is a deep slate, never pure black.
 
 Share of the screen: about 60% ground and map, 30% trays and surfaces, 10% accent and status colours.
 
-### Building status colours (owner decision pending, see section 12)
+### Building status colours (owner decision: option A, 16 Nov 2026)
 
-`plan.md` section 4b defines three ratings: **green** (good), **yellow** (needs some work), **red** (imminent risk). The owner wants no red in the app. Until the owner decides how to square the two, build with these colours, and keep the data values as `green`, `yellow` and `red` so a change is a one-line edit:
+`plan.md` section 4b defines three ratings: **green** (good), **yellow** (needs some work), **red** (imminent risk). The owner wants no red in the app, and chose **option A**: green, amber and orange on screen, with the wording from `docs/engineering.md` D4 (including "unsafe / imminent risk" for the worst rating). The data values stay `green`, `yellow` and `red`:
 
 | Rating (data) | Colour | Hex | Zahle name |
 |---|---|---|---|
 | `green` | Green | `#1FA971` | Vine |
 | `yellow` | Amber | `#F5A524` | Apricot |
 | `red` | Orange | `#EE7A2F` | Terracotta |
-| none | Grey | `#A3A8B3` | Limestone grey ("Not yet inspected") |
+| none | Grey with fine hatch | `#A3A8B3` | Limestone grey ("Not yet inspected"). The hatch is described in section 1. |
 
 Status colours differ in lightness as well as hue. They always come with their word (rule 1 of `plan.md` section 4), and with the arch icon: one, two or three filled arches. Text on a status colour is dark slate unless white passes 4.5:1. Wording for each rating comes from `docs/engineering.md` D4, never from this file.
 
@@ -68,6 +86,8 @@ Status colours differ in lightness as well as hue. They always come with their w
 | Role | Font | Notes |
 |---|---|---|
 | Headings | Inter Tight, 600 | |
+| Display moments | Source Serif 4, 500 | Titles on sign-up and waiting screens, empty-state lines, the building heading in the preview tray. Nowhere else. |
+| Micro-labels | Inter, 600, 13px, uppercase, letter-spacing 0.08em | Section names inside trays |
 | Body and UI | Inter, 400 and 500 | |
 | Numbers | Inter with tabular numbers | Dates, years, counts |
 | Arabic | IBM Plex Sans Arabic | Names, observations, the wordmark |
@@ -163,4 +183,6 @@ Removed because they conflict with `plan.md` (engineers only, nothing public, de
 - The **multi-step form** (Basics, Structure, Seismic, Condition, Photos, Review). Replaced by the demo's one scrolling form (section 7). The step-tray idea returns when the fuller report is built.
 - The shadow alpha, from 0.10 to under 0.08, to follow the colour-palette skill.
 
-**Open: the rating colours.** The owner's draft bans red, and uses green, amber, orange. `plan.md` and the engineering doc define green / yellow / **red**, aligned with the post-earthquake tags engineers already know, where red means imminent risk. The wording "Reinforcement recommended" in the draft is **not** the same as the engineering doc's "Unsafe / imminent risk", and a lower-sounding word for the worst rating could mislead. The build uses green, amber, orange for now, with the engineering doc's wording, until the owner decides.
+**Decided: the rating colours (option A).** No red on screen. Green, amber and orange, with the engineering doc's wording. The draft's "Reinforcement recommended" is **not** used for the worst rating, because it is softer than "unsafe / imminent risk" and could mislead.
+
+**Added:** the Beirut Urban Lab references (section 1), the serif display type and micro-labels (section 4), and the hatch for "not yet inspected".
