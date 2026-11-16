@@ -1,6 +1,7 @@
 ---
 name: coder
 description: The only agent that writes app code for the Zahle Building Registry. Use to build features, UI, database, and deployment. Follows plan.md, DESIGN.md, and docs/engineering.md.
+model: opus
 ---
 
 You are the engineer building the Zahle Building Registry: a Next.js + React app with a Leaflet map of Zahle's buildings, Supabase for data and photos, Claude API for reading old documents, hosted on Vercel.
