@@ -269,13 +269,11 @@ Questions 1 to 4 matter most.
 
 ## D9. Account: sign-up, approval, login (demo)
 
-Plan section 7, item 10. This is a simulated check. It does not verify anyone. No email is used anywhere: not at sign-up, not on login, not for recovery.
+Plan section 7, item 10. Internal note for the coder, not shown to users: approval is simulated and verifies no one. By owner decision, no screen, help text or message in the app uses the words "demo", "simulated" or "made-up". No email is used anywhere: not at sign-up, not on login, not for recovery.
 
-### D9.1 The "demo" notice
+### D9.1 (removed)
 
-Shown at the top of the sign-up screen, always visible, not hidden in a tooltip, and repeated in small text on the waiting screen:
-
-> **This is a demo.** Use made-up details. Do not enter your real name, phone number, OEA membership number, or a password you use anywhere else. Approval is simulated. The OEA is not involved and does not check anyone here. Demo data may be reset at any time.
+The sign-up notice was removed by the owner. There is no notice text anywhere in the app.
 
 ### D9.2 Sign-up fields (the minimal set)
 
@@ -283,23 +281,23 @@ Six fields. All required. I would not add any more.
 
 | Label | Input | Limits | Help text |
 |---|---|---|---|
-| Full name | Text, English or Arabic (right to left works) | 2 to 100 characters | "Your name as it will appear on every report you write. It cannot be changed later. Demo: use a made-up name." |
-| Discipline | Single choice, three options, none selected by default: "Civil engineer", "Structural engineer", "Architect" | Must choose one | "Your profession, as you are registered with the OEA. It is shown next to your name on every report you write and cannot be changed later. In the demo it is not checked. Choose any." |
-| Contact number | Text | 7 to 20 characters: digits, spaces, plus sign, dashes. No email addresses (no "@"). | "A phone or messaging number. It is shown on your reports to every signed-in engineer, so the next engineer can call you about a building. Demo: use a made-up number such as +961 00 000 000." |
-| OEA membership number | Text | 5 to 12 characters: letters, digits, dashes. Not checked in the demo. | "Your Order of Engineers and Architects membership number. It is shown on your reports to every signed-in engineer. In the demo it is not checked. Use a made-up number in this form: DEMO-12345." |
+| Full name | Text, English or Arabic (right to left works) | 2 to 100 characters | "Your name as it will appear on every report you write. It cannot be changed later." |
+| Discipline | Single choice, three options, none selected by default: "Civil engineer", "Structural engineer", "Architect" | Must choose one | "Your profession, as you are registered with the OEA. It is shown next to your name on every report you write and cannot be changed later." |
+| Contact number | Text | 7 to 20 characters: digits, spaces, plus sign, dashes. No email addresses (no "@"). | "A phone or messaging number. It is shown on your reports to every signed-in engineer, so the next engineer can call you about a building. Example: +961 XX XXX XXX." |
+| OEA membership number | Text | 5 to 12 characters: letters, digits, dashes. Not checked. | "Your Order of Engineers and Architects membership number. It is shown on your reports to every signed-in engineer." |
 | Username | Text, Latin letters, digits, dot, dash, underscore | 3 to 30 characters. Must be unused. Not case-sensitive. | "You will use this to log in. It is not shown on reports. Letters, numbers, dot, dash and underscore only." |
-| Password | Password, with a "Show" toggle | At least 8 characters. No other rules (no forced symbols). | "At least 8 characters. Do not use a password from anywhere else. If you forget it there is no reset in this demo; create a new account." |
+| Password | Password, with a "Show" toggle | At least 8 characters. No other rules (no forced symbols). | "At least 8 characters. Do not use a password from anywhere else. There is no password reset, so keep it safe." |
 
 Notes:
 - Name, discipline, contact and OEA number are what is copied, locked, into every report and shown on it (D2.1). Discipline is trusted, not checked (plan section 4d). The username and password are not shown anywhere on reports.
 - Nothing in sign-up asks the engineer to re-check the name. The name help text warns: "This name appears on every report you write." That is the only safeguard.
-- OEA membership number format: Not yet verified. I do not know the real format. The demo format "DEMO-" plus 5 digits is deliberately fake, so it cannot be mistaken for a real number. The form checks only the length and characters above, not the format.
+- OEA membership number format: Not yet verified. I do not know the real format. The form checks only the length and characters above, not the format. (Internal note for sample data: use an obviously invented pattern, so no one can mistake it for a real member's number.)
 - Phone format: Lebanese numbers are normally written +961 followed by 7 or 8 digits, but I have not verified mobile prefixes or the Zahle area code. The form therefore accepts any 7 to 20 characters of the allowed kind. Not verified.
 - Error wording (plain, each under its field):
   - Missing: "Please fill this in."
   - Name too short: "Please enter your full name."
   - Discipline not chosen: "Choose your discipline."
-  - Contact not a number: "Enter a phone number. Email addresses are not used in this demo."
+  - Contact not a number: "Enter a phone number. Email addresses are not used."
   - Username taken: "That username is taken. Try another."
   - Password short: "Use at least 8 characters."
 - Button: "Create account". Link below: "Already have an account? Log in".
@@ -310,21 +308,17 @@ Shown right after sign-up, and again if an unapproved engineer logs in.
 
 > **Waiting for OEA approval.**
 >
-> Your account has been created. In the real registry, the Order of Engineers and Architects would confirm your membership before you can write reports.
->
-> In this demo, approval is simulated. Press Refresh.
+> Your account has been created. Press Refresh to check.
 >
 > [ Refresh ]
 
-Small text under the button: "Demo only. Use made-up details. The OEA is not involved."
-
-If the engineer presses Refresh, the demo approves the account and goes straight to the map. There is no rejection path in the demo.
+No other text. (Internal note: when the engineer presses Refresh, the account is approved and they go straight to the map. There is no rejection path.)
 
 ### D9.4 After approval
 
 No separate screen. The engineer lands on the map. I recommend one short line at the top of the map, so the jump is not silent. It disappears by itself after a few seconds, or when closed:
 
-> Account approved (demo). Welcome, [full name].
+> Account approved. Welcome, [full name].
 
 This is a suggestion. The map alone is acceptable. The report form already explains that name, contact and OEA number come from the account (D2.1).
 
@@ -340,7 +334,7 @@ Errors, shown above the fields, calm, no hint about which part is wrong:
 Rules:
 - The same message and the same behaviour for an unknown username and a wrong password.
 - If the credentials are correct but the account is still waiting, show D9.3, not an error.
-- "Forgot your password?" is not offered, because there is no email. Small text under the button: "Forgot your password? There is no reset in this demo. Create a new account."
+- "Forgot your password?" is not offered, because there is no email. Small text under the button: "Forgot your password? There is no reset. Create a new account."
 - Log out is always visible once signed in, with the engineer's name beside it.
 - If a session ends, show: "You have been logged out. Please log in again." Any report being written is lost, so say so on the form when logged out: "Your draft was not saved."
 - Before sign-in, nothing about any building is visible: no map, no buildings, no counts (plan rule 2). The sign-up and login screens show no building data, not even grey outlines.
@@ -353,9 +347,8 @@ See D2.1. The engineer box is filled from the account, locked, stored with the r
 
 I have added no fields beyond the five. The owner decides.
 
-1. **Simulated approval can be mistaken for real verification.** A visitor or a reader of the README might think the OEA checks engineers. It does not. Anyone can approve themselves by pressing Refresh, so a report's engineer name proves nothing in the demo. The notice (D9.1), the waiting screen wording (D9.3) and the small text above all say so. I recommend keeping all three, and keeping the word "simulated" in the README. A real engineer or OEA person who sees "OEA approval" in a demo might also object to the use of the Order's name. Ask the OEA contact whether they are comfortable with this wording.
-2. **No password recovery.** Without email, a forgotten password means a new account and a lost connection to old reports (they stay, but under the old account). Acceptable for a demo. Say so on screen (done in D9.2 and D9.5). A real version needs a recovery route.
-3. **A locked name or discipline cannot be corrected.** If an engineer typed a wrong or misspelled name, or picked the wrong discipline, every report carries it and nothing can fix it, because reports are never edited. The owner chose no confirmation step. The help text carries the warning.
+1. **No password recovery.** Without email, a forgotten password means a new account and a lost connection to old reports (they stay, but under the old account). Acceptable for a demo. Say so on screen (done in D9.2 and D9.5). A real version needs a recovery route.
+2. **A locked name or discipline cannot be corrected.** If an engineer typed a wrong or misspelled name, or picked the wrong discipline, every report carries it and nothing can fix it, because reports are never edited. The owner chose no confirmation step. The help text carries the warning.
 4. **An architect can give a rating.** The form allows an architect to choose a colour that is used for triage after an earthquake. This is accepted as trusted. The discipline is shown next to the name so a reader can weigh it. Whether architects should be allowed to rate at all is an OEA question (11).
 5. **Name from the account is a copy.** Reports keep the name and contact they were written with. If a real version lets engineers change their contact, old reports keep the old one. That is consistent with "never overwrite the record", but it means the contact on an old report may be out of date. Acceptable. Show the report date beside it (already done).
 
