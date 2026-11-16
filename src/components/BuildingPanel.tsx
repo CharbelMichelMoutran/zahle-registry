@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { NOT_INSPECTED } from "@/lib/content";
 import { firstLine, formatDate } from "@/lib/format";
+import { DISCIPLINE_LABEL, DISCIPLINE_SHORT, SHOW_DISCIPLINE_IN_HISTORY, type Engineer } from "@/lib/account";
 import type { ConstructionDateChange, Report, ReportInput } from "@/lib/report";
 import { ColourBadge, NotYetInspectedBadge } from "./report/ColourBadge";
 import ReportForm from "./report/ReportForm";
@@ -23,6 +24,7 @@ type Props = {
   openReportId: string | null;
   data: BuildingData;
   draft: ReportInput | null;
+  engineer: Engineer | null;
   notice: string | null;
   onTab: (tab: Tab) => void;
   onOpenReport: (id: string | null) => void;
@@ -163,6 +165,7 @@ function Preview({ reports, onMaximize }: Props & { reports: Report[] }) {
           </p>
           <p className="mt-1 text-[13px] text-slate-500">
             By <bdi dir="auto">{latest.engineer_name}</bdi>
+            {latest.engineer_discipline && `, ${DISCIPLINE_LABEL[latest.engineer_discipline]}`}
           </p>
         </div>
       ) : (
@@ -200,6 +203,7 @@ function FullView(props: Props & { data: Extract<BuildingData, { status: "ready"
     return (
       <ReportForm
         buildingId={props.buildingId}
+        engineer={props.engineer}
         draft={draft}
         onChange={props.onDraftChange}
         latest={data.reports[0] ?? null}
@@ -253,6 +257,10 @@ function FullView(props: Props & { data: Extract<BuildingData, { status: "ready"
               <span className="font-medium text-slate-900 tabular-nums">{formatDate(r.report_date)}</span>
               <bdi dir="auto" className="min-w-0 truncate text-slate-600">
                 {r.engineer_name}
+                {SHOW_DISCIPLINE_IN_HISTORY && r.engineer_discipline && (
+                  // Dropped on narrow phones to keep rows short; always shown in the opened report.
+                  <span className="hidden min-[375px]:inline">, {DISCIPLINE_SHORT[r.engineer_discipline]}</span>
+                )}
               </bdi>
             </div>
             <div className="mt-1 flex items-start gap-2 text-sm">

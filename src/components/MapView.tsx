@@ -2,6 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { Engineer } from "@/lib/account";
+import { apiFetch } from "@/lib/client-fetch";
 import { sortNewestFirst } from "@/lib/format";
 import { sameConstructionDate, inputConstructionDate, reportConstructionDate, type Colour, type Report, type ReportInput } from "@/lib/report";
 import BuildingPanel, { type BuildingData, type Level, type Tab } from "./BuildingPanel";
@@ -93,7 +95,13 @@ function usePanelInset(nav: Nav) {
   return inset;
 }
 
-export default function MapView() {
+export default function MapView({
+  engineer,
+  onDraftsChange,
+}: {
+  engineer: Engineer | null;
+  onDraftsChange: (count: number) => void;
+}) {
   const { nav, navRef, push, goTo } = usePanelNavigation();
   const panelInset = usePanelInset(nav);
   const [colours, setColours] = useState<ReadonlyMap<string, Colour>>(new Map());
@@ -101,13 +109,15 @@ export default function MapView() {
   const [drafts, setDrafts] = useState<Record<string, ReportInput>>({});
   const [notice, setNotice] = useState<string | null>(null);
   const buildingsRef = useRef(buildings);
+  const draftCount = Object.keys(drafts).length;
+  useEffect(() => onDraftsChange(draftCount), [draftCount, onDraftsChange]);
   useEffect(() => {
     buildingsRef.current = buildings;
   }, [buildings]);
 
   // Map colours: latest report per building.
   useEffect(() => {
-    fetch("/api/buildings/colours")
+    apiFetch("/api/buildings/colours")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
       .then((rows: { id: string; colour: Colour }[]) => setColours(new Map(rows.map((r) => [r.id, r.colour]))))
       .catch((err) => console.error("Could not load building colours", err));
@@ -119,7 +129,7 @@ export default function MapView() {
   const loadBuilding = useCallback(async (id: string) => {
     setBuildings((b) => (b[id]?.status === "ready" ? b : { ...b, [id]: { status: "loading" } }));
     try {
-      const res = await fetch(`/api/buildings/${id}/reports`);
+      const res = await apiFetch(`/api/buildings/${id}/reports`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const body = await res.json();
       const data: BuildingData = { status: "ready", reports: sortNewestFirst(body.reports), changes: body.changes };
@@ -242,6 +252,7 @@ export default function MapView() {
           openReportId={nav.openReportId}
           data={data ?? { status: "loading" }}
           draft={drafts[nav.buildingId] ?? null}
+          engineer={engineer}
           notice={notice}
           onTab={setTab}
           onOpenReport={openReport}

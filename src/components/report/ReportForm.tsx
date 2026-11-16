@@ -27,24 +27,18 @@ import {
   type Report,
   type ReportInput,
 } from "@/lib/report";
+import type { Engineer } from "@/lib/account";
+import { apiFetch } from "@/lib/client-fetch";
 import { DOT_CLASS } from "./ColourBadge";
+import { REPORT_BY_HELP, ReportByBox } from "./ReportByBox";
 import { Checkbox, DraftBanner, FieldError, inputClass, Section } from "./ui";
-
-/** Remembered on this device only, so an engineer on site does not retype them. */
-const ENGINEER_KEY = "zahle-registry:engineer";
 
 export function newDraft(latest: Report | null): ReportInput {
   const [y, m, d] = todayParts();
-  let engineer = { name: "", contact: "" };
-  try {
-    engineer = { ...engineer, ...JSON.parse(localStorage.getItem(ENGINEER_KEY) ?? "{}") };
-  } catch {}
   const empty = (): ObservationInput => ({ text: "", notInspected: false, reason: "" });
   return {
     clientRequestId: crypto.randomUUID(),
     basedOnReportId: latest?.id ?? null,
-    engineerName: engineer.name,
-    engineerContact: engineer.contact,
     day: String(d),
     month: String(m),
     year: String(y),
@@ -69,6 +63,7 @@ export function prefillConstruction(latest: Report | null) {
 
 type Props = {
   buildingId: string;
+  engineer: Engineer | null;
   draft: ReportInput;
   onChange: (update: (d: ReportInput) => ReportInput) => void;
   /** The report the construction date was prefilled from. */
@@ -78,7 +73,7 @@ type Props = {
   onStale: () => Promise<void>;
 };
 
-export default function ReportForm({ buildingId, draft, onChange, latest, onSaved, onStale }: Props) {
+export default function ReportForm({ buildingId, engineer, draft, onChange, latest, onSaved, onStale }: Props) {
   const uid = useId();
   const [touched, setTouched] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
@@ -91,7 +86,7 @@ export default function ReportForm({ buildingId, draft, onChange, latest, onSave
     [draft, latest],
   );
   const areasComplete = allAreasComplete(draft.observations);
-  const valid = Object.keys(errors).length === 0;
+  const valid = Object.keys(errors).length === 0 && engineer !== null;
 
   const touch = (field: string) => setTouched((t) => (t.has(field) ? t : new Set(t).add(field)));
   const shown = (field: string) => (touched.has(field) ? errors[field] : undefined);
@@ -108,19 +103,13 @@ export default function ReportForm({ buildingId, draft, onChange, latest, onSave
     setSaving(true);
     setServerError(null);
     try {
-      const res = await fetch(`/api/buildings/${buildingId}/reports`, {
+      const res = await apiFetch(`/api/buildings/${buildingId}/reports`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(draft),
       });
       const body = await res.json().catch(() => ({}));
       if (res.ok) {
-        try {
-          localStorage.setItem(
-            ENGINEER_KEY,
-            JSON.stringify({ name: draft.engineerName.trim(), contact: draft.engineerContact.trim() }),
-          );
-        } catch {}
         onSaved(body.report as Report);
         return;
       }
@@ -135,8 +124,6 @@ export default function ReportForm({ buildingId, draft, onChange, latest, onSave
   }
 
   const ids = {
-    name: `${uid}-name`,
-    contact: `${uid}-contact`,
     day: `${uid}-day`,
     residents: `${uid}-residents`,
     constructionYear: `${uid}-cyear`,
@@ -156,36 +143,18 @@ export default function ReportForm({ buildingId, draft, onChange, latest, onSave
     >
       <DraftBanner text={DRAFT_BANNER} />
 
-      {/* Engineer */}
-      <Section label={FIELDS.engineerName.label} htmlFor={ids.name} help={FIELDS.engineerName.help}>
-        <input
-          id={ids.name}
-          dir="auto"
-          autoComplete="name"
-          maxLength={LIMITS.nameMax + 20}
-          value={draft.engineerName}
-          onChange={(e) => set("engineerName", e.target.value)}
-          onBlur={() => touch("engineerName")}
-          aria-invalid={!!shown("engineerName")}
-          className={inputClass}
+      {/* Engineer: from the account, locked. The server copies it from the session, not from this form. */}
+      {engineer ? (
+        <ReportByBox
+          name={engineer.fullName}
+          discipline={engineer.discipline}
+          contact={engineer.contact}
+          oeaNumber={engineer.oeaNumber}
+          help={REPORT_BY_HELP}
         />
-        <FieldError message={shown("engineerName")} />
-      </Section>
-
-      <Section label={FIELDS.engineerContact.label} htmlFor={ids.contact} help={FIELDS.engineerContact.help}>
-        <input
-          id={ids.contact}
-          dir="auto"
-          autoComplete="tel"
-          maxLength={LIMITS.emailMax + 20}
-          value={draft.engineerContact}
-          onChange={(e) => set("engineerContact", e.target.value)}
-          onBlur={() => touch("engineerContact")}
-          aria-invalid={!!shown("engineerContact")}
-          className={inputClass}
-        />
-        <FieldError message={shown("engineerContact")} />
-      </Section>
+      ) : (
+        <div className="h-24 animate-pulse rounded-lg bg-slate-100" aria-label="Loading your account" />
+      )}
 
       {/* Date of report: day / month / year */}
       <Section label={FIELDS.reportDate.label} htmlFor={ids.day} help={FIELDS.reportDate.help}>
@@ -555,8 +524,6 @@ function summary(area: Area, o: ObservationInput) {
 }
 
 const FIELD_NAMES: Record<string, string> = {
-  engineerName: "engineer name",
-  engineerContact: "contact",
   reportDate: "date of report",
   residents: "people living in the building",
   constructionYear: "construction date",

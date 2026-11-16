@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import type { FeatureCollection, MultiPolygon } from "geojson";
 import "leaflet/dist/leaflet.css";
+import { apiFetch } from "@/lib/client-fetch";
 import type { Colour } from "@/lib/report";
 
 /** Central Zahle, Lebanon. */
@@ -109,7 +110,7 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
     const controller = new AbortController();
     let layer: L.GeoJSON | null = null;
 
-    fetch("/api/buildings", { signal: controller.signal })
+    apiFetch("/api/buildings", { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json() as Promise<FeatureCollection<MultiPolygon, { id: string }>>;

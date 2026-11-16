@@ -2,6 +2,7 @@ import { AREA_CONTENT, COLOUR_CONTENT, COLOUR_FIELD, DRAFT_BANNER, FIELDS, NOT_I
 import { formatConstructionDate, formatDate, formatSaveTime } from "@/lib/format";
 import { AREAS, reportConstructionDate, type ConstructionDateChange, type Report } from "@/lib/report";
 import { ColourBadge } from "./ColourBadge";
+import { ReportByBox } from "./ReportByBox";
 import { DraftBanner, Section } from "./ui";
 
 /** A saved report, read-only, in the same order and with the same labels as the form. */
@@ -14,12 +15,12 @@ export default function ReportView({ report, change }: { report: Report; change?
         Saved {formatSaveTime(r.created_at)}. A saved report cannot be changed.
       </p>
 
-      <Section label={FIELDS.engineerName.label}>
-        <Value>{r.engineer_name}</Value>
-      </Section>
-      <Section label={FIELDS.engineerContact.label}>
-        <Value>{r.engineer_contact}</Value>
-      </Section>
+      <ReportByBox
+        name={r.engineer_name}
+        discipline={r.engineer_discipline}
+        contact={r.engineer_contact}
+        oeaNumber={r.engineer_oea_number}
+      />
       <Section label={FIELDS.reportDate.label}>
         <Value>{formatDate(r.report_date)}</Value>
       </Section>

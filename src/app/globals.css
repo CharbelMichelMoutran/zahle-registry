@@ -21,3 +21,14 @@ body {
 .leaflet-container {
   font-family: inherit;
 }
+
+/* The "Account approved" line fades out by itself (docs/engineering.md D9.4). */
+@keyframes fadeout {
+  0%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

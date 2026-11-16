@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
-      <body className="h-full overflow-hidden">{children}</body>
+      <body className="min-h-full">{children}</body>
     </html>
   );
 }
