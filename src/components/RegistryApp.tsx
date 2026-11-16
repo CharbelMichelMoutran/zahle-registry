@@ -56,7 +56,7 @@ export default function RegistryApp() {
     <MotionConfig reducedMotion="user">
       <div className="flex h-dvh flex-col overflow-hidden bg-ground">
         <header className="z-[1200] flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface px-4">
-          <h1 className="min-w-0 flex-1 overflow-hidden">
+          <h1 className="shrink-0">
             <Wordmark size="small" />
           </h1>
           <AccountMenu name={engineer?.fullName ?? null} onLogout={logout} />
@@ -115,14 +115,14 @@ function AccountMenu({ name, onLogout }: { name: string | null; onLogout: () => 
   }, [open]);
 
   return (
-    <div ref={ref} className="relative shrink-0">
+    <div ref={ref} className="relative ml-auto flex min-w-0 justify-end">
       <motion.button
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
         whileTap={{ scale: 0.97 }}
         onClick={() => setOpen((o) => !o)}
-        className="flex min-h-11 max-w-[46vw] items-center gap-2 rounded-control border border-line bg-surface px-3 text-body text-ink transition-colors hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-accent"
+        className="flex min-h-11 min-w-0 max-w-[260px] items-center gap-2 rounded-control border border-line bg-surface px-3 text-body text-ink transition-colors hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-accent"
       >
         <bdi dir="auto" className="truncate">{name ?? "Account"}</bdi>
         <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-muted" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
