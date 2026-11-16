@@ -4,11 +4,8 @@
  */
 
 // ---------------------------------------------------------------------------
-// Open decisions (plan section 7). Defaults chosen by the orchestrator; easy to flip.
+// Owner decision (plan section 7): easy to flip.
 // ---------------------------------------------------------------------------
-
-/** Show a gentle, non-blocking warning when Green is chosen but an area is "Not inspected". */
-export const WARN_GREEN_WITH_NOT_INSPECTED = true;
 
 /** Offer the "Not inspected" tick box on the final observation (roof, columns, foundations always have it). */
 export const FINAL_OBSERVATION_ALLOWS_NOT_INSPECTED = false;
@@ -159,7 +156,6 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Remove invisible control characters (keep new lines and tabs) and trim. */
 export const clean = (s: string) =>
-  // eslint-disable-next-line no-control-regex
   s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim();
 
 const len = (s: string) => [...s].length; // count characters, not UTF-16 units

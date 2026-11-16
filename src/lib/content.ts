@@ -150,14 +150,6 @@ export const COLOUR_CONTENT: Record<Colour, { word: string; label: string; descr
   },
 };
 
-/**
- * Open decision 1 (plan section 7): gentle, non-blocking note when Green rests on
- * areas that were not inspected. Wording drafted by the coder; for civil-engineer review.
- */
-export const greenWithNotInspectedWarning = (areas: string[]) =>
-  `You chose Green, but ${areas.join(", ")} ${areas.length === 1 ? "was" : "were"} not inspected. ` +
-  `The report will show "Not inspected" and your reason beside the colour. You can still save.`;
-
 export const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
