@@ -4,46 +4,50 @@ import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import type { FeatureCollection, MultiPolygon } from "geojson";
 import "leaflet/dist/leaflet.css";
+import type { Colour } from "@/lib/report";
 
 /** Central Zahle, Lebanon. */
 const ZAHLE_CENTER: L.LatLngTuple = [33.8467, 35.9025];
 const OPEN_ZOOM = 16;
+/** The imported area plus a margin, so the map cannot be dragged away from Zahle. */
+const ZAHLE_BOUNDS = L.latLngBounds([33.82, 35.86], [33.875, 35.945]);
 
-const baseStyle: L.PathOptions = {
-  color: "#475569",
-  weight: 1,
-  fillColor: "#94a3b8",
-  fillOpacity: 0.25,
+/** Map fill per report colour. Grey = no report yet ("Not yet inspected"). */
+const COLOUR_STYLE: Record<Colour | "none", L.PathOptions> = {
+  none: { color: "#64748b", weight: 1, fillColor: "#94a3b8", fillOpacity: 0.3 },
+  green: { color: "#15803d", weight: 1, fillColor: "#22c55e", fillOpacity: 0.55 },
+  yellow: { color: "#a16207", weight: 1, fillColor: "#facc15", fillOpacity: 0.65 },
+  red: { color: "#b91c1c", weight: 1, fillColor: "#ef4444", fillOpacity: 0.55 },
 };
-
-const selectedStyle: L.PathOptions = {
-  color: "#1d4ed8",
-  weight: 3,
-  fillColor: "#3b82f6",
-  fillOpacity: 0.45,
-};
+const SELECTED_OUTLINE: L.PathOptions = { color: "#0f172a", weight: 3 };
 
 type Props = {
+  colours: ReadonlyMap<string, Colour>;
   selectedId: string | null;
-  onSelect: (id: string | null) => void;
-  /** Space covered by the report panel, so the selected building is panned into view. */
+  onSelect: (id: string) => void;
+  onEmptyClick: () => void;
+  /** Space covered by the panel, so a newly selected building is not hidden behind it. */
   panelInset: { right: number; bottom: number };
 };
 
 type Status = "loading" | "ready" | "error";
 
-export default function BuildingMap({ selectedId, onSelect, panelInset }: Props) {
+export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClick, panelInset }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layersRef = useRef(new Map<string, L.Polygon>());
-  const onSelectRef = useRef(onSelect);
+  const handlersRef = useRef({ onSelect, onEmptyClick });
   const buildingClickRef = useRef<MouseEvent | null>(null);
+  const insetRef = useRef(panelInset);
+  const coloursRef = useRef(colours);
+  const selectedRef = useRef(selectedId);
   const [status, setStatus] = useState<Status>("loading");
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    onSelectRef.current = onSelect;
-  }, [onSelect]);
+    handlersRef.current = { onSelect, onEmptyClick };
+    insetRef.current = panelInset;
+  });
 
   // Create the map once.
   useEffect(() => {
@@ -53,22 +57,40 @@ export default function BuildingMap({ selectedId, onSelect, panelInset }: Props)
     const map = L.map(containerRef.current, {
       center: ZAHLE_CENTER,
       zoom: OPEN_ZOOM,
-      minZoom: 13,
+      minZoom: 14,
       maxZoom: 19,
-      preferCanvas: true, // thousands of outlines draw much faster on canvas
+      maxBounds: ZAHLE_BOUNDS,
+      maxBoundsViscosity: 0.9,
       zoomControl: false,
+      // Canvas draws 4,595 outlines cheaply. `tolerance` widens the tap target by
+      // a few pixels so small buildings can be tapped; `padding` draws beyond the
+      // screen edge so panning does not reveal undrawn areas.
+      renderer: L.canvas({ padding: 0.5, tolerance: 6 }),
+      // Zoom: pinch and wheel stop exactly where the user lets go (quarter steps)
+      // instead of jumping to the nearest whole level afterwards.
+      zoomSnap: 0.25,
+      zoomDelta: 1,
+      wheelPxPerZoomLevel: 120,
+      bounceAtZoomLimits: false,
+      // Panning: keep the glide after a drag, but cap its speed so a quick flick
+      // does not throw the map far away.
+      inertiaDeceleration: 3400,
+      inertiaMaxSpeed: 1500,
+      easeLinearity: 0.25,
     });
     L.control.zoom({ position: "topleft" }).addTo(map);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
+      keepBuffer: 4, // keep nearby tiles, fewer blank squares when panning back
+      updateWhenZooming: false, // no half-loaded tiles mid-pinch
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
-    // A click on empty map closes the report. Building clicks on the canvas also
-    // reach the map, so skip the DOM event a building has already handled.
+    // A click on empty map minimises or closes the panel. Building clicks on the
+    // canvas also reach the map, so skip the DOM event a building already handled.
     map.on("click", (e) => {
-      if (e.originalEvent !== buildingClickRef.current) onSelectRef.current(null);
+      if (e.originalEvent !== buildingClickRef.current) handlersRef.current.onEmptyClick();
     });
     mapRef.current = map;
 
@@ -84,7 +106,6 @@ export default function BuildingMap({ selectedId, onSelect, panelInset }: Props)
     const map = mapRef.current;
     if (!map) return;
     const layers = layersRef.current;
-
     const controller = new AbortController();
     let layer: L.GeoJSON | null = null;
 
@@ -95,13 +116,13 @@ export default function BuildingMap({ selectedId, onSelect, panelInset }: Props)
       })
       .then((data) => {
         layer = L.geoJSON(data, {
-          style: () => baseStyle,
+          style: (f) => styleFor(f!.properties.id, coloursRef.current, selectedRef.current),
           onEachFeature: (feature, featureLayer) => {
             const id = feature.properties.id;
             layers.set(id, featureLayer as L.Polygon);
             featureLayer.on("click", (e) => {
               buildingClickRef.current = (e as L.LeafletMouseEvent).originalEvent;
-              onSelectRef.current(id);
+              handlersRef.current.onSelect(id);
             });
           },
         }).addTo(map);
@@ -120,24 +141,39 @@ export default function BuildingMap({ selectedId, onSelect, panelInset }: Props)
     };
   }, [attempt]);
 
-  // Highlight the selected building and keep it clear of the panel.
+  // Recolour only the buildings whose report colour changed.
   useEffect(() => {
+    const before = coloursRef.current;
+    coloursRef.current = colours;
+    const changed = new Set([...before.keys(), ...colours.keys()]);
+    for (const id of changed) {
+      if (before.get(id) === colours.get(id)) continue;
+      layersRef.current.get(id)?.setStyle(styleFor(id, colours, selectedRef.current));
+    }
+  }, [colours]);
+
+  // Outline the selected building; pan only if it would sit behind the panel.
+  useEffect(() => {
+    const previous = selectedRef.current;
+    selectedRef.current = selectedId;
+    if (previous && previous !== selectedId) {
+      layersRef.current.get(previous)?.setStyle(styleFor(previous, coloursRef.current, null));
+    }
     const map = mapRef.current;
-    if (!map || !selectedId) return;
-    const layer = layersRef.current.get(selectedId);
-    if (!layer) return;
+    const layer = selectedId ? layersRef.current.get(selectedId) : undefined;
+    if (!map || !layer) return;
 
-    layer.setStyle(selectedStyle);
+    layer.setStyle(styleFor(selectedId!, coloursRef.current, selectedId));
     layer.bringToFront();
-    map.panInside(layer.getBounds().getCenter(), {
-      paddingTopLeft: [24, 24],
-      paddingBottomRight: [panelInset.right + 24, panelInset.bottom + 24],
-    });
-
-    return () => {
-      layer.setStyle(baseStyle);
-    };
-  }, [selectedId, status, panelInset.right, panelInset.bottom]);
+    if (previous !== selectedId) {
+      const inset = insetRef.current;
+      map.panInside(layer.getBounds().getCenter(), {
+        paddingTopLeft: [24, 24],
+        paddingBottomRight: [inset.right + 24, inset.bottom + 24],
+        duration: 0.3,
+      });
+    }
+  }, [selectedId, status]);
 
   return (
     <div className="relative h-full w-full">
@@ -168,4 +204,9 @@ export default function BuildingMap({ selectedId, onSelect, panelInset }: Props)
       )}
     </div>
   );
+}
+
+function styleFor(id: string, colours: ReadonlyMap<string, Colour>, selectedId: string | null): L.PathOptions {
+  const base = COLOUR_STYLE[colours.get(id) ?? "none"];
+  return id === selectedId ? { ...base, ...SELECTED_OUTLINE } : base;
 }
