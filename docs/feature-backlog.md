@@ -1,8 +1,17 @@
 # Feature backlog — Zahle Building Registry
 
-Pasted by the project owner on 16 Nov 2026 and **not scheduled**. Nothing here is built. Per `CLAUDE.md`, anything outside `plan.md` section 7 "In" waits on the Later list until the owner decides. This file keeps the owner's full text, plus what the orchestrator found when checking it against `plan.md` and `DESIGN.md`.
+**Update, 16 Nov 2026: the owner chose all 12 features and told the orchestrator to change whatever they conflict with. They are now in `plan.md` section 7 as items 11 to 22, and the conflicts below were resolved in the owner's favour (see "How each conflict was resolved"). Nothing here is built yet, except parts of item 22.** This file keeps the owner's full original text, and what the orchestrator found when checking it against the plan.
 
-## What conflicts with the plan (the owner must decide)
+## How each conflict was resolved (owner's call, 16 Nov 2026)
+
+1. **Residents:** in. `plan.md` section 3, rule 2 and section 5 were rewritten: two roles, nothing public, residents see only their own building, the Order merged into engineers.
+2. **AI features:** in. The Anthropic Console is no longer deferred. Safeguards added to the plan: rules 6 and 7 (the AI never hides anything; the protected list always flags), the civil-engineer writes the protected list and the context file, the OEA contact reviews them, and the devil's advocate tests prompt injection.
+3. **Orange clash:** solved by making the worst rating **red** (the owner's other instruction today). Orange is now only Claude's flag colour.
+4. **Demo wording:** the "Demo location" and "Demo code" labels are allowed because the owner asked for them. They are the only exceptions.
+5. **Real SMS:** allowed once, through Twilio, to the owner's own US number.
+6. **New technical question:** engineer accounts use our own login, residents need Supabase Auth, and row-level security wants one login system. The coder proposes how to unify them before items 12 and 15 are built.
+
+## What conflicted with the plan (the original check)
 
 1. **Residents.** Items 2, 3, 4 and 5 add residents: phone verification, inspection requests, a building log, and a resident map. `plan.md` section 3 says "engineers only", section 4 rule 2 says "only engineers see reports", and section 5 rejected a resident view because verifying residency is too hard. `DESIGN.md` removed the Resident role. Adding these changes the product direction, so it needs an explicit owner decision and a plan rewrite.
 2. **AI features (6 to 9, 11).** They need the Anthropic Console, which the owner deferred on 16 Nov 2026. They also change the product into an AI triage tool, and a wrong "don't flag" on a safety issue is a real risk. The civil-engineer agent must write and the owner's OEA contact must review the protected list and the context file before any of it ships.
@@ -21,11 +30,11 @@ Pasted by the project owner on 16 Nov 2026 and **not scheduled**. Nothing here i
 | 6 to 9 | Claude sorts, flags, verdicts, rulebook | New. Need the key, the owner's decision on direction, and OEA review. |
 | 2 to 5 | Residents | Conflict. See above. |
 
-## Suggested order when work resumes (the owner decides)
+## Suggested build order (the owner decides; mirrored in `plan.md` section 12)
 
-- **A. Fits the plan, no new key needed:** 1 (engineers only), the Ctrl+K command bar from 12, and finishing 10.
-- **B. After the Anthropic key and owner decisions:** AI document-to-form (already in plan section 7 item 5), then 11, then 6 to 9.
-- **C. Only if the owner changes the product direction:** 2 to 5.
+Item numbers below are the plan's items (11 to 22), not this list's numbers. The mapping is: location 11, phone verification 12, requests 13, resident log 14, own-building map and row-level security 15, Claude sorts 16, Claude flags 17, verdicts 18, rulebook 19, context file 20, engineer map query 21, navigation 22.
+
+(a) red for the worst rating, and the Cmd+K command bar; (b) location suggestion; (c) set up the Anthropic Console, then AI document-to-form and the context file; (d) unify login, then residents with phone codes, requests, log, and the own-building map; (e) Claude sorting and flagging with verdicts; (f) the rulebook and its reflection job; (g) engineer map query; (h) sample data, README, and the full test.
 
 ## The owner's text, unchanged
 

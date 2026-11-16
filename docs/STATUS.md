@@ -20,7 +20,7 @@ Last updated: 16 Nov 2026, when the project owner paused for the day. Read this 
 | Map colour | Grey with a fine hatch until inspected. After a report, the building takes the latest report's colour. |
 | Accounts (simulated) | Sign-up with full name, contact, OEA number, discipline, username, password. No email. "Waiting for OEA approval." then Refresh approves automatically and goes into the map. Name, discipline, contact and OEA number are locked onto each report from the account, on the server. Passwords stored as salted hashes. All data routes need login. |
 | Design pass | Done from `DESIGN.md`: Zahle theme, stacked bilingual wordmark with زحلة, Source Serif display type, springy Motion tray, arch icons, hatch for unknowns, reduced-motion support, 375px phone layout. |
-| Ratings | Labelled by meaning ("Good condition", "Needs some work", "Imminent risk") with colour and arches beside them. Data values stay `green`, `yellow`, `red`. Screen colours: green, amber, orange (no red). |
+| Ratings | Labelled by meaning ("Good condition", "Needs some work", "Imminent risk") with colour and arches beside them. Data values stay `green`, `yellow`, `red`. **The live site still draws the worst rating orange.** The owner decided on 16 Nov 2026 that it must be **red** (`#D6402B` to start, the coder checks it against amber and orange). Not built yet: it is the first step in the build order below. |
 | Server region | Pinned to Vercel's Portland region (`vercel.json`), next to the database (US West), so loading is about 450ms. |
 
 ## Not built yet
@@ -30,7 +30,11 @@ Last updated: 16 Nov 2026, when the project owner paused for the day. Read this 
 - Photos in reports. Floors, structure type, seismic measures, units (all on the Later list).
 - AI document-to-form (plan item 5). Needs the Anthropic Console and key, which the owner deferred.
 - The polished README with screenshots, and making the repo public.
-- Everything in `docs/feature-backlog.md` (owner's pasted list, not scheduled; it conflicts with the plan in places, see that file).
+- **The owner's 12 new features, now in scope** (`plan.md` section 7, items 11 to 22; full text and how each conflict was resolved in `docs/feature-backlog.md`): location suggestion; residents (phone verification, inspection requests, building log, own-building-only map with row-level security); Claude sorting and flagging submissions; engineer verdicts; the learning rulebook; the Lebanon context file; plain-language engineer map query; the Cmd+K command bar. **None is built.**
+
+## Build order (the owner decides; step (a) is next)
+
+(a) red for the worst rating, and the Cmd+K command bar; (b) location suggestion; (c) set up the Anthropic Console, then AI document-to-form and the context file; (d) unify login, then residents with phone codes, requests, log, and the own-building map; (e) Claude sorting and flagging with verdicts; (f) the rulebook and its reflection job; (g) engineer map query; (h) sample data, README, and the full test. The 30-hour estimate no longer holds. The order keeps a working demo at every step, so the owner can stop after any item.
 
 ## How the work is divided
 
@@ -53,7 +57,8 @@ Files that carry the work: `plan.md` (decisions, scope), `DESIGN.md` (look and m
 - Anthropic Console deferred. No AI features until it is set up.
 - Report format as above; colour is a required last field with no default; history rows show the date, name, discipline, colour word and the first line of the final observation.
 - Simulated accounts: no email, OEA number stored and shown on reports, no login attempt limit, discipline is trusted not checked, all signed-in engineers see each other's data (so a new engineer can call the previous one).
-- Rating colours: **option A**, green, amber, orange with no red on screen. Then **A1**: labels by meaning, no colour names.
+- Rating colours: first option A (no red), then **reversed on 16 Nov 2026: the worst rating is red**. Labels by meaning (A1), no colour names. Orange is now free for Claude's flags.
+- **Scope widened (16 Nov 2026):** all 12 features from the owner's list are in. Conflicts were resolved in the owner's favour: two roles (engineer, resident), the Order merged into engineers, nothing public but residents see only their own building, the Anthropic Console is needed, one real SMS through Twilio to the owner's number, and "Demo location" and "Demo code" labels allowed because the owner asked for them.
 - Design references: Family (main), Raycast, and the Beirut Urban Lab family (Beirut Built Environment Database, Precarious Homes, the lab's home page). Zahle theme is a hard rule.
 - Repo stays private until the owner says.
 - Settings: auto-compact window set to 400,000 tokens in the owner's personal Claude settings.
@@ -64,8 +69,11 @@ Files that carry the work: `plan.md` (decisions, scope), `DESIGN.md` (look and m
 2. **Arch icons:** keep "more filled = more concern" (green 1, amber 2, orange 3)? The coder chose it. The orchestrator recommends keeping it.
 3. **Waiting-screen text:** the civil-engineer's true version ("Your account has been created. Press Refresh to check.") is in use. The coder's alternative claimed the OEA confirms membership, which the app does not do.
 4. **Send the OEA questions** (questions 1 to 15 at the end of `docs/engineering.md`) to the owner's senior OEA contact.
-5. **Which feature group to do next** from `docs/feature-backlog.md` (group A recommended).
-6. **Reference sites already given; `DESIGN.md` already written.** Nothing more needed for design unless the owner wants changes.
+5. **Set up the Anthropic Console** (sign up, add $50, set a $50 hard limit, create a key). The AI features cannot start without it. The owner signs in; Claude does the rest from the command line.
+6. **Set up Twilio** (free trial) for the one real SMS to the owner's US number. Only needed at step (d).
+7. **Approve the order of work** above, or change it.
+8. **Decide the login question** before step (d): engineer accounts use our own login, residents need Supabase Auth, and row-level security works best with one system. The coder proposes how to unify them without collecting emails, and what it costs.
+9. **Safety review:** the civil-engineer drafts the protected list and the context file; the owner's OEA contact should read them before the AI goes live.
 
 ## Data and accounts
 

@@ -68,18 +68,25 @@ Light and warm. Dark text is a deep slate, never pure black.
 
 Share of the screen: about 60% ground and map, 30% trays and surfaces, 10% accent and status colours.
 
-### Building status colours (owner decision: option A, 16 Nov 2026)
+### Building status colours (owner decision, 16 Nov 2026: the worst rating is **red**)
 
-`plan.md` section 4b defines three ratings: **green** (good), **yellow** (needs some work), **red** (imminent risk). The owner wants no red in the app, and chose **option A**: green, amber and orange on screen, with the wording from `docs/engineering.md` D4 (including "unsafe / imminent risk" for the worst rating). The data values stay `green`, `yellow` and `red`:
+`plan.md` section 4b defines three ratings: **green** (good), **yellow** (needs some work), **red** (imminent risk). The owner first chose no red (option A), then reversed it on 16 Nov 2026: **the worst rating is red on screen**, so engineers read it the way they already know the post-earthquake tags. This reverses the earlier "no red" rule, which now applies to everything else: no red for errors, buttons or decoration. Wording stays by meaning ("Good condition", "Needs some work", "Imminent risk"), from `docs/engineering.md` D4:
 
 | Rating (data) | Colour | Hex | Zahle name |
 |---|---|---|---|
 | `green` | Green | `#1FA971` | Vine |
 | `yellow` | Amber | `#F5A524` | Apricot |
-| `red` | Orange | `#EE7A2F` | Terracotta |
+| `red` | Red | `#D6402B` | Roof tile |
 | none | Grey with fine hatch | `#A3A8B3` | Limestone grey ("Not yet inspected"). The hatch is described in section 1. |
+| (Claude's flag, not a rating) | Orange | `#F07B2E` | Claude orange. Pulsing ring around a flagged building on the engineer map. |
+
+The red hex is a starting point. The coder checks it against the amber and the orange (they must be easy to tell apart, in lightness as well as hue, and for colour-blind users) and adjusts it if not. Errors in forms keep the dark orange text they have now, never red, so red always means "imminent risk" and nothing else.
 
 Status colours differ in lightness as well as hue. They always come with their word (rule 1 of `plan.md` section 4), and with the arch icon: one, two or three filled arches. Text on a status colour is dark slate unless white passes 4.5:1. Wording for each rating comes from `docs/engineering.md` D4, never from this file.
+
+**Claude's flag is a second, separate signal.** A flagged building gets the orange pulsing ring on top of its rating colour. It never replaces the rating, and it always opens a tray with Claude's reason and evidence. The pulse stops under reduced motion (a steady ring instead).
+
+**Resident map:** the resident's own building is drawn in full status colour. Every other building is barely visible: a faint outline only, no fill, not even grey. A resident never sees another building's status or any Claude flag.
 
 ## 4. Type
 
@@ -126,7 +133,7 @@ Patterns:
 
 ### Layout
 - Full-screen light map. The tray floats at the bottom on phones, and bottom-left on desktop (max width 440px).
-- Top bar: wordmark with **زحلة** on the left. On the right: the signed-in engineer's name and a menu with "Log out". There is no role switch (see section 12).
+- Top bar: wordmark with **زحلة** on the left. On the right: the signed-in person's name and a menu with "Log out". There is no role switch: the role (engineer or resident) comes from the account, and each role sees its own map and trays (owner decision, 16 Nov 2026).
 - Map tiles are muted and light. The map stays quiet; the trays carry the personality.
 - Buildings: grey by default. After a report, the building takes its rating colour (section 3), with a thin white outline so shapes stay readable.
 
@@ -143,7 +150,20 @@ Patterns:
 - **Waiting for OEA approval:** the arch icon, the exact text from `docs/engineering.md` D9.3, and a "Refresh" button. After Refresh, the tray carries the engineer straight into the map with the fading welcome line.
 
 ### Command bar (from Raycast)
-Ctrl+K or Cmd+K, or a search button, opens a command bar to find a building by street, neighbourhood or landmark (OpenStreetMap has few addresses in Zahle, see `plan.md` section 9). Results are clean rows: name, muted detail line, keyboard navigation, highlighted row. Choosing one flies the map there. *(Built when plan item 2, picking a building by address, is built.)*
+Ctrl+K or Cmd+K, or a search button, opens a command bar to find a building by street, neighbourhood or landmark (OpenStreetMap has few addresses in Zahle, see `plan.md` section 9). Results are clean rows: name, muted detail line, keyboard navigation, highlighted row. Choosing one flies the map there. In scope now (`plan.md` item 22). For engineers it also takes a plain-language question (item 21), and shows results as a list tray plus highlights on the map, with a one-line reason per building.
+
+### "Is this your building?" tray (plan item 11)
+On open, if the person allows location, a tray rises with the closest building highlighted, two alternatives as clean rows, and "None of these — pick on the map". The map flies to the closest with `spring-gentle`. Location denied: go straight to "Pick your building on the map". More than about 20 km from Zahle: offer a visitor "Try the demo as a resident standing on [a real Zahle street]", with a visible "Demo location" label. That label and the "Demo code" on the phone-verification screen are the only demo wording allowed in the app, because the owner asked for them.
+
+### Resident screens (plan items 12 to 15)
+- **Verify your phone:** a calm card, visible labels, the 6-digit code in separate boxes with big touch targets. The public site shows "Demo code: ######" on screen instead of texting.
+- **Resident tray:** the own building's status chip, then "Request an inspection" and "Add to the building log". After a request, the only message is "Received — an engineer will review."
+- **Building log:** clean rows, newest first, with photos as small thumbnails and "when did you notice it" as a muted detail line.
+
+### Engineer screens for Claude (plan items 16 to 19)
+- **Flag tray:** Claude's report with the reason, the evidence, and the rules used, then two clear buttons, "Flag was right" and "Not needed", and an optional note. A small line shows "Flags confirmed: X%".
+- **Labels:** each resident submission shows Claude's label as a chip with its reason. Overriding is one tap. "Unwise" items sit in a held list with the reason, never removed.
+- **Rulebook page:** a bordered list with rule text, kind, status, score, and Approve and Reject on candidates that need an engineer.
 
 ### States every screen needs
 - **Loading:** nothing under 100ms, a small inline spinner up to 1s, skeleton rows beyond that.
@@ -162,7 +182,7 @@ Ctrl+K or Cmd+K, or a search button, opens a command bar to find a building by s
 
 ## 10. Definition of "beautiful" for this project
 A screen is done when:
-1. It has no black, no red, nothing gloomy, and it feels like Zahle (section 2) without clichés.
+1. It has no black, nothing gloomy, no red except the "Imminent risk" rating (section 3), and it feels like Zahle (section 2) without clichés.
 2. Opening, closing and changing a tray feels springy and smooth, like Family.
 3. Lists and spacing are crisp and precise, like Raycast.
 4. It passes ui-review and ux-audit with no major issues.
@@ -176,13 +196,15 @@ No purple-blue gradient washes. No glassmorphism or backdrop blur. No emoji as i
 
 ## 12. Changes from the owner's draft, and open decisions
 
-Removed because they conflict with `plan.md` (engineers only, nothing public, demo scope):
-- The **Order / Engineer / Resident role switch**, the Resident view, the Order view, "Request an inspection", and the **public map** showing "Inspected / Not yet inspected". Rule 2 of `plan.md` section 4: only engineers see reports, and nothing is public.
+**Update, 16 Nov 2026 (owner widened the scope, see `plan.md` items 11 to 22):** the Resident view and "Request an inspection" are **back in**, with the role coming from the account and not a switch. The Order is merged into engineers. The **public map** showing "Inspected / Not yet inspected" is **still out**: nothing is public, and a resident sees only their own building. Section 7 now describes these screens.
+
+Still out, or changed from the owner's first draft:
+- The **role switch** pill. Roles come from the account.
 - Searching by **owner**. We do not store owners.
-- The **AI document scan tray**. Deferred (Anthropic Console is not set up). Kept in the design intent for later: fields fill one by one with a "From document" tag.
+- The **AI document scan tray**. Now unblocked, because the Anthropic Console is needed anyway. Design intent: fields fill one by one with a "From document" tag. Built at plan item 5.
 - The **multi-step form** (Basics, Structure, Seismic, Condition, Photos, Review). Replaced by the demo's one scrolling form (section 7). The step-tray idea returns when the fuller report is built.
 - The shadow alpha, from 0.10 to under 0.08, to follow the colour-palette skill.
 
-**Decided: the rating colours (option A).** No red on screen. Green, amber and orange, with the engineering doc's wording. The draft's "Reinforcement recommended" is **not** used for the worst rating, because it is softer than "unsafe / imminent risk" and could mislead.
+**Decided: the rating colours.** First option A (no red), then reversed on 16 Nov 2026: **the worst rating is red** (section 3). Wording stays by meaning, from the engineering doc. The draft's "Reinforcement recommended" is **not** used for the worst rating, because it is softer than "unsafe / imminent risk" and could mislead. Orange is now Claude's flag colour.
 
 **Added:** the Beirut Urban Lab references (section 1), the serif display type and micro-labels (section 4), and the hatch for "not yet inspected".
