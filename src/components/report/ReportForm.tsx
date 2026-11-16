@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import {
   AREA_CONTENT,
   COLOUR_CONTENT,
@@ -93,6 +93,8 @@ type Props = {
   onSaved: (report: Report) => void;
   /** Another report was saved meanwhile: reload and re-base the prefill. */
   onStale: () => Promise<void>;
+  /** Share of the form that is complete, shown as a line under the tab bar. */
+  onProgress?: (value: number) => void;
 };
 
 export default function ReportForm({
@@ -103,6 +105,7 @@ export default function ReportForm({
   latest,
   onSaved,
   onStale,
+  onProgress,
 }: Props) {
   const uid = useId();
   const [touched, setTouched] = useState<Set<string>>(new Set());
@@ -183,6 +186,7 @@ export default function ReportForm({
     (k) => k !== "constructionChangeReason" || constructionChanged,
   );
   const progress = needed.filter((k) => !errors[k]).length / needed.length;
+  useEffect(() => onProgress?.(progress), [progress, onProgress]);
 
   return (
     <form
@@ -193,7 +197,6 @@ export default function ReportForm({
         save();
       }}
     >
-      <Progress value={progress} />
       <DraftBanner text={DRAFT_BANNER} />
 
       {/* Engineer: from the account, locked. The server copies it from the session, not from this form. */}
@@ -653,24 +656,6 @@ function ObservationField({
         </details>
       )}
     </Section>
-  );
-}
-
-function Progress({ value }: { value: number }) {
-  return (
-    <div
-      role="progressbar"
-      aria-label="Report completion"
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={Math.round(value * 100)}
-      className="sticky top-0 z-10 -mx-5 -mt-3 h-0.5 bg-line"
-    >
-      <div
-        className="h-full origin-left bg-accent transition-transform duration-300 ease-out"
-        style={{ transform: `scaleX(${value})` }}
-      />
-    </div>
   );
 }
 
