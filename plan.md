@@ -160,10 +160,11 @@ The project owner chose to leave adoption out of this project. **Later test:** o
 7. Arabic text displays and types correctly, right to left, in reports, names, and AI output. The UI stays in English.
 8. Public link, polished GitHub README (section 2)
 9. The design rules in section 4
+10. **Engineer verification (simulated), decided by the project owner 16 Nov 2026.** An engineer creates an account. The demo then says "Waiting for OEA approval. Refresh." When the engineer refreshes, the demo approves the account automatically. This stands in for the real OEA check, which is out of scope. The engineer's account details (name and contact) are filled into every report they write. Details of the sign-up fields are still to be decided.
 
 ### Out (for a later version)
 
-- Real user accounts and login (OEA membership)
+- Real user accounts and login with real OEA membership checks (the demo has a simulated version, see section 7 "In", item 10)
 - The Order role: assigning reviews to engineers
 - Arabic UI translation and language switch
 - Bulk scanning and a searchable document archive
