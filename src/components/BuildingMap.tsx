@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import type { FeatureCollection, MultiPolygon } from "geojson";
 import "leaflet/dist/leaflet.css";
+import { animate } from "motion";
 import { apiFetch } from "@/lib/client-fetch";
+import { prefersReducedMotion, springGentle } from "@/lib/motion";
 import type { Colour } from "@/lib/report";
 
 /** Central Zahle, Lebanon. */
@@ -13,33 +15,48 @@ const OPEN_ZOOM = 16;
 /** The imported area plus a margin, so the map cannot be dragged away from Zahle. */
 const ZAHLE_BOUNDS = L.latLngBounds([33.82, 35.86], [33.875, 35.945]);
 
-/** Map fill per report colour. Grey = no report yet ("Not yet inspected"). */
-const COLOUR_STYLE: Record<Colour | "none", L.PathOptions> = {
-  none: { color: "#64748b", weight: 1, fillColor: "#94a3b8", fillOpacity: 0.3 },
-  green: { color: "#15803d", weight: 1, fillColor: "#22c55e", fillOpacity: 0.55 },
-  yellow: { color: "#a16207", weight: 1, fillColor: "#facc15", fillOpacity: 0.65 },
-  red: { color: "#b91c1c", weight: 1, fillColor: "#ef4444", fillOpacity: 0.55 },
-};
-const SELECTED_OUTLINE: L.PathOptions = { color: "#0f172a", weight: 3 };
+/** Building fills (DESIGN.md section 3). Data values stay green / yellow / red; no red on screen. */
+const RATING_FILL: Record<Colour, string> = { green: "#1FA971", yellow: "#F5A524", red: "#EE7A2F" };
+const OUTLINE = { color: "#FFFFFF", weight: 1, opacity: 0.9 };
+const SELECTED_OUTLINE: L.PathOptions = { color: "#2F7CF6", weight: 3, opacity: 1 };
+
+/** "Not yet inspected": stone grey with a fine diagonal hatch (the only texture in the app). */
+let hatch: CanvasPattern | string | null = null;
+function hatchFill(): CanvasPattern | string {
+  if (hatch) return hatch;
+  const tile = document.createElement("canvas");
+  tile.width = tile.height = 6;
+  const ctx = tile.getContext("2d")!;
+  ctx.fillStyle = "rgba(163, 168, 179, 0.45)";
+  ctx.fillRect(0, 0, 6, 6);
+  ctx.strokeStyle = "rgba(110, 116, 128, 0.55)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(-1, 7);
+  ctx.lineTo(7, -1);
+  ctx.stroke();
+  hatch = document.createElement("canvas").getContext("2d")!.createPattern(tile, "repeat") ?? "#A3A8B3";
+  return hatch;
+}
 
 type Props = {
   colours: ReadonlyMap<string, Colour>;
   selectedId: string | null;
   onSelect: (id: string) => void;
   onEmptyClick: () => void;
-  /** Space covered by the panel, so a newly selected building is not hidden behind it. */
-  panelInset: { right: number; bottom: number };
+  /** The area the tray covers, in map pixels, so a selected building is not hidden behind it. */
+  coveredRect: () => { left: number; top: number; right: number; bottom: number } | null;
 };
 
 type Status = "loading" | "ready" | "error";
 
-export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClick, panelInset }: Props) {
+export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClick, coveredRect }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layersRef = useRef(new Map<string, L.Polygon>());
   const handlersRef = useRef({ onSelect, onEmptyClick });
   const buildingClickRef = useRef<MouseEvent | null>(null);
-  const insetRef = useRef(panelInset);
+  const coveredRef = useRef(coveredRect);
   const coloursRef = useRef(colours);
   const selectedRef = useRef(selectedId);
   const [status, setStatus] = useState<Status>("loading");
@@ -47,7 +64,7 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
 
   useEffect(() => {
     handlersRef.current = { onSelect, onEmptyClick };
-    insetRef.current = panelInset;
+    coveredRef.current = coveredRect;
   });
 
   // Create the map once.
@@ -79,7 +96,9 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
       inertiaMaxSpeed: 1500,
       easeLinearity: 0.25,
     });
-    L.control.zoom({ position: "topleft" }).addTo(map);
+    L.control.zoom({ position: "topright" }).addTo(map);
+    // OpenStreetMap tiles, muted and lightened in CSS (.leaflet-tile-pane in globals.css)
+    // so the map stays quiet and the coloured footprints carry the meaning (DESIGN.md section 7).
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       keepBuffer: 4, // keep nearby tiles, fewer blank squares when panning back
@@ -167,12 +186,9 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
     layer.setStyle(styleFor(selectedId!, coloursRef.current, selectedId));
     layer.bringToFront();
     if (previous !== selectedId) {
-      const inset = insetRef.current;
-      map.panInside(layer.getBounds().getCenter(), {
-        paddingTopLeft: [24, 24],
-        paddingBottomRight: [inset.right + 24, inset.bottom + 24],
-        duration: 0.3,
-      });
+      // Wait a frame so the tray is laid out, then move only if it would cover the building.
+      const frame = requestAnimationFrame(() => flyClearOfTray(map, layer, coveredRef.current()));
+      return () => cancelAnimationFrame(frame);
     }
   }, [selectedId, status]);
 
@@ -208,6 +224,57 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
 }
 
 function styleFor(id: string, colours: ReadonlyMap<string, Colour>, selectedId: string | null): L.PathOptions {
-  const base = COLOUR_STYLE[colours.get(id) ?? "none"];
+  const rating = colours.get(id);
+  const base: L.PathOptions = rating
+    ? { ...OUTLINE, fillColor: RATING_FILL[rating], fillOpacity: 0.85 }
+    : // Leaflet's canvas renderer passes fillColor straight to ctx.fillStyle, so a pattern works.
+      { ...OUTLINE, fillColor: hatchFill() as unknown as string, fillOpacity: 1 };
   return id === selectedId ? { ...base, ...SELECTED_OUTLINE } : base;
+}
+
+const MARGIN = 24;
+
+/**
+ * If the tray covers the building, glide the map (spring-gentle) just far enough
+ * to show it above the tray, or beside it on wide screens. Otherwise do nothing:
+ * the map never moves on its own (DESIGN.md section 6).
+ */
+function flyClearOfTray(
+  map: L.Map,
+  layer: L.Polygon,
+  tray: { left: number; top: number; right: number; bottom: number } | null,
+) {
+  const size = map.getSize();
+  const p = map.latLngToContainerPoint(layer.getBounds().getCenter());
+  let dx = 0;
+  let dy = 0;
+  // Keep inside the visible map first.
+  if (p.x < MARGIN) dx = p.x - MARGIN;
+  if (p.x > size.x - MARGIN) dx = p.x - (size.x - MARGIN);
+  if (p.y < MARGIN) dy = p.y - MARGIN;
+  if (p.y > size.y - MARGIN) dy = p.y - (size.y - MARGIN);
+
+  const x = p.x - dx;
+  const y = p.y - dy;
+  if (tray && x > tray.left - MARGIN && x < tray.right + MARGIN && y > tray.top - MARGIN && y < tray.bottom + MARGIN) {
+    const up = y - (tray.top - MARGIN); // move the building above the tray
+    const right = tray.right + MARGIN - x; // or to the right of it (desktop)
+    const roomRight = size.x - tray.right > 2 * MARGIN;
+    if (roomRight && right < up) dx -= right;
+    else dy += up;
+  }
+  if (!dx && !dy) return;
+
+  if (prefersReducedMotion()) {
+    map.panBy([dx, dy], { animate: false });
+    return;
+  }
+  let done = 0;
+  animate(0, 1, {
+    ...springGentle,
+    onUpdate: (v) => {
+      map.panBy([dx * (v - done), dy * (v - done)], { animate: false });
+      done = v;
+    },
+  });
 }
