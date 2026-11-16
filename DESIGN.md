@@ -139,7 +139,7 @@ Patterns:
 
 ### Sign-up, waiting and login
 - Calm, centred card on `ground`, with the wordmark. Visible labels on every field. No icons inside inputs.
-- Sign-up carries the "demo, use made-up details" notice, plain and friendly, above the form.
+- No "demo" notice anywhere in the app. The owner does not want "This is a demo" text unless they ask for it.
 - **Waiting for OEA approval:** the arch icon, the exact text from `docs/engineering.md` D9.3, and a "Refresh" button. After Refresh, the tray carries the engineer straight into the map with the fading welcome line.
 
 ### Command bar (from Raycast)
