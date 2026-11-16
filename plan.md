@@ -1,6 +1,6 @@
 # Zahle Building Registry — Project Plan
 
-This file is the shared plan for the project. Every agent (civil engineering advisor, builder, reviewer) reads it before starting any task. If a task conflicts with this plan, stop and ask the project owner.
+This file is the shared plan for the project. The orchestrator and every agent (civil-engineer, coder, devils-advocate) read it before starting any task. If a task conflicts with this plan, stop and ask the project owner.
 
 ---
 
@@ -169,13 +169,17 @@ The project owner chose to leave adoption out of this project. **Later test:** o
 
 ## 8. Team (agents)
 
-All agents live in `.claude/agents/` in this repo. All agents read this file first.
+**Orchestrator: the main Claude Code session** (instructions in `CLAUDE.md`). It sees the big picture, explains the full experience to the project owner, keeps this plan up to date, breaks work into tasks, and sends them to the agents below. It is not a separate agent, because agents cannot start other agents or talk to the project owner.
+
+The agents live in `.claude/agents/` in this repo. All of them read this file first.
 
 | Agent | Job |
 |---|---|
-| **civil-engineer** | Advises on engineering content: building facts and inspection fields, condition colour wording (aligned with standard post-earthquake tagging), Lebanese codes (Law 646/2004, Decrees 14293 and 7964), wording of remarks. Writes no app code. Its advice is checked once by the project owner's senior OEA contact. |
-| **builder** | The only agent that writes code. Builds the whole app, including the UI, following this plan and `DESIGN.md`. |
-| **reviewer** | Tests every feature by using it as an engineer in a real browser (Playwright). Tries Arabic text, uploads the real messy document, checks the design rules in section 4. Reports bugs. Does not fix code. |
+| **civil-engineer** | Advises on engineering content: building facts and inspection fields, condition colour wording (aligned with standard post-earthquake tagging), Lebanese codes (Law 646/2004, Decrees 14293 and 7964), realistic sample data. Writes only to `docs/engineering.md`, never app code. Its advice is checked once by the project owner's senior OEA contact. |
+| **coder** | The only agent that writes app code. Builds features and the UI, following this plan, `DESIGN.md`, `docs/engineering.md`, and the examples and skills the project owner provides. |
+| **devils-advocate** | Tries to break the app in a real browser (Playwright MCP), two ways: as an attacker (drain the AI budget, wipe data, inject scripts, upload huge or fake files, reach private data) and as a confused or hurried engineer (Arabic text, wrong building, half-filled forms, slow phone). Also checks the design rules in section 4. Reports problems ranked by severity. Never fixes code. |
+
+**MCP:** only Playwright, for the devil's advocate. GitHub, Supabase, and Vercel are used through their command-line tools.
 
 **Project owner:** makes every decision, accepts or rejects work, and watches a full demo run once a week.
 
@@ -196,7 +200,7 @@ The project owner signs in to each account. Claude does everything after that th
 
 | Risk | Mitigation |
 |---|---|
-| Agents build something the owner cannot judge, because the owner writes no code | A separate reviewer agent tests each feature. The owner watches a full demo weekly. |
+| Agents build something the owner cannot judge, because the owner writes no code | The devils-advocate agent tests each feature in a real browser. The owner watches a full demo weekly. |
 | AI misreads the messy document | The engineer always confirms the fields. Test on the real document in week 1, not week 3. |
 | "Beautiful" stays vague and eats hours | Write `DESIGN.md` before any code. |
 | Scope grows past 30 hours | Anything not in section 7 "In" goes on the "Later" list. |
