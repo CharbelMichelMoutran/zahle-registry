@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { WAITING } from "@/lib/content";
+import { ArchMark } from "../ui/Arch";
+import { Button } from "../ui/Button";
 
 export const WELCOME_KEY = "zr:welcome";
 
@@ -30,26 +32,22 @@ export default function WaitingPanel() {
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold text-slate-900">{WAITING.title}</h1>
+    <div className="space-y-4 text-center">
+      <ArchMark className="mx-auto h-11 w-10 text-accent" />
+      <h1 className="font-serif text-heading font-medium text-ink">{WAITING.title}</h1>
       {WAITING.body.map((p) => (
-        <p key={p} className="text-[15px] leading-relaxed text-slate-700">
+        <p key={p} className="text-body text-muted">
           {p}
         </p>
       ))}
       {error && (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-800">
+        <p role="alert" className="rounded-control bg-attention-soft px-3 py-2 text-micro text-attention">
           {error}
         </p>
       )}
-      <button
-        type="button"
-        onClick={refresh}
-        disabled={busy}
-        className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:bg-slate-400"
-      >
+      <Button onClick={refresh} disabled={busy} className="w-full">
         {busy ? "Refreshing…" : "Refresh"}
-      </button>
+      </Button>
       <LogoutLink onDone={() => router.replace("/login")} />
     </div>
   );
@@ -57,14 +55,14 @@ export default function WaitingPanel() {
 
 function LogoutLink({ onDone }: { onDone: () => void }) {
   return (
-    <p className="text-center text-sm">
+    <p className="text-center text-body">
       <button
         type="button"
         onClick={async () => {
           await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
           onDone();
         }}
-        className="font-medium text-slate-600 underline underline-offset-2 hover:text-slate-900"
+        className="min-h-11 px-3 font-medium text-muted underline underline-offset-2 hover:text-ink"
       >
         Log out
       </button>

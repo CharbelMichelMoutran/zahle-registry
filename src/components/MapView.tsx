@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence } from "motion/react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Engineer } from "@/lib/account";
@@ -79,22 +80,6 @@ function usePanelNavigation() {
   return { nav, navRef, push, goTo };
 }
 
-function usePanelInset(nav: Nav) {
-  const [inset, setInset] = useState({ right: 0, bottom: 0 });
-  const open = nav.depth > 0;
-  useEffect(() => {
-    const update = () => {
-      if (!open) return setInset({ right: 0, bottom: 0 });
-      const wide = window.matchMedia("(min-width: 768px)").matches;
-      setInset(wide ? { right: 392, bottom: 0 } : { right: 0, bottom: Math.round(window.innerHeight * 0.35) });
-    };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, [open]);
-  return inset;
-}
-
 export default function MapView({
   engineer,
   onDraftsChange,
@@ -103,11 +88,12 @@ export default function MapView({
   onDraftsChange: (count: number) => void;
 }) {
   const { nav, navRef, push, goTo } = usePanelNavigation();
-  const panelInset = usePanelInset(nav);
+  const trayRef = useRef<HTMLElement | null>(null);
+  const coveredRect = useCallback(() => coveredRectOf(trayRef.current), []);
   const [colours, setColours] = useState<ReadonlyMap<string, Colour>>(new Map());
   const [buildings, setBuildings] = useState<Record<string, BuildingData>>({});
   const [drafts, setDrafts] = useState<Record<string, ReportInput>>({});
-  const [notice, setNotice] = useState<string | null>(null);
+  const [celebrateKey, setCelebrateKey] = useState<number | null>(null);
   const buildingsRef = useRef(buildings);
   const draftCount = Object.keys(drafts).length;
   useEffect(() => onDraftsChange(draftCount), [draftCount, onDraftsChange]);
@@ -149,7 +135,7 @@ export default function MapView({
   const selectBuilding = useCallback(
     (id: string) => {
       const current = navRef.current;
-      setNotice(null);
+      setCelebrateKey(null);
       loadBuilding(id);
       if (current.buildingId === id) return;
       const next = { buildingId: id, level: "preview" as const, tab: "history" as const, openReportId: null };
@@ -162,19 +148,19 @@ export default function MapView({
   const close = useCallback(() => goTo(0), [goTo]);
   const minimize = useCallback(() => goTo(1), [goTo]);
   const maximize = (tab?: Tab) => {
-    setNotice(null);
+    setCelebrateKey(null);
     const id = navRef.current.buildingId;
     if (id && (tab ?? navRef.current.tab) === "create") ensureDraft(id, buildingsRef.current[id]);
     push({ ...navRef.current, level: "full", tab: tab ?? navRef.current.tab, openReportId: null, depth: 2 });
   };
   const setTab = (tab: Tab) => {
-    setNotice(null);
+    setCelebrateKey(null);
     const id = navRef.current.buildingId;
     if (id && tab === "create") ensureDraft(id, buildingsRef.current[id]);
     goTo(2, { ...navRef.current, level: "full", tab, openReportId: null });
   };
   const openReport = (reportId: string | null) => {
-    setNotice(null);
+    setCelebrateKey(null);
     if (reportId) push({ ...navRef.current, openReportId: reportId, depth: 3 });
     else goTo(2, { ...navRef.current, openReportId: null });
   };
@@ -208,8 +194,9 @@ export default function MapView({
     setBuildings((b) => ({ ...b, [id]: { status: "ready", reports, changes: ready?.changes ?? [] } }));
     setColours((c) => withColour(c, id, reports[0].colour));
     loadBuilding(id); // picks up the construction-date change record, if any
-    goTo(2, { ...navRef.current, level: "full", tab: "history", openReportId: null });
-    setNotice("Report saved. It is now part of this building's record and cannot be changed.");
+    // DESIGN.md 7.5: the tray returns to the preview and celebrates once.
+    goTo(1, { ...navRef.current, level: "preview", tab: "history", openReportId: null });
+    setCelebrateKey(Date.now());
   };
 
   /** Another report was saved meanwhile: re-base the form on it, keeping the engineer's text. */
@@ -242,10 +229,13 @@ export default function MapView({
         selectedId={nav.buildingId}
         onSelect={selectBuilding}
         onEmptyClick={onEmptyMapClick}
-        panelInset={panelInset}
+        coveredRect={coveredRect}
       />
+      <AnimatePresence>
       {nav.buildingId && nav.depth > 0 && (
         <BuildingPanel
+          key="tray"
+          ref={trayRef}
           buildingId={nav.buildingId}
           level={nav.level}
           tab={nav.tab}
@@ -253,7 +243,7 @@ export default function MapView({
           data={data ?? { status: "loading" }}
           draft={drafts[nav.buildingId] ?? null}
           engineer={engineer}
-          notice={notice}
+          celebrateKey={celebrateKey}
           onTab={setTab}
           onOpenReport={openReport}
           onMaximize={maximize}
@@ -268,8 +258,15 @@ export default function MapView({
           onStale={onStale}
         />
       )}
+      </AnimatePresence>
     </div>
   );
+}
+
+/** The tray's box in map coordinates (both sit in the same container), ignoring its slide-in transform. */
+function coveredRectOf(el: HTMLElement | null) {
+  if (!el) return null;
+  return { left: el.offsetLeft, top: el.offsetTop, right: el.offsetLeft + el.offsetWidth, bottom: el.offsetTop + el.offsetHeight };
 }
 
 function withColour(map: ReadonlyMap<string, Colour>, id: string, colour: Colour | undefined) {

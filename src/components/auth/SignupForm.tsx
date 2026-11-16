@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { DISCIPLINE_LABEL, DISCIPLINES, validateSignup, type SignupInput } from "@/lib/account";
 import { SIGNUP_FIELDS } from "@/lib/content";
+import { Button } from "../ui/Button";
 import { authInputClass } from "./AuthShell";
 import { PasswordInput } from "./PasswordInput";
 
@@ -58,10 +59,10 @@ export default function SignupForm() {
 
   const field = (f: Exclude<Field, "discipline" | "password">, props: React.InputHTMLAttributes<HTMLInputElement>) => (
     <div>
-      <label htmlFor={f} className="block text-sm font-semibold text-slate-900">
+      <label htmlFor={f} className="block text-body font-semibold text-ink">
         {SIGNUP_FIELDS[f].label}
       </label>
-      <p id={`${f}-help`} className="mt-0.5 mb-2 text-[13px] leading-snug text-slate-500">
+      <p id={`${f}-help`} className="mt-0.5 mb-2 text-micro leading-snug text-muted">
         {SIGNUP_FIELDS[f].help}
       </p>
       <input
@@ -80,19 +81,19 @@ export default function SignupForm() {
 
   return (
     <form onSubmit={submit} noValidate className="space-y-5">
-      <h1 className="text-xl font-semibold text-slate-900">Create account</h1>
+      <h1 className="font-serif text-heading font-medium text-ink">Create account</h1>
 
       {field("fullName", { dir: "auto", autoComplete: "name", maxLength: 120 })}
 
       <fieldset>
-        <legend className="block text-sm font-semibold text-slate-900">{SIGNUP_FIELDS.discipline.label}</legend>
-        <p className="mt-0.5 mb-2 text-[13px] leading-snug text-slate-500">{SIGNUP_FIELDS.discipline.help}</p>
+        <legend className="block text-body font-semibold text-ink">{SIGNUP_FIELDS.discipline.label}</legend>
+        <p className="mt-0.5 mb-2 text-micro leading-snug text-muted">{SIGNUP_FIELDS.discipline.help}</p>
         <div className="grid gap-2 sm:grid-cols-3">
           {DISCIPLINES.map((d) => (
             <label
               key={d}
-              className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-sm ${
-                input.discipline === d ? "border-slate-900 ring-1 ring-slate-900" : "border-slate-300"
+              className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-control border px-3 py-2.5 text-body transition-colors ${
+                input.discipline === d ? "border-accent bg-accent-soft" : "border-line hover:bg-surface-soft"
               }`}
             >
               <input
@@ -104,7 +105,7 @@ export default function SignupForm() {
                   set("discipline", d);
                   touch("discipline");
                 }}
-                className="h-4 w-4 accent-slate-900"
+                className="h-5 w-5 accent-accent"
               />
               {DISCIPLINE_LABEL[d]}
             </label>
@@ -118,10 +119,10 @@ export default function SignupForm() {
       {field("username", { autoComplete: "username", autoCapitalize: "none", spellCheck: false, maxLength: 40 })}
 
       <div>
-        <label htmlFor="password" className="block text-sm font-semibold text-slate-900">
+        <label htmlFor="password" className="block text-body font-semibold text-ink">
           {SIGNUP_FIELDS.password.label}
         </label>
-        <p id="password-help" className="mt-0.5 mb-2 text-[13px] leading-snug text-slate-500">
+        <p id="password-help" className="mt-0.5 mb-2 text-micro leading-snug text-muted">
           {SIGNUP_FIELDS.password.help}
         </p>
         <PasswordInput
@@ -138,21 +139,21 @@ export default function SignupForm() {
       </div>
 
       {error && (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-800">
+        <p role="alert" className="rounded-control bg-attention-soft px-3 py-2 text-micro text-attention">
           {error}
         </p>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={saving}
-        className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:bg-slate-400"
+        className="w-full"
       >
         {saving ? "Creating account…" : "Create account"}
-      </button>
-      <p className="text-center text-sm text-slate-600">
+      </Button>
+      <p className="text-center text-body text-muted">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-slate-900 underline underline-offset-2">
+        <Link href="/login" className="inline-flex min-h-11 items-center px-1 font-medium text-accent underline underline-offset-2">
           Log in
         </Link>
       </p>
@@ -162,5 +163,5 @@ export default function SignupForm() {
 
 export function FieldError({ message }: { message?: string }) {
   if (!message) return null;
-  return <p className="mt-1.5 text-[13px] text-red-700">{message}</p>;
+  return <p className="mt-1.5 text-micro text-attention">{message}</p>;
 }

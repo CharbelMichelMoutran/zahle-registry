@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { LOGIN_TEXT } from "@/lib/content";
+import { Button } from "../ui/Button";
 import { authInputClass } from "./AuthShell";
 import { PasswordInput } from "./PasswordInput";
 
@@ -44,19 +45,19 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={submit} noValidate className="space-y-4">
-      <h1 className="text-xl font-semibold text-slate-900">Log in</h1>
+      <h1 className="font-serif text-heading font-medium text-ink">Log in</h1>
       {expired && (
-        <p role="status" className="rounded-lg bg-slate-100 px-3 py-2 text-[13px] text-slate-700">
+        <p role="status" className="rounded-control bg-surface-soft px-3 py-2 text-micro text-ink">
           {LOGIN_TEXT.loggedOut}
         </p>
       )}
       {error && (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-800">
+        <p role="alert" className="rounded-control bg-attention-soft px-3 py-2 text-micro text-attention">
           {error}
         </p>
       )}
       <div>
-        <label htmlFor="username" className="mb-1.5 block text-sm font-semibold text-slate-900">
+        <label htmlFor="username" className="mb-1.5 block text-body font-semibold text-ink">
           Username
         </label>
         <input
@@ -71,22 +72,22 @@ export default function LoginForm() {
         />
       </div>
       <div>
-        <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-slate-900">
+        <label htmlFor="password" className="mb-1.5 block text-body font-semibold text-ink">
           Password
         </label>
         <PasswordInput id="password" value={password} onChange={setPassword} autoComplete="current-password" />
       </div>
-      <button
+      <Button
         type="submit"
         disabled={busy}
-        className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:bg-slate-400"
+        className="w-full"
       >
         {busy ? "Logging in…" : "Log in"}
-      </button>
-      <p className="text-center text-[13px] text-slate-500">{LOGIN_TEXT.forgot}</p>
-      <p className="text-center text-sm text-slate-600">
+      </Button>
+      <p className="text-center text-micro text-muted">{LOGIN_TEXT.forgot}</p>
+      <p className="text-center text-body text-muted">
         No account?{" "}
-        <Link href="/signup" className="font-medium text-slate-900 underline underline-offset-2">
+        <Link href="/signup" className="inline-flex min-h-11 items-center px-1 font-medium text-accent underline underline-offset-2">
           Create one
         </Link>
       </p>

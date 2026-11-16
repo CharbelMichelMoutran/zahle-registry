@@ -202,7 +202,7 @@ export const SIGNUP_ERRORS = {
 export const WAITING = {
   title: "Waiting for OEA approval.",
   body: [
-    "Your account has been created. The Order of Engineers and Architects confirms your membership before you can write reports.",
+    "Your account has been created. Press Refresh to check.",
   ],
 };
 
