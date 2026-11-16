@@ -4,6 +4,8 @@ A building registry for civil engineers in Zahle, Lebanon. A portfolio demo, bui
 
 **Read `plan.md` before every task.** It is the source of truth for the problem, scope, design rules, and decisions. If a request conflicts with it, stop and ask the project owner.
 
+**At the start of a session, also read `docs/STATUS.md`.** It says where the project stands, what the owner is waiting on, and how to resume. Read `DESIGN.md` before any UI work.
+
 ## Your role: orchestrator
 
 In the main session you are the orchestrator. The project owner writes no code; they direct, decide, and review.

@@ -235,9 +235,16 @@ The project owner signs in to each account. Claude does everything after that th
 
 - Final report template: being researched separately.
 
+## 12. Status (16 Nov 2026)
+
+The current state, what is built, what is waiting on the owner, and how to resume are in **`docs/STATUS.md`**. In short: map, accounts (simulated), building window, reports, locked author, and the Zahle design pass are built and live; sample data, search, photos, AI, and the README are not. The repo stays private until the owner says. No "demo" wording in the app unless the owner asks.
+
 ## Later list
 
 (Add ideas here instead of building them now.)
+
+- **Owner's feature list (16 Nov 2026), not scheduled:** location suggestion, residents (phone verification, inspection requests, building log, resident map), Claude sorting and flagging with a learning rulebook, engineer verdicts, a Lebanon engineering context file, plain-language engineer map query, and the Ctrl+K command bar. Full text and a check against this plan in **`docs/feature-backlog.md`**. Several items conflict with this plan (residents, AI before the key exists, a second orange, demo wording), so the owner decides before any of it is built. Suggested first group: location suggestion for engineers, the Ctrl+K command bar, and the context file.
+- Sample buildings with realistic history (scope item 6, still open).
 
 - **Post-earthquake triage queue:** after an earthquake, each engineer gets a list of buildings ranked by triage colour × number of residents. (Needs a residents count per building.)
 - Fuller building facts (floors, structure type, seismic measures, units) and photos in the report. Civil-engineer's draft is in `docs/engineering.md`.
