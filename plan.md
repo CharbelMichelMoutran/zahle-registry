@@ -146,9 +146,12 @@ The project owner chose to leave adoption out of this project. **Later test:** o
 1. Map of Zahle with clickable buildings (OpenStreetMap coverage confirmed good), outlines copied into the database
 2. Pick a building: location suggests it and the engineer confirms, or typed address, or a click (no real accounts; the engineer picks a demo name)
 3. Building record: facts, inspection history, and documents (section 4c)
-4. Building facts and inspection form, clearly marked "draft template":
-   - **Building facts:** year built, number of floors, structure type, seismic measures (yes / no / unknown), number of units
-   - **Inspection:** condition colour (green / yellow / red, section 4b), engineer's remarks, photos
+4. Building window and report form, clearly marked "draft template". **Decided by the project owner (16 Nov 2026), replacing the earlier facts-and-inspection split for the demo:**
+   - **Clicking a building opens a window with two actions:** "Building history" and "Create report".
+   - **Building history** lists past reports: report date (day, month, year), engineer's name, and the building's colour from that report. Opening a past report shows it in the same format as the form below, read-only.
+   - **Colour** = how the building is rated for natural disasters (green / yellow / red, section 4b). It is a **required field at the end of the form**, picked after the four observations. In the history list, each colour is shown with the first line of that report's final observation beside it (rule 1: a colour never stands alone).
+   - **Create report** fields: engineer info (name and contact); **date of report (day, month, year)**; number of people currently living in the building; building construction date (autofilled from the previous report, editable; an edit keeps the earlier value and **asks for a short reason**, section 4); engineer's observations on the roof, the columns, the foundations, and a final observation. **Each observation area has a "Not inspected" tick box** (with a reason) for parts the engineer could not see. Limits (report year from 1990, construction date from 1800, observations at least 10 characters) are accepted for the demo and unverified. No "visual check only" line near the colour; no inspection-type field in the demo.
+   - Floors, structure type, seismic measures, and units are **not** in the demo report. Photos are not in the demo report. Both go on the Later list.
 5. AI document-to-form: one uploaded image, AI fills the building facts, engineer confirms. **Built right after the form, not last.** It is what sets the project apart and the main reason engineers would want to use it. Tested on the real document in week 1 (a quick check, no UI).
 6. Sample data with history: several buildings with past inspections and scanned documents, so the demo shows the record paying off
 7. Arabic text displays and types correctly, right to left, in reports, names, and AI output. The UI stays in English.
@@ -192,7 +195,7 @@ The project owner signs in to each account. Claude does everything after that th
 | GitHub (CharbelMichelMoutran) | Log in once from the terminal | Free |
 | Supabase | Sign up with GitHub | Free tier |
 | Vercel | Sign up with GitHub | Free tier |
-| Anthropic Console | Sign up, add $50 credit, set a $50 spending limit, create an API key | Up to $50 |
+| Anthropic Console | **Deferred.** Not set up for now. Needed later, before AI document-to-form (section 7, item 5) can run: sign up, add $50 credit, set a $50 spending limit, create an API key | Up to $50 |
 
 ---
 
@@ -206,7 +209,6 @@ The project owner signs in to each account. Claude does everything after that th
 | Scope grows past 30 hours | Anything not in section 7 "In" goes on the "Later" list. |
 | Anyone with the public link can call the AI upload and spend the $50 budget | Set a hard spending limit in the Anthropic Console. Rate-limit the upload (e.g. a few per visitor per day) and cap image size. |
 | With no accounts, any visitor can edit or delete demo data | Seed data that can be restored with one action ("Reset demo"). Run a nightly automatic reset. |
-| Made-up ratings on real Zahle buildings look like real findings | Every screen carries a "Demo — fictional data" label. |
 | The real paper document holds personal data (owner names, ID numbers, addresses) | Black out personal details before the photo goes into the public demo or the API. Use the unedited original only for private testing. |
 | The civil-engineer agent gets Lebanese codes or field names wrong | The project owner's senior OEA contact reviews the fields and colour wording once (about 10 minutes). |
 | Location picks the wrong building | Location only suggests; the engineer always confirms. |
@@ -218,7 +220,7 @@ The project owner signs in to each account. Claude does everything after that th
 
 ## 10. First three steps (this week)
 
-1. **Owner:** sign in to the four accounts in section 8. Pick 2 or 3 websites whose look you love, for `DESIGN.md`. Photograph the messy engineering document from home.
+1. **Owner:** sign in to the three accounts in section 8 (GitHub, Supabase, Vercel; the Anthropic Console is deferred). Pick 2 or 3 websites whose look you love, for `DESIGN.md`. Photograph the messy engineering document from home.
 2. **Claude:** set up the GitHub repo with this `plan.md`, connect Supabase and Vercel, and test the AI on the real document.
 3. **Claude:** create the three agents in `.claude/agents/`.
 4. **Owner:** ask the senior OEA contact for a 10-minute look at the fields and colour wording, once the civil-engineer agent drafts them.
@@ -234,6 +236,8 @@ The project owner signs in to each account. Claude does everything after that th
 (Add ideas here instead of building them now.)
 
 - **Post-earthquake triage queue:** after an earthquake, each engineer gets a list of buildings ranked by triage colour × number of residents. (Needs a residents count per building.)
+- Fuller building facts (floors, structure type, seismic measures, units) and photos in the report. Civil-engineer's draft is in `docs/engineering.md`.
+- Optional "inspection type" (routine / after an event) and basement levels, suggested by the civil-engineer.
 - Real engineer accounts, verified by OEA membership number.
 - The Order role: assigns building reviews to engineers.
 - On-site check: mark reports saved far from the building as "not filed on site."
