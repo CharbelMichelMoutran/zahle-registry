@@ -7,7 +7,7 @@ export function Wordmark({ size = "large" }: { size?: "large" | "small" }) {
     return (
       <span className="inline-flex items-baseline gap-2 whitespace-nowrap" aria-label="Zahle Building Registry">
         <span className="font-heading text-body font-semibold lowercase tracking-tight text-ink">
-          zahle building registry
+          zahle<span className="hidden min-[400px]:inline"> building registry</span>
         </span>
         <span lang="ar" dir="rtl" className="font-arabic text-lead font-semibold text-ink">
           زحلة
