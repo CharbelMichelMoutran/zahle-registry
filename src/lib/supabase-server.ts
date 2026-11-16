@@ -1,0 +1,16 @@
+import "server-only";
+import { createClient } from "@supabase/supabase-js";
+
+/**
+ * Supabase client for the app server only. It uses the secret key, which must
+ * never reach the browser; `server-only` makes the build fail if this file is
+ * ever imported from client code.
+ */
+export function createServerSupabase() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY;
+  if (!url || !key) {
+    throw new Error("SUPABASE_URL and SUPABASE_SECRET_KEY must be set.");
+  }
+  return createClient(url, key, { auth: { persistSession: false } });
+}
