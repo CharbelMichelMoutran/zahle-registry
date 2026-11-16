@@ -2,6 +2,7 @@
  * The demo report (docs/engineering.md, Part A): types, limits and validation.
  * Shared by the form (to enable Save) and the server (to reject bad input).
  */
+import type { Discipline } from "./account";
 
 // ---------------------------------------------------------------------------
 // Owner decision (plan section 7): easy to flip.
@@ -15,11 +16,6 @@ export const FINAL_OBSERVATION_ALLOWS_NOT_INSPECTED = false;
 // ---------------------------------------------------------------------------
 
 export const LIMITS = {
-  nameMin: 2,
-  nameMax: 100,
-  contactMin: 7,
-  phoneMax: 20,
-  emailMax: 254,
   reportYearMin: 1990,
   constructionYearMin: 1800,
   residentsMax: 1000,
@@ -50,8 +46,12 @@ export type ConstructionDate = {
 export type Report = {
   id: string;
   building_id: string;
+  /** Copied from the account when the report was saved. Empty on early reports, which had typed details. */
+  engineer_id: string | null;
   engineer_name: string;
   engineer_contact: string;
+  engineer_discipline: Discipline | null;
+  engineer_oea_number: string | null;
   report_date: string; // YYYY-MM-DD
   residents_count: number | null;
   residents_not_verified: boolean;
@@ -112,8 +112,6 @@ export type ObservationInput = { text: string; notInspected: boolean; reason: st
 export type ReportInput = {
   clientRequestId: string;
   basedOnReportId: string | null;
-  engineerName: string;
-  engineerContact: string;
   day: string;
   month: string;
   year: string;
@@ -133,8 +131,6 @@ export type ReportPayload = {
   building_id: string;
   client_request_id: string;
   based_on_report_id: string | null;
-  engineer_name: string;
-  engineer_contact: string;
   report_date: string;
   residents_count: number | null;
   residents_not_verified: boolean;
@@ -149,8 +145,6 @@ export type ReportPayload = {
 
 export type FieldErrors = Partial<Record<string, string>>;
 
-const PHONE = /^\+?[0-9][0-9 -]*[0-9]$/;
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const INTEGER = /^\d+$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -206,19 +200,6 @@ export function validateReport(
   today: [number, number, number],
 ): { errors: FieldErrors; constructionChanged: boolean } {
   const errors: FieldErrors = {};
-
-  const name = clean(input.engineerName);
-  if (len(name) < LIMITS.nameMin || len(name) > LIMITS.nameMax) {
-    errors.engineerName = `Enter your name (${LIMITS.nameMin} to ${LIMITS.nameMax} characters).`;
-  }
-
-  const contact = clean(input.engineerContact);
-  const isPhone = PHONE.test(contact) && len(contact) >= LIMITS.contactMin && len(contact) <= LIMITS.phoneMax;
-  const isEmail = EMAIL.test(contact) && len(contact) <= LIMITS.emailMax;
-  if (!isPhone && !isEmail) {
-    errors.engineerContact =
-      "Enter a phone number (7 to 20 digits, spaces, + or -) or an email address.";
-  }
 
   // Date of report: a real calendar date, 1990 or later, not in the future.
   const [y, m, d] = [input.year, input.month, input.day].map((s) => s.trim());
@@ -308,8 +289,6 @@ export function toPayload(
     building_id: buildingId,
     client_request_id: input.clientRequestId,
     based_on_report_id: input.basedOnReportId,
-    engineer_name: clean(input.engineerName),
-    engineer_contact: clean(input.engineerContact),
     report_date: iso(Number(input.year), Number(input.month), Number(input.day)),
     residents_count: input.residentsNotVerified ? null : Number(input.residents.trim()),
     residents_not_verified: input.residentsNotVerified,

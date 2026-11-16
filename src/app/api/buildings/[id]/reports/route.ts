@@ -1,5 +1,6 @@
-import { createHash } from "node:crypto";
-import { connection, type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
+import { requireEngineer } from "@/lib/api-auth";
+import { visitorHash } from "@/lib/session";
 import { createServerSupabase } from "@/lib/supabase-server";
 import {
   reportConstructionDate,
@@ -17,8 +18,9 @@ const json = (body: unknown, status = 200) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 
 /** All reports for one building (newest first) and its construction-date changes. */
-export async function GET(_req: NextRequest, ctx: RouteContext<"/api/buildings/[id]/reports">) {
-  await connection();
+export async function GET(req: NextRequest, ctx: RouteContext<"/api/buildings/[id]/reports">) {
+  const { denied } = await requireEngineer(req);
+  if (denied) return denied;
   const { id } = await ctx.params;
   if (!UUID.test(id)) return json({ error: "Unknown building." }, 404);
 
@@ -53,18 +55,14 @@ const DB_ERRORS: Record<string, [number, string]> = {
   ],
   FUTURE_DATE: [422, "The date of report cannot be in the future."],
   CHANGE_REASON_REQUIRED: [422, "Say why you are changing the construction date."],
+  NOT_APPROVED: [403, "Your account is waiting for approval."],
 };
-
-function visitorHash(req: NextRequest) {
-  const ip =
-    req.headers.get("x-real-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  return createHash("sha256")
-    .update(`${process.env.SUPABASE_SECRET_KEY}:${ip}`)
-    .digest("hex");
-}
 
 /** Save a new report. Reports are never edited or deleted, so there is no PUT or DELETE. */
 export async function POST(req: NextRequest, ctx: RouteContext<"/api/buildings/[id]/reports">) {
+  // Who wrote the report comes from the session, never from the request body.
+  const { engineer, denied } = await requireEngineer(req);
+  if (denied) return denied;
   const { id } = await ctx.params;
   if (!UUID.test(id)) return json({ error: "Unknown building." }, 404);
 
@@ -110,7 +108,11 @@ export async function POST(req: NextRequest, ctx: RouteContext<"/api/buildings/[
   }
 
   const payload = toPayload(id, input, result.constructionChanged);
-  const { data, error } = await supabase.rpc("create_report", { p: payload, p_ip_hash: visitorHash(req) });
+  const { data, error } = await supabase.rpc("create_report", {
+    p: payload,
+    p_engineer_id: engineer.id,
+    p_ip_hash: visitorHash(req.headers),
+  });
 
   if (error) {
     const known = DB_ERRORS[error.message];
