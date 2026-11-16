@@ -44,10 +44,10 @@ Build a public, working **portfolio demo** for Zahle in **3 weeks (about 30 hour
 
 A tool for **civil engineers only**. One website with a map of Zahle's buildings. The engineer:
 
-1. **Picks a building.** When the site opens, it uses the engineer's location and selects the building they are standing at. Or the engineer types an address, or clicks a building on the map.
-2. **Sees the building's record:** every past report and document.
-3. **Fills in a report** with photos and a condition colour (section 4b).
-4. **Can upload a photo of an old paper document.** The AI fills in the form fields it can read, and the engineer checks and corrects them before saving.
+1. **Picks a building.** When the site opens, it uses the engineer's location to suggest the building they are standing at, and the engineer confirms with one tap (phone location is rough indoors, often 20–50 m off). Or the engineer types an address, or clicks a building on the map.
+2. **Sees the building's record:** its facts, every past inspection, and every scanned document. This is the payoff of the whole product: the next engineer does not start from scratch.
+3. **Adds an inspection** with photos, a condition colour (section 4b), and remarks.
+4. **Can upload a photo of an old paper document.** The AI fills in the building facts it can read, and the engineer checks and corrects them before saving.
 
 Residents, the public, and the Order do not use the app in this version.
 
@@ -81,10 +81,11 @@ Hiding dangerous buildings is **not** the answer. Silence is what lets them coll
 
 ### Rules every agent must follow
 
-1. **Every finding comes with a next step.** A report never shows only a colour. It shows what is wrong and what fixes it.
+1. **A colour never stands alone.** Every inspection shows the engineer's remarks next to its colour.
 2. **Only engineers see reports.** Nothing about any building is public.
 3. **Mark unknowns as "Not yet verified,"** never as findings.
 4. **The record is separate from enforcement.** The registry records facts. Fines and evacuations stay with the authorities. The app is not the punisher.
+5. **Never overwrite the record.** A new inspection is added to the history; old inspections stay as they were. Changes to building facts keep the previous value and who changed it.
 
 ### 4b. Condition colours
 
@@ -98,7 +99,19 @@ The engineer picks one colour per report:
 
 The form must make clear to the engineer that **after an earthquake these colours are used for triage, so choose carefully.**
 
-### 4c. Trust model (first version)
+After earthquakes, engineers already use a standard green / yellow / red tagging, where yellow means "limited entry." The civil-engineer agent aligns the exact wording with that standard, so engineers read the colours the way they already know them.
+
+### 4c. What is stored
+
+| Part | What it holds | Changes how |
+|---|---|---|
+| **Building** | Outline and location (copied once from OpenStreetMap), year built, number of floors, structure type, seismic measures (yes / no / unknown), number of units | Facts are edited, but every earlier value is kept with who changed it and when |
+| **Inspection** | Date, engineer, condition colour, engineer's remarks, photos | Added only, never edited or deleted |
+| **Document** | Scanned image of an old paper record, the facts the AI read from it, the date added | Added only |
+
+The building outlines are copied into our own database once, not loaded live from OpenStreetMap, because OpenStreetMap's building IDs change when people edit the map. That would cut records off from their buildings.
+
+### 4d. Trust model (first version)
 
 - **Engineers are trusted.** A report uploaded by an engineer is assumed to be honest.
 - In the demo there are no real accounts. In a real version, engineers are easy to verify because each is a registered OEA member.
@@ -130,20 +143,17 @@ The project owner chose to leave adoption out of this project. **Later test:** o
 
 ### In (in build order)
 
-1. Map of Zahle with clickable buildings (OpenStreetMap coverage confirmed good)
-2. Pick a building: by location on opening, by typed address, or by clicking (no real accounts)
-3. Building record: past reports and documents
-4. Engineer report with **6 draft fields**, clearly marked "draft template":
-   1. Year built
-   2. Number of floors
-   3. Structure type
-   4. Seismic measures (yes / no / unknown)
-   5. Condition colour (green / yellow / red, section 4b)
-   6. Photos
-5. AI document-to-form: one uploaded image, AI fills the fields, engineer confirms. **Built last**, but tested on the real document in week 1 (a quick check, no UI) so there are no surprises.
-6. Arabic text displays and types correctly, right to left, in reports, names, and AI output. The UI stays in English.
-7. Public link, polished GitHub README (section 2)
-8. The design rules in section 4
+1. Map of Zahle with clickable buildings (OpenStreetMap coverage confirmed good), outlines copied into the database
+2. Pick a building: location suggests it and the engineer confirms, or typed address, or a click (no real accounts; the engineer picks a demo name)
+3. Building record: facts, inspection history, and documents (section 4c)
+4. Building facts and inspection form, clearly marked "draft template":
+   - **Building facts:** year built, number of floors, structure type, seismic measures (yes / no / unknown), number of units
+   - **Inspection:** condition colour (green / yellow / red, section 4b), engineer's remarks, photos
+5. AI document-to-form: one uploaded image, AI fills the building facts, engineer confirms. **Built right after the form, not last.** It is what sets the project apart and the main reason engineers would want to use it. Tested on the real document in week 1 (a quick check, no UI).
+6. Sample data with history: several buildings with past inspections and scanned documents, so the demo shows the record paying off
+7. Arabic text displays and types correctly, right to left, in reports, names, and AI output. The UI stays in English.
+8. Public link, polished GitHub README (section 2)
+9. The design rules in section 4
 
 ### Out (for a later version)
 
@@ -163,9 +173,9 @@ All agents live in `.claude/agents/` in this repo. All agents read this file fir
 
 | Agent | Job |
 |---|---|
-| **civil-engineer** | Advises on engineering content: report fields, condition colour wording, Lebanese codes (Law 646/2004, Decrees 14293 and 7964), wording of findings and next steps. Writes no app code. |
+| **civil-engineer** | Advises on engineering content: building facts and inspection fields, condition colour wording (aligned with standard post-earthquake tagging), Lebanese codes (Law 646/2004, Decrees 14293 and 7964), wording of remarks. Writes no app code. Its advice is checked once by the project owner's senior OEA contact. |
 | **builder** | The only agent that writes code. Builds the whole app, including the UI, following this plan and `DESIGN.md`. |
-| **reviewer** | Tests every feature by using it as an engineer. Tries Arabic text, uploads the real messy document, checks the design rules in section 4. Reports bugs. Does not fix code. |
+| **reviewer** | Tests every feature by using it as an engineer in a real browser (Playwright). Tries Arabic text, uploads the real messy document, checks the design rules in section 4. Reports bugs. Does not fix code. |
 
 **Project owner:** makes every decision, accepts or rejects work, and watches a full demo run once a week.
 
@@ -194,6 +204,9 @@ The project owner signs in to each account. Claude does everything after that th
 | With no accounts, any visitor can edit or delete demo data | Seed data that can be restored with one action ("Reset demo"). Run a nightly automatic reset. |
 | Made-up ratings on real Zahle buildings look like real findings | Every screen carries a "Demo — fictional data" label. |
 | The real paper document holds personal data (owner names, ID numbers, addresses) | Black out personal details before the photo goes into the public demo or the API. Use the unedited original only for private testing. |
+| The civil-engineer agent gets Lebanese codes or field names wrong | The project owner's senior OEA contact reviews the fields and colour wording once (about 10 minutes). |
+| Location picks the wrong building | Location only suggests; the engineer always confirms. |
+| An empty database makes the demo look like a plain form | Sample data with history is part of the scope (section 7, item 6). |
 | Recruiters testing the demo are not in Zahle, or refuse location | The map opens on central Zahle, and they click a building or type an address. |
 | OpenStreetMap has few street addresses in Zahle, so address search finds little | Search also matches street, neighbourhood, and landmark names, then zooms there so the engineer clicks the building. |
 
@@ -204,6 +217,7 @@ The project owner signs in to each account. Claude does everything after that th
 1. **Owner:** sign in to the four accounts in section 8. Pick 2 or 3 websites whose look you love, for `DESIGN.md`. Photograph the messy engineering document from home.
 2. **Claude:** set up the GitHub repo with this `plan.md`, connect Supabase and Vercel, and test the AI on the real document.
 3. **Claude:** create the three agents in `.claude/agents/`.
+4. **Owner:** ask the senior OEA contact for a 10-minute look at the fields and colour wording, once the civil-engineer agent drafts them.
 
 ---
 
