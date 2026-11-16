@@ -1,0 +1,166 @@
+# DESIGN.md — Zahle Building Registry
+
+Every agent reads this file, together with `plan.md`, before any UI work. If a design choice is not covered here, follow the spirit of this file and ask the project owner. Where this file and `plan.md` disagree, `plan.md` wins, and the orchestrator asks the owner.
+
+Written from the owner's draft (16 Nov 2026). Changes from the draft are listed in section 12.
+
+## 1. The idea in one line
+
+Family's springy, friendly trays and Raycast's crisp precision, in light and warm Zahle colours, on top of a calm map.
+
+| Site | Take | Leave |
+|---|---|---|
+| **Family** (main reference) | Trays that slide up and change height smoothly. Springy, physical motion. Buttons that feel good to press. Friendly, bright colour. Calm, human wording. | Crypto and wallet content. |
+| **Raycast** | Crisp, precise layout. A command bar for fast search. Clean list rows. Keyboard shortcuts. Fine borders and soft depth. | The dark, black, gloomy theme. Red accents. |
+
+## 2. Zahle: the theme (hard rule)
+
+The design must feel like Zahle, not like a generic map app. Zahle is the "City of Wine and Poetry", on the Berdawni river, at the foot of Mount Sannine, in the Bekaa valley, with stone houses, arched windows and red-tile roofs. These details come from general knowledge. **The owner corrects anything wrong or missing.**
+
+How Zahle shows up. Each item is small, and each one has a job:
+
+| Zahle thing | Where it appears in the design |
+|---|---|
+| **Limestone** | The warm cream ground (`ground`) and the soft surfaces. The calm base of everything. |
+| **Red roof tile (terracotta)** | The strongest status colour (section 3). Warm, not alarming. |
+| **Vineyards** | The "good" green. |
+| **The Berdawni river** | The accent blue: buttons, links, selected states, focus. |
+| **Bekaa sun** | `sun`, for the one celebration moment after a saved report. |
+| **The three-arch window (Lebanese triple arch)** | The shape language. The tray's grab handle is a small arch. Empty states and the brand mark use a single-line arch icon. The three-level status uses three arches of rising fill. One shape, used with restraint. |
+| **Arabic name** | The wordmark shows "Zahle Building Registry" with **زحلة** beside it in IBM Plex Sans Arabic, in the top-left. |
+| **Poetry** | Short, human lines in empty states and the "Waiting for OEA approval" screen. Two or three lines in the whole app, never decoration. |
+
+Rules for the Zahle theme: no stock "Lebanese" clichés (no cedar tree, no flag colours, no ornament patterns, no illustrations of people or buildings). No textures or patterns on surfaces. If a Zahle idea does not carry meaning, leave it out.
+
+## 3. Colours
+
+Light and warm. Dark text is a deep slate, never pure black.
+
+| Token | Hex | Zahle name | Use |
+|---|---|---|---|
+| `ground` | `#F7F6F2` | Limestone | Page background behind trays |
+| `surface` | `#FFFFFF` | | Trays, cards, inputs |
+| `surface-soft` | `#F1EFEA` | | Hover rows, secondary buttons |
+| `border` | `#E6E3DC` | | Fine 1px borders (Raycast precision) |
+| `text` | `#1F2A37` | | Main text |
+| `text-muted` | `#5B6472` | | Secondary text. Must pass 4.5:1 on white |
+| `accent` | `#2F7CF6` | Berdawni | Main buttons, links, selected states |
+| `accent-soft` | `#E6F0FE` | | Selected backgrounds, focus glow |
+| `sun` | `#FFC94D` | Bekaa sun | Celebration moment only |
+
+Share of the screen: about 60% ground and map, 30% trays and surfaces, 10% accent and status colours.
+
+### Building status colours (owner decision pending, see section 12)
+
+`plan.md` section 4b defines three ratings: **green** (good), **yellow** (needs some work), **red** (imminent risk). The owner wants no red in the app. Until the owner decides how to square the two, build with these colours, and keep the data values as `green`, `yellow` and `red` so a change is a one-line edit:
+
+| Rating (data) | Colour | Hex | Zahle name |
+|---|---|---|---|
+| `green` | Green | `#1FA971` | Vine |
+| `yellow` | Amber | `#F5A524` | Apricot |
+| `red` | Orange | `#EE7A2F` | Terracotta |
+| none | Grey | `#A3A8B3` | Limestone grey ("Not yet inspected") |
+
+Status colours differ in lightness as well as hue. They always come with their word (rule 1 of `plan.md` section 4), and with the arch icon: one, two or three filled arches. Text on a status colour is dark slate unless white passes 4.5:1. Wording for each rating comes from `docs/engineering.md` D4, never from this file.
+
+## 4. Type
+
+| Role | Font | Notes |
+|---|---|---|
+| Headings | Inter Tight, 600 | |
+| Body and UI | Inter, 400 and 500 | |
+| Numbers | Inter with tabular numbers | Dates, years, counts |
+| Arabic | IBM Plex Sans Arabic | Names, observations, the wordmark |
+
+Scale: 13 / 15 / 17 / 20 / 24 / 32 px. At most 3 sizes on one screen. Weights 400, 500, 600 only. `dir="auto"` on text inputs and on any user text. The UI stays in English.
+
+## 5. Shape and depth
+
+- Radius: trays 24px, cards 16px, buttons and inputs 12px, chips 999px.
+- Depth: 1px `border` first, then a soft shadow. Shadow alpha stays **below 0.08** (for example `0 8px 32px rgba(31, 42, 55, 0.07)`), never a hard drop-shadow.
+- A list or table sits in a bordered panel with hairline row dividers. It is never bare text on the ground.
+- 8px spacing rhythm (4px for tight details). Touch targets at least 44px.
+- The tray grab handle is a small arch, 40px wide.
+
+## 6. Motion
+
+Use the Motion library (`motion`) for springs. This is the owner's call, and it overrides the generic "no spring" default in the VectorLab motion skill.
+
+| Token | Setting | Use |
+|---|---|---|
+| `spring-tray` | stiffness 400, damping 34 | Trays opening, closing, changing height |
+| `spring-snappy` | stiffness 600, damping 38 | Buttons, toggles, chips |
+| `spring-gentle` | stiffness 220, damping 28 | Map fly-to, larger moves |
+| `fade-fast` | 150ms, ease-out | Content changing inside a tray |
+| `press` | scale to 0.97 on press, spring back | Every button |
+
+Patterns:
+- **Trays morph, they do not swap.** The tray changes height smoothly (preview to maximized and back). The old content fades out and the new fades in. Use Motion layout animations, so the work is done with transforms and stays smooth on phones.
+- **Things come from where they were touched.** The tray rises from the bottom. The map flies to a tapped building with `spring-gentle`. The map must not move on its own unless the tray would cover the building.
+- Lists stagger in by 30ms per item, at most 8.
+- **One** celebration: after a report is saved, a checkmark pops with a `sun` highlight. Once per save, nothing more.
+- Every animation shows where something came from or went. No decoration-only motion. No looping motion on static screens.
+- **Reduced motion:** when the system asks for it, use instant changes or simple fades. No springs, no stagger, no fly-to animation.
+
+## 7. Screens and components
+
+### Layout
+- Full-screen light map. The tray floats at the bottom on phones, and bottom-left on desktop (max width 440px).
+- Top bar: wordmark with **زحلة** on the left. On the right: the signed-in engineer's name and a menu with "Log out". There is no role switch (see section 12).
+- Map tiles are muted and light. The map stays quiet; the trays carry the personality.
+- Buildings: grey by default. After a report, the building takes its rating colour (section 3), with a thin white outline so shapes stay readable.
+
+### The building tray (the heart of the app)
+1. **Preview.** Tap a building and a small tray springs up: the status chip with its word and arch icon, the date of the latest report, the first line of the final observation, or "Not yet inspected". Two buttons: "View history" and "Create report".
+2. **Maximized.** A maximize control expands the tray (spring-tray) into a full view with two tabs, **History** and **Create report**. The selected tab indicator slides with `spring-snappy`. Minimize returns to the preview.
+3. **History.** Clean rows, Raycast-style, newest first: date, engineer name and discipline, status chip, first line of the final observation. Opening a row shows the report read-only, in the same layout as the form.
+4. **Create report.** One scrolling form in `docs/engineering.md` Part A order: "Report by" (locked), date, residents, construction date, the four observations, then the colour. Not a multi-step wizard: the demo form is short, and the colour must stay at the end. A thin progress line shows how much is complete. Save is a clear verb button, "Save report", disabled until the form is complete, with the reason shown.
+5. **Saved.** The celebration moment, the tray returns to the preview, and the building changes colour on the map.
+
+### Sign-up, waiting and login
+- Calm, centred card on `ground`, with the wordmark. Visible labels on every field. No icons inside inputs.
+- Sign-up carries the "demo, use made-up details" notice, plain and friendly, above the form.
+- **Waiting for OEA approval:** the arch icon, the exact text from `docs/engineering.md` D9.3, and a "Refresh" button. After Refresh, the tray carries the engineer straight into the map with the fading welcome line.
+
+### Command bar (from Raycast)
+Ctrl+K or Cmd+K, or a search button, opens a command bar to find a building by street, neighbourhood or landmark (OpenStreetMap has few addresses in Zahle, see `plan.md` section 9). Results are clean rows: name, muted detail line, keyboard navigation, highlighted row. Choosing one flies the map there. *(Built when plan item 2, picking a building by address, is built.)*
+
+### States every screen needs
+- **Loading:** nothing under 100ms, a small inline spinner up to 1s, skeleton rows beyond that.
+- **Empty:** one friendly line and one action. Example, for a building with no history: "No reports yet. Create the first one."
+- **Errors:** never blame the user, and always offer a way to recover. Example: "We could not save this report. Your answers are still here. Save report again".
+
+## 8. Words
+- Calm, accurate, kind. Rating wording comes from `docs/engineering.md`.
+- Buttons start with a verb: "Save report", "Create report", "Log in", "Refresh". Never "OK" or "Submit".
+
+## 9. Skills to use
+- **While building:** frontend-design, make-interfaces-feel-better, web-animation-design, emil-design-engineering, and VectorLab's motion, transitions, typography, spacing, colour-palette, anti-slop, viewports, forms, keyboard, labels.
+- **Before calling a screen done:** ui-design-review (review), and VectorLab's ux-audit.
+- **Weekly:** full-audit.
+- Where a skill's generic default disagrees with this file (for example, spring motion), this file wins.
+
+## 10. Definition of "beautiful" for this project
+A screen is done when:
+1. It has no black, no red, nothing gloomy, and it feels like Zahle (section 2) without clichés.
+2. Opening, closing and changing a tray feels springy and smooth, like Family.
+3. Lists and spacing are crisp and precise, like Raycast.
+4. It passes ui-review and ux-audit with no major issues.
+5. It works on a phone at 375px width, with no sideways scrolling.
+6. Arabic text displays and types correctly, right to left.
+7. Colour is never the only signal.
+8. With reduced motion on, nothing springs.
+
+## 11. Anti-slop rules (from the owner, plus the VectorLab skill)
+No purple-blue gradient washes. No glassmorphism or backdrop blur. No emoji as icons. No cards with a thick coloured left border. No cartoon people in empty states. No decorative pills around static text. No icons inside inputs except search and clear.
+
+## 12. Changes from the owner's draft, and open decisions
+
+Removed because they conflict with `plan.md` (engineers only, nothing public, demo scope):
+- The **Order / Engineer / Resident role switch**, the Resident view, the Order view, "Request an inspection", and the **public map** showing "Inspected / Not yet inspected". Rule 2 of `plan.md` section 4: only engineers see reports, and nothing is public.
+- Searching by **owner**. We do not store owners.
+- The **AI document scan tray**. Deferred (Anthropic Console is not set up). Kept in the design intent for later: fields fill one by one with a "From document" tag.
+- The **multi-step form** (Basics, Structure, Seismic, Condition, Photos, Review). Replaced by the demo's one scrolling form (section 7). The step-tray idea returns when the fuller report is built.
+- The shadow alpha, from 0.10 to under 0.08, to follow the colour-palette skill.
+
+**Open: the rating colours.** The owner's draft bans red, and uses green, amber, orange. `plan.md` and the engineering doc define green / yellow / **red**, aligned with the post-earthquake tags engineers already know, where red means imminent risk. The wording "Reinforcement recommended" in the draft is **not** the same as the engineering doc's "Unsafe / imminent risk", and a lower-sounding word for the worst rating could mislead. The build uses green, amber, orange for now, with the engineering doc's wording, until the owner decides.
