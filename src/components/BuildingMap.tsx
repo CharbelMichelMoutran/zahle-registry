@@ -65,7 +65,7 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
       // Canvas draws 4,595 outlines cheaply. `tolerance` widens the tap target by
       // a few pixels so small buildings can be tapped; `padding` draws beyond the
       // screen edge so panning does not reveal undrawn areas.
-      renderer: L.canvas({ padding: 0.5, tolerance: 6 }),
+      renderer: L.canvas({ padding: 0.25, tolerance: 6 }),
       // Zoom: pinch and wheel stop exactly where the user lets go (quarter steps)
       // instead of jumping to the nearest whole level afterwards.
       zoomSnap: 0.25,
