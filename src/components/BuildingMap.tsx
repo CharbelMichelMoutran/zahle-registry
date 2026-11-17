@@ -1,17 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import type { FeatureCollection, MultiPolygon } from "geojson";
 import "leaflet/dist/leaflet.css";
 import { animate } from "motion";
+import { motion } from "motion/react";
 import { apiFetch } from "@/lib/client-fetch";
-import { prefersReducedMotion, springGentle } from "@/lib/motion";
+import { prefersReducedMotion, springGentle, springSnappy } from "@/lib/motion";
 import type { Colour } from "@/lib/report";
+import { attachMapNavigation, type MapNavigation } from "./map-navigation";
 
 /** Central Zahle, Lebanon. */
 const ZAHLE_CENTER: L.LatLngTuple = [33.8467, 35.9025];
 const OPEN_ZOOM = 16;
+const MIN_ZOOM = 14;
+const MAX_ZOOM = 19;
 /** The imported area plus a margin, so the map cannot be dragged away from Zahle. */
 const ZAHLE_BOUNDS = L.latLngBounds([33.82, 35.86], [33.875, 35.945]);
 
@@ -53,6 +57,7 @@ type Status = "loading" | "ready" | "error";
 export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClick, coveredRect }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const navRef = useRef<MapNavigation | null>(null);
   const layersRef = useRef(new Map<string, L.Polygon>());
   const handlersRef = useRef({ onSelect, onEmptyClick });
   const buildingClickRef = useRef<MouseEvent | null>(null);
@@ -61,6 +66,7 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
   const selectedRef = useRef(selectedId);
   const [status, setStatus] = useState<Status>("loading");
   const [attempt, setAttempt] = useState(0);
+  const [zoom, setZoom] = useState(OPEN_ZOOM);
 
   useEffect(() => {
     handlersRef.current = { onSelect, onEmptyClick };
@@ -75,8 +81,8 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
     const map = L.map(containerRef.current, {
       center: ZAHLE_CENTER,
       zoom: OPEN_ZOOM,
-      minZoom: 14,
-      maxZoom: 19,
+      minZoom: MIN_ZOOM,
+      maxZoom: MAX_ZOOM,
       maxBounds: ZAHLE_BOUNDS,
       maxBoundsViscosity: 0.9,
       zoomControl: false,
@@ -84,11 +90,13 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
       // a few pixels so small buildings can be tapped; `padding` draws beyond the
       // screen edge so panning does not reveal undrawn areas.
       renderer: L.canvas({ padding: 0.25, tolerance: 6 }),
-      // Zoom: pinch and wheel stop exactly where the user lets go (quarter steps)
-      // instead of jumping to the nearest whole level afterwards.
-      zoomSnap: 0.25,
-      zoomDelta: 1,
-      wheelPxPerZoomLevel: 120,
+      // Trackpad scroll pans and pinch zooms through map-navigation.ts, not Leaflet's
+      // wheel zoom. Zoom stops exactly where the user lets go: with any zoomSnap,
+      // Leaflet would later snap a fractional zoom and the map would jump.
+      scrollWheelZoom: false,
+      zoomSnap: 0,
+      zoomDelta: 1, // keyboard + and -
+      zoomAnimation: !prefersReducedMotion(),
       bounceAtZoomLimits: false,
       // Panning: keep the glide after a drag, but cap its speed so a quick flick
       // does not throw the map far away.
@@ -96,7 +104,6 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
       inertiaMaxSpeed: 1500,
       easeLinearity: 0.25,
     });
-    L.control.zoom({ position: "topright" }).addTo(map);
     // OpenStreetMap tiles, muted and lightened in CSS (.leaflet-tile-pane in globals.css)
     // so the map stays quiet and the coloured footprints carry the meaning (DESIGN.md section 7).
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -112,9 +119,13 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
     map.on("click", (e) => {
       if (e.originalEvent !== buildingClickRef.current) handlersRef.current.onEmptyClick();
     });
+    map.on("zoomend", () => setZoom(map.getZoom()));
+    navRef.current = attachMapNavigation(map, ZAHLE_BOUNDS);
     mapRef.current = map;
 
     return () => {
+      navRef.current?.destroy();
+      navRef.current = null;
       map.remove();
       mapRef.current = null;
       layers.clear();
@@ -195,6 +206,11 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
   return (
     <div className="relative h-full w-full">
       <div ref={containerRef} className="h-full w-full" aria-label="Map of Zahle buildings" />
+      <ZoomButtons
+        canZoomIn={zoom < MAX_ZOOM - 0.01}
+        canZoomOut={zoom > MIN_ZOOM + 0.01}
+        onZoom={(direction) => navRef.current?.zoomStep(direction)}
+      />
 
       {status !== "ready" && (
         <div className="pointer-events-none absolute inset-x-0 top-4 z-[1000] flex justify-center px-4">
@@ -220,6 +236,64 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * + and − (DESIGN.md sections 5 and 6). Bottom-right on desktop, beside the tray;
+ * top-right on phones, below the status line, where the bottom tray never reaches.
+ * Outside the Leaflet container, so wheel and pinch over them never move the map.
+ */
+function ZoomButtons({
+  canZoomIn,
+  canZoomOut,
+  onZoom,
+}: {
+  canZoomIn: boolean;
+  canZoomOut: boolean;
+  onZoom: (direction: 1 | -1) => void;
+}) {
+  return (
+    <div className="absolute top-16 right-3 z-[1000] flex flex-col divide-y divide-line overflow-hidden rounded-control border border-line bg-surface shadow-soft md:top-auto md:right-4 md:bottom-8">
+      <ZoomButton label="Zoom in" enabled={canZoomIn} onClick={() => onZoom(1)} className="rounded-t-control">
+        <path d="M10 4.5v11M4.5 10h11" strokeLinecap="round" />
+      </ZoomButton>
+      <ZoomButton label="Zoom out" enabled={canZoomOut} onClick={() => onZoom(-1)} className="rounded-b-control">
+        <path d="M4.5 10h11" strokeLinecap="round" />
+      </ZoomButton>
+    </div>
+  );
+}
+
+/** aria-disabled rather than disabled, so keyboard focus stays put at the zoom limit. */
+function ZoomButton({
+  label,
+  enabled,
+  onClick,
+  className,
+  children,
+}: {
+  label: string;
+  enabled: boolean;
+  onClick: () => void;
+  className: string;
+  children: ReactNode;
+}) {
+  return (
+    <motion.button
+      type="button"
+      aria-label={label}
+      title={label}
+      aria-disabled={!enabled}
+      onClick={enabled ? onClick : undefined}
+      whileTap={enabled ? { scale: 0.97 } : undefined}
+      transition={springSnappy}
+      className={`flex h-11 w-11 items-center justify-center text-ink transition-colors hover:bg-surface-soft focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent aria-disabled:cursor-not-allowed aria-disabled:text-stone aria-disabled:hover:bg-surface ${className}`}
+    >
+      <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+        {children}
+      </svg>
+    </motion.button>
   );
 }
 
