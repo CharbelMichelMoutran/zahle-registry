@@ -146,3 +146,49 @@ export const LOCATE = {
   typeAddress: "Type address",
   currentLocation: "Use current location",
 } as const;
+
+// ---------------------------------------------------------------------------
+// Residents (plan.md item 12, resident first version). Verb-first buttons and
+// no "demo" wording.
+// ---------------------------------------------------------------------------
+
+/** The first screen: who is signing in. */
+export const ROLE_TEXT = {
+  title: "Log in",
+  lead: "Choose how you use the registry.",
+  resident: { label: "Resident", detail: "See your own building and ask for an inspection." },
+  engineer: { label: "Engineer", detail: "Inspect buildings and write reports." },
+  back: "Choose another role",
+} as const;
+
+export const RESIDENT_SIGN_IN = {
+  title: "Log in as a resident",
+  name: "Name",
+  phone: "Phone number",
+  /** The one resident sign-in number, as shown. The server uses RESIDENT_PHONE. */
+  phoneShown: "+1 555 010 0000",
+  sendCode: "Send code",
+  sending: "Sending…",
+  codeTitle: "Enter the code",
+  codeSent: "We sent a 6-digit code to ",
+  code: "Code",
+  codeShown: "000000",
+  logIn: "Log in",
+  loggingIn: "Logging in…",
+  changeName: "Change name",
+  missingName: "Enter your name.",
+  nameTooLong: (max: number) => `Use at most ${max} characters.`,
+  failed: "Something went wrong. Please try again.",
+} as const;
+
+export const RESIDENT_NAME_MAX = 100;
+
+/** The resident's own building tray (plan.md item 12). */
+export const RESIDENT_TRAY = {
+  label: "Building",
+  title: "Your building",
+  requestInspection: "Request inspection",
+} as const;
+
+/** Shown in the Locate menu when the browser will not share location. */
+export const LOCATION_OFF = "Location is off. Turn it on in your browser settings to find your building.";

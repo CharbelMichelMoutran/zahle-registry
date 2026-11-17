@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AuthShell } from "@/components/auth/AuthShell";
-import LoginForm from "@/components/auth/LoginForm";
+import LoginScreen from "@/components/auth/LoginScreen";
 
 export const metadata: Metadata = { title: "Log in · Zahle Building Registry" };
 
@@ -9,7 +9,7 @@ export default function LoginPage() {
   return (
     <AuthShell>
       <Suspense>
-        <LoginForm />
+        <LoginScreen />
       </Suspense>
     </AuthShell>
   );
