@@ -54,7 +54,8 @@ const DB_ERRORS: Record<string, [number, string]> = {
     "Another report was saved for this building while you were writing. Your text is kept. Check the construction date, then save again.",
   ],
   FUTURE_DATE: [422, "The date of report cannot be in the future."],
-  CHANGE_REASON_REQUIRED: [422, "Say why you are changing the construction date."],
+  // Raised only until migration 20261118000100_report_freedom is applied.
+  CHANGE_REASON_REQUIRED: [422, "Add a reason for the new construction date."],
   NOT_APPROVED: [403, "Your account is waiting for approval."],
 };
 
@@ -93,6 +94,7 @@ export async function POST(req: NextRequest, ctx: RouteContext<"/api/buildings/[
   if (latest.error) return json({ error: "Could not save the report. Please try again." }, 500);
 
   let result: ReturnType<typeof validateReport>;
+  let payload: ReturnType<typeof toPayload> | null = null;
   try {
     // The latest calendar day anywhere (UTC+14), so a valid local "today" is accepted.
     result = validateReport(
@@ -100,14 +102,14 @@ export async function POST(req: NextRequest, ctx: RouteContext<"/api/buildings/[
       latest.data ? reportConstructionDate(latest.data) : null,
       todayParts("Pacific/Kiritimati"),
     );
+    // Only the rating is required (owner, 17 Nov 2026); the rest is checked against limits only.
+    if (Object.keys(result.errors).length === 0) payload = toPayload(id, input, result.constructionChanged);
   } catch {
     return json({ error: "Invalid request." }, 400);
   }
-  if (Object.keys(result.errors).length > 0) {
+  if (!payload) {
     return json({ error: "Some fields need attention.", fields: result.errors }, 422);
   }
-
-  const payload = toPayload(id, input, result.constructionChanged);
   const { data, error } = await supabase.rpc("create_report", {
     p: payload,
     p_engineer_id: engineer.id,

@@ -3,6 +3,7 @@
  * Shared by the form (to enable Save) and the server (to reject bad input).
  */
 import type { Discipline } from "./account";
+import { REPORT_ERRORS as E } from "./content";
 
 // ---------------------------------------------------------------------------
 // Owner decision (plan section 7): easy to flip.
@@ -12,16 +13,15 @@ import type { Discipline } from "./account";
 export const FINAL_OBSERVATION_ALLOWS_NOT_INSPECTED = false;
 
 // ---------------------------------------------------------------------------
-// Limits (Part A, D2). Accepted for the demo, not verified.
+// Limits. Only the ones that protect the system (owner, 17 Nov 2026): no
+// minimum lengths, nothing that tells the engineer what to write.
 // ---------------------------------------------------------------------------
 
 export const LIMITS = {
   reportYearMin: 1990,
   constructionYearMin: 1800,
   residentsMax: 1000,
-  observationMin: 10,
   observationMax: 2000,
-  reasonMin: 10,
   reasonMax: 300,
 } as const;
 
@@ -82,7 +82,8 @@ export type ConstructionDateChange = {
   new_month: number | null;
   new_approximate: boolean;
   new_not_verified: boolean;
-  reason: string;
+  /** Optional since the report redesign: null when no reason was given. */
+  reason: string | null;
   changed_by: string;
   changed_at: string;
 };
@@ -169,30 +170,25 @@ export function todayParts(timeZone?: string): [number, number, number] {
 const iso = (y: number, m: number, d: number) =>
   `${String(y).padStart(4, "0")}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
-export function isAreaComplete(area: Area, o: ObservationInput) {
-  if (o.notInspected && areaAllowsNotInspected(area)) {
-    const n = len(clean(o.reason));
-    return n >= LIMITS.reasonMin && n <= LIMITS.reasonMax;
-  }
-  const n = len(clean(o.text));
-  return n >= LIMITS.observationMin && n <= LIMITS.observationMax;
-}
-
-export const allAreasComplete = (obs: Record<Area, ObservationInput>) =>
-  AREAS.every((a) => isAreaComplete(a, obs[a]));
-
+/**
+ * The construction date the form holds. An empty year means "Not yet verified"
+ * (plan rule 3): an unknown is never a finding.
+ */
 export function inputConstructionDate(input: ReportInput): ConstructionDate {
-  if (input.constructionNotVerified) {
+  const y = input.constructionYear.trim();
+  if (!y) {
     return { year: null, month: null, approximate: false, notVerified: true };
   }
-  const year = INTEGER.test(input.constructionYear.trim()) ? Number(input.constructionYear) : null;
+  const year = INTEGER.test(y) ? Number(y) : null;
   const month = input.constructionMonth ? Number(input.constructionMonth) : null;
-  return { year, month, approximate: input.constructionApproximate, notVerified: false };
+  return { year, month, approximate: input.constructionApproximate === true, notVerified: false };
 }
 
 /**
- * Validate the whole form. `previous` is the construction date the form was
- * prefilled from (null for a building's first report); `today` is [y, m, d].
+ * Validate the whole form. Only the rating is required (owner, 17 Nov 2026);
+ * everything else is optional and only checked against limits that protect
+ * the system. `previous` is the construction date the form was prefilled from
+ * (null for a building's first report); `today` is [y, m, d].
  */
 export function validateReport(
   input: ReportInput,
@@ -200,69 +196,69 @@ export function validateReport(
   today: [number, number, number],
 ): { errors: FieldErrors; constructionChanged: boolean } {
   const errors: FieldErrors = {};
+  const str = (v: unknown) => (typeof v === "string" ? v : "");
 
   // Date of report: a real calendar date, 1990 or later, not in the future.
-  const [y, m, d] = [input.year, input.month, input.day].map((s) => s.trim());
+  const [y, m, d] = [input.year, input.month, input.day].map((s) => str(s).trim());
   let reportYear: number | null = null;
   if (!INTEGER.test(y) || !INTEGER.test(m) || !INTEGER.test(d)) {
-    errors.reportDate = "Enter the full date: day, month and year.";
+    errors.reportDate = E.date;
   } else {
     const [yy, mm, dd] = [Number(y), Number(m), Number(d)];
     const date = new Date(Date.UTC(yy, mm - 1, dd));
     const real = date.getUTCFullYear() === yy && date.getUTCMonth() === mm - 1 && date.getUTCDate() === dd;
-    if (!real) errors.reportDate = "This date does not exist. Check the day and month.";
-    else if (yy < LIMITS.reportYearMin) errors.reportDate = `The year must be ${LIMITS.reportYearMin} or later.`;
-    else if (iso(yy, mm, dd) > iso(...today)) errors.reportDate = "The date of report cannot be in the future.";
+    if (!real) errors.reportDate = E.date;
+    else if (yy < LIMITS.reportYearMin) errors.reportDate = E.dateTooEarly(LIMITS.reportYearMin);
+    else if (iso(yy, mm, dd) > iso(...today)) errors.reportDate = E.dateFuture;
     else reportYear = yy;
   }
 
-  // Residents: a whole number 0 to 1000, or "Not yet verified".
-  if (!input.residentsNotVerified) {
-    const r = input.residents.trim();
-    if (!INTEGER.test(r) || Number(r) > LIMITS.residentsMax) {
-      errors.residents = `Enter a whole number from 0 to ${LIMITS.residentsMax}, or tick "Not yet verified".`;
-    }
+  // Residents: optional. If given, a whole number 0 to 1000.
+  const residents = str(input.residents).trim();
+  if (!input.residentsNotVerified && residents && (!INTEGER.test(residents) || Number(residents) > LIMITS.residentsMax)) {
+    errors.residents = E.residents(LIMITS.residentsMax);
   }
 
-  // Construction date: 1800 up to the report year, or "Not yet verified".
+  // Construction date: optional. If given, a 4-digit year from 1800 to the report year.
   const construction = inputConstructionDate(input);
   if (!construction.notVerified) {
     const maxYear = reportYear ?? today[0];
-    if (construction.year === null || input.constructionYear.trim().length !== 4) {
-      errors.constructionYear = 'Enter a 4-digit year, or tick "Not yet verified".';
-    } else if (construction.year < LIMITS.constructionYearMin || construction.year > maxYear) {
-      errors.constructionYear = `The year must be from ${LIMITS.constructionYearMin} to ${maxYear} (not after the report year).`;
-    }
-    if (construction.month !== null && !(construction.month >= 1 && construction.month <= 12)) {
-      errors.constructionYear = "Choose a month from the list, or leave it empty.";
+    if (
+      construction.year === null ||
+      str(input.constructionYear).trim().length !== 4 ||
+      construction.year < LIMITS.constructionYearMin ||
+      construction.year > maxYear ||
+      (construction.month !== null && !(Number.isInteger(construction.month) && construction.month >= 1 && construction.month <= 12))
+    ) {
+      errors.constructionYear = E.constructionYear(LIMITS.constructionYearMin, maxYear);
     }
   }
 
+  // A change keeps the previous value; the reason is optional.
   const constructionChanged = previous !== null && !sameConstructionDate(previous, construction);
-  if (constructionChanged) {
-    const n = len(clean(input.constructionChangeReason));
-    if (n < LIMITS.reasonMin || n > LIMITS.reasonMax) {
-      errors.constructionChangeReason = `Say why you are changing it (${LIMITS.reasonMin} to ${LIMITS.reasonMax} characters).`;
-    }
+  if (constructionChanged && len(clean(str(input.constructionChangeReason))) > LIMITS.reasonMax) {
+    errors.constructionChangeReason = E.tooLong(LIMITS.reasonMax);
   }
 
   for (const area of AREAS) {
     const o = input.observations[area];
-    if (o.notInspected && !areaAllowsNotInspected(area)) {
-      errors[area] = "Write an observation.";
-    } else if (!isAreaComplete(area, o)) {
-      errors[area] = o.notInspected
-        ? `Say why it was not inspected (${LIMITS.reasonMin} to ${LIMITS.reasonMax} characters).`
-        : `Write at least ${LIMITS.observationMin} characters (at most ${LIMITS.observationMax}).`;
+    if (typeof o !== "object" || o === null) {
+      errors.form = E.reload;
+      continue;
+    }
+    if (o.notInspected && areaAllowsNotInspected(area)) {
+      if (len(clean(str(o.reason))) > LIMITS.reasonMax) errors[area] = E.tooLong(LIMITS.reasonMax);
+    } else if (len(clean(str(o.text))) > LIMITS.observationMax) {
+      errors[area] = E.tooLong(LIMITS.observationMax);
     }
   }
 
   if (!input.colour || !COLOURS.includes(input.colour)) {
-    errors.colour = "Choose a colour to save this report.";
+    errors.colour = E.rating;
   }
 
-  if (!UUID.test(input.clientRequestId)) errors.form = "Reload the page and try again.";
-  if (input.basedOnReportId !== null && !UUID.test(input.basedOnReportId)) errors.form = "Reload the page and try again.";
+  if (!UUID.test(str(input.clientRequestId))) errors.form = E.reload;
+  if (input.basedOnReportId !== null && !UUID.test(str(input.basedOnReportId))) errors.form = E.reload;
 
   return { errors, constructionChanged };
 }
@@ -274,12 +270,14 @@ export function toPayload(
   constructionChanged: boolean,
 ): ReportPayload {
   const c = inputConstructionDate(input);
+  const residentsUnknown = input.residentsNotVerified === true || input.residents.trim() === "";
   const obs = Object.fromEntries(
     AREAS.flatMap((area) => {
       const o = input.observations[area];
       const notInspected = o.notInspected && areaAllowsNotInspected(area);
+      // Empty text is "No remarks" (null). "Not inspected" keeps its reason, even empty ('').
       return [
-        [`${area}_observation`, notInspected ? null : clean(o.text)],
+        [`${area}_observation`, notInspected ? null : clean(o.text) || null],
         [`${area}_not_inspected_reason`, notInspected ? clean(o.reason) : null],
       ];
     }),
@@ -290,13 +288,14 @@ export function toPayload(
     client_request_id: input.clientRequestId,
     based_on_report_id: input.basedOnReportId,
     report_date: iso(Number(input.year), Number(input.month), Number(input.day)),
-    residents_count: input.residentsNotVerified ? null : Number(input.residents.trim()),
-    residents_not_verified: input.residentsNotVerified,
+    // Left empty is an unknown: stored as "Not yet verified" (plan rule 3).
+    residents_count: residentsUnknown ? null : Number(input.residents.trim()),
+    residents_not_verified: residentsUnknown,
     construction_year: c.year,
     construction_month: c.month,
     construction_approximate: c.approximate,
     construction_not_verified: c.notVerified,
-    construction_change_reason: constructionChanged ? clean(input.constructionChangeReason) : null,
+    construction_change_reason: constructionChanged ? clean(input.constructionChangeReason) || null : null,
     ...obs,
     colour: input.colour!,
   };
