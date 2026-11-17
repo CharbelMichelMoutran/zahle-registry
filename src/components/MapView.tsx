@@ -9,6 +9,7 @@ import { sortNewestFirst } from "@/lib/format";
 import { sameConstructionDate, inputConstructionDate, reportConstructionDate, type Colour, type Report, type ReportInput } from "@/lib/report";
 import BuildingPanel, { type BuildingData, type Level, type Tab } from "./BuildingPanel";
 import { newDraft, prefillConstruction } from "./report/ReportForm";
+import { coveredRectOf } from "./tray-rect";
 
 // Leaflet needs `window`, so the map renders only in the browser.
 const BuildingMap = dynamic(() => import("./BuildingMap"), {
@@ -286,12 +287,6 @@ export default function MapView({
       </AnimatePresence>
     </div>
   );
-}
-
-/** The tray's box in map coordinates (both sit in the same container), ignoring its slide-in transform. */
-function coveredRectOf(el: HTMLElement | null) {
-  if (!el) return null;
-  return { left: el.offsetLeft, top: el.offsetTop, right: el.offsetLeft + el.offsetWidth, bottom: el.offsetTop + el.offsetHeight };
 }
 
 function withColour(map: ReadonlyMap<string, Colour>, id: string, colour: Colour | undefined) {

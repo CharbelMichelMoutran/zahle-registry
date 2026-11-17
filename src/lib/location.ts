@@ -25,3 +25,19 @@ export async function getCurrentLocation(): Promise<LocatedBuilding | null> {
   lastId = pick.id;
   return pick;
 }
+
+/**
+ * Ask the browser for location, so its real permission prompt appears. Resolves
+ * true if allowed. The coordinates are not used yet: `getCurrentLocation()`
+ * still chooses the building.
+ */
+export function askBrowserLocation(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof navigator === "undefined" || !("geolocation" in navigator)) return resolve(false);
+    navigator.geolocation.getCurrentPosition(
+      () => resolve(true),
+      () => resolve(false), // denied, unavailable or timed out: all read as "location is off"
+      { maximumAge: 10 * 60 * 1000, timeout: 15000 },
+    );
+  });
+}

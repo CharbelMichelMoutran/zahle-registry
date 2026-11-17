@@ -26,6 +26,11 @@ const ZAHLE_BOUNDS = L.latLngBounds([33.82, 35.86], [33.875, 35.945]);
 const RATING_FILL: Record<Colour, string> = { green: "#1FA971", yellow: "#F5A524", red: "#D6402B" };
 const OUTLINE = { color: "#FFFFFF", weight: 1, opacity: 0.9 };
 const SELECTED_OUTLINE: L.PathOptions = { color: "#2F7CF6", weight: 3, opacity: 1 };
+/**
+ * Resident map (DESIGN.md section 3): every building but their own is barely
+ * visible, a faint outline with no fill, and cannot be tapped.
+ */
+const FAINT: L.PathOptions = { color: "#5B6472", weight: 0.75, opacity: 0.22, fill: false, interactive: false };
 
 /** "Not yet inspected": stone grey with a fine diagonal hatch (the only texture in the app). */
 let hatch: CanvasPattern | string | null = null;
@@ -55,16 +60,36 @@ type Props = {
   focus: { id: string; key: number } | null;
   /** The area the tray covers, in map pixels, so a selected building is not hidden behind it. */
   coveredRect: () => { left: number; top: number; right: number; bottom: number } | null;
+  /** Where the outlines come from. Residents get geometry only, from their own route. */
+  outlinesUrl?: string;
+  /**
+   * Resident map: only this building (their own, once chosen) is drawn in colour
+   * and can be tapped; every other one is a faint outline. Undefined: engineer map.
+   */
+  residentOwnId?: string | null;
+  /** Called once the outlines are on the map (so "Locate building" can pick one). */
+  onReady?: () => void;
 };
 
 type Status = "loading" | "ready" | "error";
 
-export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClick, focus, coveredRect }: Props) {
+export default function BuildingMap({
+  colours,
+  selectedId,
+  onSelect,
+  onEmptyClick,
+  focus,
+  coveredRect,
+  outlinesUrl = "/api/buildings",
+  residentOwnId,
+  onReady,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const navRef = useRef<MapNavigation | null>(null);
   const layersRef = useRef(new Map<string, L.Polygon>());
-  const handlersRef = useRef({ onSelect, onEmptyClick });
+  const handlersRef = useRef({ onSelect, onEmptyClick, onReady });
+  const viewRef = useRef<View>(residentOwnId === undefined ? null : { ownId: residentOwnId });
   const buildingClickRef = useRef<MouseEvent | null>(null);
   const coveredRef = useRef(coveredRect);
   const coloursRef = useRef(colours);
@@ -75,7 +100,7 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
   const [zoom, setZoom] = useState(OPEN_ZOOM);
 
   useEffect(() => {
-    handlersRef.current = { onSelect, onEmptyClick };
+    handlersRef.current = { onSelect, onEmptyClick, onReady };
     coveredRef.current = coveredRect;
   });
 
@@ -146,14 +171,14 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
     const controller = new AbortController();
     let layer: L.GeoJSON | null = null;
 
-    apiFetch("/api/buildings", { signal: controller.signal })
+    apiFetch(outlinesUrl, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json() as Promise<FeatureCollection<MultiPolygon, { id: string }>>;
       })
       .then((data) => {
         layer = L.geoJSON(data, {
-          style: (f) => styleFor(f!.properties.id, coloursRef.current, selectedRef.current),
+          style: (f) => styleFor(f!.properties.id, coloursRef.current, selectedRef.current, viewRef.current),
           onEachFeature: (feature, featureLayer) => {
             const id = feature.properties.id;
             layers.set(id, featureLayer as L.Polygon);
@@ -170,6 +195,7 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
           }),
         );
         setStatus("ready");
+        handlersRef.current.onReady?.();
       })
       .catch((err: unknown) => {
         if (controller.signal.aborted) return;
@@ -183,7 +209,7 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
       layers.clear();
       setLocatableBuildings([]);
     };
-  }, [attempt]);
+  }, [attempt, outlinesUrl]);
 
   // Recolour only the buildings whose report colour changed.
   useEffect(() => {
@@ -192,9 +218,19 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
     const changed = new Set([...before.keys(), ...colours.keys()]);
     for (const id of changed) {
       if (before.get(id) === colours.get(id)) continue;
-      layersRef.current.get(id)?.setStyle(styleFor(id, colours, selectedRef.current));
+      layersRef.current.get(id)?.setStyle(styleFor(id, colours, selectedRef.current, viewRef.current));
     }
   }, [colours]);
+
+  // Resident map: their building was just chosen, so it takes its colour.
+  useEffect(() => {
+    const before = viewRef.current;
+    if (residentOwnId === undefined || before?.ownId === residentOwnId) return;
+    viewRef.current = { ownId: residentOwnId };
+    for (const id of [before?.ownId, residentOwnId]) {
+      if (id) layersRef.current.get(id)?.setStyle(styleFor(id, coloursRef.current, selectedRef.current, viewRef.current));
+    }
+  }, [residentOwnId]);
 
   // Outline the selected building; pan only if it would sit behind the panel.
   // A "Locate building" request flies to it instead, wherever it is.
@@ -202,13 +238,13 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
     const previous = selectedRef.current;
     selectedRef.current = selectedId;
     if (previous && previous !== selectedId) {
-      layersRef.current.get(previous)?.setStyle(styleFor(previous, coloursRef.current, null));
+      layersRef.current.get(previous)?.setStyle(styleFor(previous, coloursRef.current, null, viewRef.current));
     }
     const map = mapRef.current;
     const layer = selectedId ? layersRef.current.get(selectedId) : undefined;
     if (!map || !layer) return;
 
-    layer.setStyle(styleFor(selectedId!, coloursRef.current, selectedId));
+    layer.setStyle(styleFor(selectedId!, coloursRef.current, selectedId, viewRef.current));
     layer.bringToFront();
     const locate = focus?.id === selectedId && focus.key !== focusedKeyRef.current;
     if (locate) focusedKeyRef.current = focus.key;
@@ -319,13 +355,19 @@ function ZoomButton({
   );
 }
 
-function styleFor(id: string, colours: ReadonlyMap<string, Colour>, selectedId: string | null): L.PathOptions {
+/** Null on the engineer map; on the resident map, which building is theirs. */
+type View = { ownId: string | null } | null;
+
+function styleFor(id: string, colours: ReadonlyMap<string, Colour>, selectedId: string | null, view: View): L.PathOptions {
+  if (view && id !== view.ownId) return FAINT;
   const rating = colours.get(id);
   const base: L.PathOptions = rating
     ? { ...OUTLINE, fillColor: RATING_FILL[rating], fillOpacity: 0.85 }
     : // Leaflet's canvas renderer passes fillColor straight to ctx.fillStyle, so a pattern works.
       { ...OUTLINE, fillColor: hatchFill() as unknown as string, fillOpacity: 1 };
-  return id === selectedId ? { ...base, ...SELECTED_OUTLINE } : base;
+  // `fill` and `interactive` are set back explicitly in case this building was drawn faint before.
+  const styled = view ? { ...base, fill: true, interactive: true } : base;
+  return id === selectedId ? { ...styled, ...SELECTED_OUTLINE } : styled;
 }
 
 const MARGIN = 24;

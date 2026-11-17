@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
-import { LOCATE } from "@/lib/content";
+import { LOCATE, LOCATION_OFF } from "@/lib/content";
 import { springSnappy } from "@/lib/motion";
 
 const ROW =
@@ -13,9 +13,21 @@ const ROW =
  * available, so inert) and "Use current location". Icon-only below md.
  * On phones the popover hangs from the right edge of the top bar (the nearest
  * positioned parent), so it never runs off the left of a 375px screen.
+ *
+ * With `waitForLocation` (residents), the menu stays open while the browser is
+ * asked for location: `onLocate` resolves false when location is off, and the
+ * menu then shows one calm line instead of closing.
  */
-export function LocateMenu({ onLocate }: { onLocate: () => void }) {
+export function LocateMenu({
+  onLocate,
+  waitForLocation = false,
+}: {
+  onLocate: () => void | Promise<boolean | void>;
+  waitForLocation?: boolean;
+}) {
   const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [off, setOff] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -68,10 +80,14 @@ export function LocateMenu({ onLocate }: { onLocate: () => void }) {
         aria-expanded={open}
         whileTap={{ scale: 0.97 }}
         transition={springSnappy}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setOff(false);
+          setOpen((o) => !o);
+        }}
         onKeyDown={(e) => {
           if (e.key === "ArrowDown" && !open) {
             e.preventDefault();
+            setOff(false);
             setOpen(true);
           }
         }}
@@ -104,9 +120,20 @@ export function LocateMenu({ onLocate }: { onLocate: () => void }) {
               role="menuitem"
               type="button"
               autoFocus
-              onClick={() => {
-                close(true);
-                onLocate();
+              aria-busy={busy || undefined}
+              onClick={async () => {
+                if (!waitForLocation) {
+                  close(true);
+                  onLocate();
+                  return;
+                }
+                if (busy) return;
+                setOff(false);
+                setBusy(true);
+                const found = await onLocate();
+                setBusy(false);
+                if (found === false) setOff(true);
+                else close(true);
               }}
               className={`${ROW} text-ink hover:bg-surface-soft focus-visible:bg-surface-soft`}
             >
@@ -115,6 +142,11 @@ export function LocateMenu({ onLocate }: { onLocate: () => void }) {
               </svg>
               {LOCATE.currentLocation}
             </button>
+            {waitForLocation && (
+              <p role="status" className={off ? "px-3 pt-1 pb-2 text-micro text-muted" : "sr-only"}>
+                {off ? LOCATION_OFF : ""}
+              </p>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
