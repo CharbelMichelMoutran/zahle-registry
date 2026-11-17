@@ -1,20 +1,11 @@
 "use client";
 
+import { motion } from "motion/react";
 import { useEffect, useId, useMemo, useState } from "react";
+import { AREA_LABEL, COLOUR_CONTENT, MONTHS, NOT_INSPECTED, NOT_YET_VERIFIED, REPORT_TEXT } from "@/lib/content";
+import { formatConstructionDate } from "@/lib/format";
+import { springSnappy } from "@/lib/motion";
 import {
-  AREA_CONTENT,
-  COLOUR_CONTENT,
-  COLOUR_FIELD,
-  DRAFT_BANNER,
-  FIELDS,
-  FINAL_PROMPT_BY_COLOUR,
-  MONTHS,
-  NOT_INSPECTED,
-  NOT_YET_VERIFIED,
-} from "@/lib/content";
-import { firstLine, formatConstructionDate, formatDate } from "@/lib/format";
-import {
-  allAreasComplete,
   areaAllowsNotInspected,
   AREAS,
   COLOURS,
@@ -23,32 +14,22 @@ import {
   todayParts,
   validateReport,
   type Area,
+  type Colour,
+  type FieldErrors,
   type ObservationInput,
   type Report,
   type ReportInput,
 } from "@/lib/report";
 import type { Engineer } from "@/lib/account";
 import { apiFetch } from "@/lib/client-fetch";
-import { Button } from "../ui/Button";
 import { RatingArches } from "../ui/Arch";
 import { STATUS_TEXT } from "./ColourBadge";
-import { REPORT_BY_HELP, ReportByBox } from "./ReportByBox";
-import {
-  Checkbox,
-  DraftBanner,
-  FieldError,
-  Group,
-  inputClass,
-  Section,
-} from "./ui";
+import { ReportBy } from "./ReportBy";
+import { AutoTextarea, compactInputClass, FieldError, Row, Toggle, writeClass } from "./ui";
 
 export function newDraft(latest: Report | null): ReportInput {
   const [y, m, d] = todayParts();
-  const empty = (): ObservationInput => ({
-    text: "",
-    notInspected: false,
-    reason: "",
-  });
+  const empty = (): ObservationInput => ({ text: "", notInspected: false, reason: "" });
   return {
     clientRequestId: crypto.randomUUID(),
     basedOnReportId: latest?.id ?? null,
@@ -59,12 +40,7 @@ export function newDraft(latest: Report | null): ReportInput {
     residentsNotVerified: false,
     ...prefillConstruction(latest),
     constructionChangeReason: "",
-    observations: {
-      roof: empty(),
-      columns: empty(),
-      foundations: empty(),
-      final: empty(),
-    },
+    observations: { roof: empty(), columns: empty(), foundations: empty(), final: empty() },
     colour: null,
   };
 }
@@ -72,18 +48,20 @@ export function newDraft(latest: Report | null): ReportInput {
 /** Construction date fields prefilled from the latest report (empty for a first report). */
 export function prefillConstruction(latest: Report | null) {
   return {
-    constructionYear: latest?.construction_year
-      ? String(latest.construction_year)
-      : "",
-    constructionMonth: latest?.construction_month
-      ? String(latest.construction_month)
-      : "",
+    constructionYear: latest?.construction_year ? String(latest.construction_year) : "",
+    constructionMonth: latest?.construction_month ? String(latest.construction_month) : "",
     constructionApproximate: latest?.construction_approximate ?? false,
     constructionNotVerified: latest?.construction_not_verified ?? false,
   };
 }
 
+/** What the tray's Save buttons show (header on wider screens, bottom bar on phones). */
+export type SaveState = { disabled: boolean; label: string; error: string | null };
+export const INITIAL_SAVE_STATE: SaveState = { disabled: true, label: REPORT_TEXT.save, error: null };
+
 type Props = {
+  /** The Save buttons outside the form submit it through this id. */
+  formId: string;
   buildingId: string;
   engineer: Engineer | null;
   draft: ReportInput;
@@ -93,11 +71,27 @@ type Props = {
   onSaved: (report: Report) => void;
   /** Another report was saved meanwhile: reload and re-base the prefill. */
   onStale: () => Promise<void>;
-  /** Share of the form that is complete, shown as a line under the tab bar. */
-  onProgress?: (value: number) => void;
+  onSaveState: (state: SaveState) => void;
 };
 
+/** Order in which a field is focused when Save finds something to fix. */
+const FIELD_ORDER = ["reportDate", "residents", "constructionYear", "constructionChangeReason", ...AREAS] as const;
+
+const STATUS_SELECTED: Record<Colour, string> = {
+  green: "border-vine bg-vine/12 ring-1 ring-vine",
+  yellow: "border-apricot bg-apricot/15 ring-1 ring-apricot",
+  red: "border-rooftile bg-rooftile/10 ring-1 ring-rooftile",
+};
+
+const SHORT_MONTHS = MONTHS.map((m) => m.slice(0, 3));
+
+/**
+ * Create report (owner, 17 Nov 2026): one calm page. Only the rating is
+ * required; it can be chosen at any time. Everything else is optional, with
+ * short labels and no help text. Limits are checked only on Save.
+ */
 export default function ReportForm({
+  formId,
   buildingId,
   engineer,
   draft,
@@ -105,10 +99,12 @@ export default function ReportForm({
   latest,
   onSaved,
   onStale,
-  onProgress,
+  onSaveState,
 }: Props) {
   const uid = useId();
-  const [touched, setTouched] = useState<Set<string>>(new Set());
+  const [showErrors, setShowErrors] = useState(false);
+  // Field messages from the server, kept only for the draft they were about.
+  const [serverFields, setServerFields] = useState<{ draft: ReportInput; fields: FieldErrors } | null>(null);
   const [saving, setSaving] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -118,26 +114,38 @@ export default function ReportForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [draft, latest],
   );
-  const areasComplete = allAreasComplete(draft.observations);
-  const valid = Object.keys(errors).length === 0 && engineer !== null;
+  const canSave = draft.colour !== null && engineer !== null && !saving;
 
-  const touch = (field: string) =>
-    setTouched((t) => (t.has(field) ? t : new Set(t).add(field)));
   const shown = (field: string) =>
-    touched.has(field) ? errors[field] : undefined;
-  const set = <K extends keyof ReportInput>(key: K, value: ReportInput[K]) =>
-    onChange((d) => ({ ...d, [key]: value }));
+    showErrors ? (errors[field] ?? (serverFields?.draft === draft ? serverFields.fields[field] : undefined)) : undefined;
+  const set = <K extends keyof ReportInput>(key: K, value: ReportInput[K]) => onChange((d) => ({ ...d, [key]: value }));
   const setObservation = (area: Area, patch: Partial<ObservationInput>) =>
-    onChange((d) => ({
-      ...d,
-      observations: {
-        ...d.observations,
-        [area]: { ...d.observations[area], ...patch },
-      },
-    }));
+    onChange((d) => ({ ...d, observations: { ...d.observations, [area]: { ...d.observations[area], ...patch } } }));
+
+  const ids: Record<(typeof FIELD_ORDER)[number], string> = {
+    reportDate: `${uid}-day`,
+    residents: `${uid}-residents`,
+    constructionYear: `${uid}-cyear`,
+    constructionChangeReason: `${uid}-reason`,
+    roof: `${uid}-roof`,
+    columns: `${uid}-columns`,
+    foundations: `${uid}-foundations`,
+    final: `${uid}-final`,
+  };
+
+  const focusFirst = (fields: FieldErrors) => {
+    const first = FIELD_ORDER.find((f) => fields[f]);
+    if (first) document.getElementById(ids[first])?.focus();
+  };
 
   async function save() {
-    if (!valid || saving) return;
+    if (!canSave) return;
+    if (Object.keys(errors).length > 0) {
+      setShowErrors(true);
+      setServerError(errors.form ?? null);
+      focusFirst(errors);
+      return;
+    }
     setSaving(true);
     setServerError(null);
     try {
@@ -152,556 +160,256 @@ export default function ReportForm({
         return;
       }
       if (res.status === 409) await onStale();
-      if (body.fields) setTouched(new Set(Object.keys(body.fields)));
-      setServerError(
-        `We could not save this report. Your answers are still here. ${body.error ?? ""}`.trim(),
-      );
+      if (body.fields) {
+        setServerFields({ draft, fields: body.fields });
+        setShowErrors(true);
+        focusFirst(body.fields);
+      }
+      setServerError(`${REPORT_TEXT.saveFailed} ${body.error ?? ""}`.trim());
     } catch {
-      setServerError(
-        "We could not reach the registry. Your answers are still here. Save report again when you are back online.",
-      );
+      setServerError(REPORT_TEXT.offline);
     } finally {
       setSaving(false);
     }
   }
 
-  const ids = {
-    day: `${uid}-day`,
-    residents: `${uid}-residents`,
-    constructionYear: `${uid}-cyear`,
-    reason: `${uid}-reason`,
-  };
+  const label = saving ? REPORT_TEXT.saving : serverError ? REPORT_TEXT.saveAgain : REPORT_TEXT.save;
+  useEffect(() => onSaveState({ disabled: !canSave, label, error: serverError }), [canSave, label, serverError, onSaveState]);
+  // Leaving the form clears the tray's Save, so nothing stale shows when it opens again.
+  useEffect(() => () => onSaveState(INITIAL_SAVE_STATE), [onSaveState]);
 
-  const missing = missingList(errors);
-  // Thin progress line (DESIGN.md 7.4): share of the required parts that are complete.
-  const PARTS = [
-    "reportDate",
-    "residents",
-    "constructionYear",
-    "constructionChangeReason",
-    ...AREAS,
-    "colour",
-  ];
-  const needed = PARTS.filter(
-    (k) => k !== "constructionChangeReason" || constructionChanged,
-  );
-  const progress = needed.filter((k) => !errors[k]).length / needed.length;
-  useEffect(() => onProgress?.(progress), [progress, onProgress]);
+  const residentsUnknown = draft.residentsNotVerified;
+  const hasYear = draft.constructionYear.trim() !== "";
 
   return (
     <form
-      className="space-y-6"
+      id={formId}
+      className="space-y-7 pb-6"
       noValidate
       onSubmit={(e) => {
         e.preventDefault();
         save();
       }}
+      onKeyDown={(e) => {
+        // Enter in a one-line field never saves by surprise; Save is a deliberate tap.
+        if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT") e.preventDefault();
+      }}
     >
-      <DraftBanner text={DRAFT_BANNER} />
+      {/* Rating: the only required field, choosable at any time. */}
+      <fieldset>
+        <legend className="sr-only">{REPORT_TEXT.ratingLabel}</legend>
+        <div className="grid grid-cols-3 gap-2">
+          {COLOURS.map((colour) => {
+            const selected = draft.colour === colour;
+            return (
+              <motion.label
+                key={colour}
+                whileTap={{ scale: 0.97 }}
+                transition={springSnappy}
+                className={[
+                  "flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2.5 rounded-card border px-2 py-3 text-center transition-colors",
+                  "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent",
+                  selected ? STATUS_SELECTED[colour] : "border-line bg-surface hover:bg-surface-soft",
+                ].join(" ")}
+              >
+                <input
+                  type="radio"
+                  name={`${uid}-rating`}
+                  value={colour}
+                  checked={selected}
+                  onChange={() => set("colour", colour)}
+                  className="sr-only"
+                />
+                <RatingArches colour={colour} large className={STATUS_TEXT[colour]} />
+                <span className="text-body leading-tight font-medium text-ink">{COLOUR_CONTENT[colour].word}</span>
+              </motion.label>
+            );
+          })}
+        </div>
+        <p className="mt-2.5 text-center text-micro text-muted">{REPORT_TEXT.ratingNote}</p>
+      </fieldset>
 
-      {/* Engineer: from the account, locked. The server copies it from the session, not from this form. */}
-      {engineer ? (
-        <ReportByBox
-          name={engineer.fullName}
-          discipline={engineer.discipline}
-          contact={engineer.contact}
-          oeaNumber={engineer.oeaNumber}
-          help={REPORT_BY_HELP}
-        />
-      ) : (
-        <div
-          className="h-24 animate-pulse rounded-control bg-surface-soft"
-          aria-label="Loading your account"
-        />
-      )}
+      {/* Date, residents, construction date: compact rows. */}
+      <div className="divide-y divide-line rounded-card border border-line bg-surface">
+        <Row label={REPORT_TEXT.date} htmlFor={ids.reportDate} error={shown("reportDate")}>
+          <input
+            id={ids.reportDate}
+            aria-label="Day"
+            inputMode="numeric"
+            maxLength={2}
+            value={draft.day}
+            onChange={(e) => set("day", e.target.value.replace(/\D/g, ""))}
+            aria-invalid={!!shown("reportDate")}
+            className={`${compactInputClass} w-12 text-center`}
+          />
+          <select
+            aria-label="Month"
+            value={draft.month}
+            onChange={(e) => set("month", e.target.value)}
+            aria-invalid={!!shown("reportDate")}
+            className={`${compactInputClass} w-[4.75rem]`}
+          >
+            {SHORT_MONTHS.map((m, i) => (
+              <option key={m} value={String(i + 1)}>
+                {m}
+              </option>
+            ))}
+          </select>
+          <input
+            aria-label="Year"
+            inputMode="numeric"
+            maxLength={4}
+            value={draft.year}
+            onChange={(e) => set("year", e.target.value.replace(/\D/g, ""))}
+            aria-invalid={!!shown("reportDate")}
+            className={`${compactInputClass} w-[4.25rem] text-center`}
+          />
+        </Row>
 
-      <Group label="Building">
-        {/* Date of report: day / month / year */}
-        <Section
-          label={FIELDS.reportDate.label}
-          htmlFor={ids.day}
-          help={FIELDS.reportDate.help}
-        >
-          <div
-            className="grid grid-cols-[4.5rem_1fr_5.5rem] gap-2"
-            onBlur={() => touch("reportDate")}
+        <Row label={REPORT_TEXT.residents} htmlFor={ids.residents} error={shown("residents")}>
+          <input
+            id={ids.residents}
+            inputMode="numeric"
+            maxLength={4}
+            disabled={residentsUnknown}
+            value={residentsUnknown ? "" : draft.residents}
+            onChange={(e) => set("residents", e.target.value.replace(/\D/g, ""))}
+            aria-invalid={!!shown("residents")}
+            className={`${compactInputClass} w-16 text-center`}
+          />
+          <Toggle label={NOT_YET_VERIFIED} checked={residentsUnknown} onChange={(v) => set("residentsNotVerified", v)} />
+        </Row>
+
+        <Row label={REPORT_TEXT.built} htmlFor={ids.constructionYear} error={shown("constructionYear")}>
+          <input
+            id={ids.constructionYear}
+            aria-label="Construction year"
+            inputMode="numeric"
+            placeholder="Year"
+            maxLength={4}
+            value={draft.constructionYear}
+            onChange={(e) => set("constructionYear", e.target.value.replace(/\D/g, ""))}
+            aria-invalid={!!shown("constructionYear")}
+            className={`${compactInputClass} w-[4.25rem] text-center`}
+          />
+          {hasYear && (
+            <>
+              <select
+                aria-label="Construction month (optional)"
+                value={draft.constructionMonth}
+                onChange={(e) => set("constructionMonth", e.target.value)}
+                className={`${compactInputClass} w-[4.75rem]`}
+              >
+                <option value="">{REPORT_TEXT.month}</option>
+                {SHORT_MONTHS.map((m, i) => (
+                  <option key={m} value={String(i + 1)}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+              <Toggle
+                label={REPORT_TEXT.approximate}
+                checked={draft.constructionApproximate}
+                onChange={(v) => set("constructionApproximate", v)}
+              />
+            </>
+          )}
+        </Row>
+
+        {/* Changed from the previous report: the old value is kept; a reason is optional. */}
+        {constructionChanged && previous && (
+          <Row
+            label={REPORT_TEXT.reason}
+            htmlFor={ids.constructionChangeReason}
+            hint={`${REPORT_TEXT.previously} ${formatConstructionDate(previous)}`}
+            error={shown("constructionChangeReason")}
           >
             <input
-              id={ids.day}
-              aria-label="Day"
-              inputMode="numeric"
-              placeholder="Day"
-              maxLength={2}
-              value={draft.day}
-              onChange={(e) => set("day", e.target.value.replace(/\D/g, ""))}
-              aria-invalid={!!shown("reportDate")}
-              className={inputClass}
+              id={ids.constructionChangeReason}
+              dir="auto"
+              placeholder={REPORT_TEXT.reasonPlaceholder}
+              maxLength={LIMITS.reasonMax}
+              value={draft.constructionChangeReason}
+              onChange={(e) => set("constructionChangeReason", e.target.value)}
+              aria-invalid={!!shown("constructionChangeReason")}
+              className={`${compactInputClass} w-full min-w-0 px-3`}
             />
-            <select
-              aria-label="Month"
-              value={draft.month}
-              onChange={(e) => set("month", e.target.value)}
-              aria-invalid={!!shown("reportDate")}
-              className={inputClass}
-            >
-              {MONTHS.map((m, i) => (
-                <option key={m} value={String(i + 1)}>
-                  {m}
-                </option>
-              ))}
-            </select>
-            <input
-              aria-label="Year"
-              inputMode="numeric"
-              placeholder="Year"
-              maxLength={4}
-              value={draft.year}
-              onChange={(e) => set("year", e.target.value.replace(/\D/g, ""))}
-              aria-invalid={!!shown("reportDate")}
-              className={inputClass}
-            />
-          </div>
-          <FieldError message={shown("reportDate")} />
-        </Section>
+          </Row>
+        )}
+      </div>
 
-        {/* Residents */}
-        <Section
-          label={FIELDS.residents.label}
-          htmlFor={ids.residents}
-          help={FIELDS.residents.help}
-        >
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <input
-              id={ids.residents}
-              inputMode="numeric"
-              maxLength={4}
-              disabled={draft.residentsNotVerified}
-              value={draft.residentsNotVerified ? "" : draft.residents}
-              onChange={(e) =>
-                set("residents", e.target.value.replace(/[^\d]/g, ""))
-              }
-              onBlur={() => touch("residents")}
-              aria-invalid={!!shown("residents")}
-              className={`${inputClass} max-w-32`}
-            />
-            <Checkbox
-              label={NOT_YET_VERIFIED}
-              checked={draft.residentsNotVerified}
-              onChange={(v) => {
-                set("residentsNotVerified", v);
-                touch("residents");
-              }}
-            />
-          </div>
-          <p className="mt-1 text-micro text-muted">
-            {FIELDS.residents.caveat}
-          </p>
-          <FieldError message={shown("residents")} />
-        </Section>
-
-        {/* Construction date */}
-        <Section
-          label={FIELDS.construction.label}
-          htmlFor={ids.constructionYear}
-          help={FIELDS.construction.help}
-        >
-          {latest && (
-            <p className="mb-2 text-micro text-muted">
-              Prefilled from the report of {formatDate(latest.report_date)}.
-            </p>
-          )}
-          <div className="grid grid-cols-[5.5rem_1fr] gap-2">
-            <input
-              id={ids.constructionYear}
-              aria-label="Construction year"
-              inputMode="numeric"
-              placeholder="Year"
-              maxLength={4}
-              disabled={draft.constructionNotVerified}
-              value={
-                draft.constructionNotVerified ? "" : draft.constructionYear
-              }
-              onChange={(e) =>
-                set("constructionYear", e.target.value.replace(/\D/g, ""))
-              }
-              onBlur={() => touch("constructionYear")}
-              aria-invalid={!!shown("constructionYear")}
-              className={inputClass}
-            />
-            <select
-              aria-label="Construction month (optional)"
-              disabled={draft.constructionNotVerified}
-              value={
-                draft.constructionNotVerified ? "" : draft.constructionMonth
-              }
-              onChange={(e) => set("constructionMonth", e.target.value)}
-              className={inputClass}
-            >
-              <option value="">Month (optional)</option>
-              {MONTHS.map((m, i) => (
-                <option key={m} value={String(i + 1)}>
-                  {m}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="mt-1 flex flex-wrap gap-x-5">
-            <Checkbox
-              label={FIELDS.construction.approximate}
-              checked={
-                !draft.constructionNotVerified && draft.constructionApproximate
-              }
-              onChange={(v) => set("constructionApproximate", v)}
-            />
-            <Checkbox
-              label={NOT_YET_VERIFIED}
-              checked={draft.constructionNotVerified}
-              onChange={(v) => {
-                onChange((d) => ({
-                  ...d,
-                  constructionNotVerified: v,
-                  constructionApproximate: v
-                    ? false
-                    : d.constructionApproximate,
-                }));
-                touch("constructionYear");
-              }}
-            />
-          </div>
-          <FieldError message={shown("constructionYear")} />
-
-          {constructionChanged && previous && (
-            <div className="mt-3 rounded-control border border-line bg-surface-soft p-3">
-              <p className="text-micro text-ink">
-                Previous value:{" "}
-                <span className="font-medium">
-                  {formatConstructionDate(previous)}
-                </span>
-                . It will be kept in the history.
-              </p>
-              <label
-                htmlFor={ids.reason}
-                className="mt-3 block text-body font-semibold text-ink"
-              >
-                {FIELDS.constructionReason.label}
-              </label>
-              <p className="mt-0.5 mb-2 text-micro text-muted">
-                {FIELDS.constructionReason.prompt}
-              </p>
-              <textarea
-                id={ids.reason}
-                dir="auto"
-                rows={2}
-                maxLength={LIMITS.reasonMax + 50}
-                value={draft.constructionChangeReason}
-                onChange={(e) =>
-                  set("constructionChangeReason", e.target.value)
-                }
-                onBlur={() => touch("constructionChangeReason")}
-                aria-invalid={!!shown("constructionChangeReason")}
-                className={inputClass}
-              />
-              <Counter
-                value={draft.constructionChangeReason}
-                max={LIMITS.reasonMax}
-              />
-              <FieldError message={shown("constructionChangeReason")} />
-            </div>
-          )}
-        </Section>
-      </Group>
-
-      <Group label="Observations">
-        {/* Observations */}
+      {/* Observations: plain writing areas. */}
+      <div className="space-y-5">
         {AREAS.map((area) => (
-          <ObservationField
+          <Observation
             key={area}
+            id={ids[area]}
             area={area}
             value={draft.observations[area]}
-            prompt={
-              area === "final" && draft.colour
-                ? FINAL_PROMPT_BY_COLOUR[draft.colour]
-                : undefined
-            }
             error={shown(area)}
             onChange={(patch) => setObservation(area, patch)}
-            onBlur={() => touch(area)}
           />
         ))}
-      </Group>
+      </div>
 
-      {/* Colour: last, required, no default */}
-      <Group label="Rating">
-        <section className="space-y-3">
-          <div>
-            <h3 className="text-body font-semibold text-ink">
-              {COLOUR_FIELD.label}
-            </h3>
-            <p className="mt-0.5 text-micro text-muted">{COLOUR_FIELD.help}</p>
-          </div>
-
-          <div className="rounded-control border border-line bg-surface-soft p-3">
-            <p className="micro-label mb-2">Your observations, in short</p>
-            <dl className="space-y-1.5 text-micro">
-              {AREAS.map((area) => (
-                <div key={area} className="flex gap-2">
-                  <dt className="w-24 shrink-0 font-medium text-ink">
-                    {AREA_CONTENT[area].label}
-                  </dt>
-                  <dd dir="auto" className="min-w-0 break-words text-muted">
-                    {summary(area, draft.observations[area])}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-
-          <div
-            role="note"
-            className="rounded-control border border-apricot/50 bg-apricot/10 p-3 text-micro leading-snug text-ink"
-          >
-            <span className="font-semibold">{COLOUR_FIELD.warningTitle}</span>{" "}
-            <span className="hidden sm:inline">{COLOUR_FIELD.warning}</span>
-            <span className="sm:hidden">
-              {COLOUR_FIELD.warningShort.replace("Choose carefully. ", "")}
-            </span>
-          </div>
-
-          <fieldset
-            disabled={!areasComplete}
-            className="space-y-2 disabled:opacity-50"
-          >
-            <legend className="sr-only">{COLOUR_FIELD.label}</legend>
-            {COLOURS.map((colour) => {
-              const c = COLOUR_CONTENT[colour];
-              const selected = draft.colour === colour;
-              return (
-                <label
-                  key={colour}
-                  className={[
-                    "flex cursor-pointer gap-3 rounded-control border p-3 transition-colors",
-                    selected
-                      ? "border-accent bg-surface ring-1 ring-accent"
-                      : "border-line bg-surface hover:border-muted/50",
-                    !areasComplete ? "cursor-not-allowed" : "",
-                  ].join(" ")}
-                >
-                  <input
-                    type="radio"
-                    name={`${uid}-colour`}
-                    value={colour}
-                    checked={selected}
-                    onChange={() => set("colour", colour)}
-                    className="mt-1 h-4 w-4 shrink-0 accent-accent"
-                  />
-                  <span>
-                    <span className="flex items-center gap-2 text-body font-semibold text-ink">
-                      <RatingArches
-                        colour={colour}
-                        className={STATUS_TEXT[colour]}
-                      />
-                      {c.label}
-                    </span>
-                    <span className="mt-0.5 block text-micro text-muted">
-                      {c.description}
-                    </span>
-                  </span>
-                </label>
-              );
-            })}
-          </fieldset>
-          {!areasComplete ? (
-            <p className="text-micro text-muted">{COLOUR_FIELD.locked}</p>
-          ) : (
-            !draft.colour && (
-              <p className="text-micro text-muted">{COLOUR_FIELD.required}</p>
-            )
-          )}
-        </section>
-      </Group>
-
-      {/* Save */}
-      <div className="sticky bottom-0 -mx-5 border-t border-line bg-surface px-5 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] ">
-        {serverError && (
-          <p
-            role="alert"
-            className="mb-2 rounded-control bg-attention-soft px-3 py-2 text-micro text-attention"
-          >
-            {serverError}
-          </p>
-        )}
-        <Button type="submit" disabled={!valid || saving} className="w-full">
-          {saving
-            ? "Saving…"
-            : serverError
-              ? "Save report again"
-              : "Save report"}
-        </Button>
-        {!valid && missing && (
-          <p className="mt-1.5 truncate text-center text-micro text-muted">
-            {missing}
-          </p>
+      <div className="border-t border-dashed border-line pt-4">
+        {engineer ? (
+          <ReportBy name={engineer.fullName} discipline={engineer.discipline} oeaNumber={engineer.oeaNumber} />
+        ) : (
+          <div className="motion-safe-only h-[18px] w-2/3 animate-pulse rounded-control bg-surface-soft" aria-label="Loading your account" />
         )}
       </div>
     </form>
   );
 }
 
-function ObservationField({
+function Observation({
+  id,
   area,
   value,
-  prompt,
   error,
   onChange,
-  onBlur,
 }: {
+  id: string;
   area: Area;
   value: ObservationInput;
-  prompt?: string;
   error?: string;
   onChange: (patch: Partial<ObservationInput>) => void;
-  onBlur: () => void;
 }) {
-  const id = useId();
-  const content = AREA_CONTENT[area];
   const canSkip = areaAllowsNotInspected(area);
   const notInspected = canSkip && value.notInspected;
 
   return (
-    <Section
-      label={content.label}
-      htmlFor={id}
-      help={notInspected ? undefined : (prompt ?? content.prompt)}
-    >
+    <section>
+      <div className="flex min-h-11 items-center justify-between gap-3">
+        <label htmlFor={id} className="text-body font-semibold text-ink">
+          {AREA_LABEL[area]}
+        </label>
+        {canSkip && <Toggle label={NOT_INSPECTED} checked={value.notInspected} onChange={(v) => onChange({ notInspected: v })} />}
+      </div>
       {notInspected ? (
-        <>
-          <label
-            htmlFor={id}
-            className="mt-1.5 mb-1 block text-micro font-medium text-ink"
-          >
-            {FIELDS.notInspected.reasonLabel}
-          </label>
-          <textarea
-            id={id}
-            dir="auto"
-            rows={2}
-            maxLength={LIMITS.reasonMax + 50}
-            value={value.reason}
-            onChange={(e) => onChange({ reason: e.target.value })}
-            onBlur={onBlur}
-            aria-invalid={!!error}
-            className={inputClass}
-          />
-          <Counter value={value.reason} max={LIMITS.reasonMax} />
-        </>
+        <input
+          id={id}
+          dir="auto"
+          placeholder={REPORT_TEXT.notInspectedReason}
+          maxLength={LIMITS.reasonMax}
+          value={value.reason}
+          onChange={(e) => onChange({ reason: e.target.value })}
+          aria-invalid={!!error}
+          className={`${writeClass} min-h-11`}
+        />
       ) : (
-        <>
-          <textarea
-            id={id}
-            dir="auto"
-            rows={4}
-            maxLength={LIMITS.observationMax + 100}
-            value={value.text}
-            onChange={(e) => onChange({ text: e.target.value })}
-            onBlur={onBlur}
-            aria-invalid={!!error}
-            className={inputClass}
-          />
-          <Counter value={value.text} max={LIMITS.observationMax} />
-        </>
-      )}
-      <FieldError message={error} />
-
-      {canSkip && (
-        <Checkbox
-          label={NOT_INSPECTED}
-          help={FIELDS.notInspected.help}
-          checked={value.notInspected}
-          onChange={(v) => {
-            onChange({ notInspected: v });
-            onBlur();
-          }}
+        <AutoTextarea
+          id={id}
+          dir="auto"
+          placeholder={REPORT_TEXT.write}
+          maxLength={LIMITS.observationMax}
+          value={value.text}
+          onChange={(e) => onChange({ text: e.target.value })}
+          aria-invalid={!!error}
         />
       )}
-
-      {!notInspected && (
-        <details className="group mt-1 text-micro">
-          <summary className="cursor-pointer py-1 font-medium text-muted select-none hover:text-ink">
-            What to look at
-          </summary>
-          <div className="mt-1 space-y-2 rounded-control bg-surface-soft p-3 text-muted">
-            <p>{content.lookAt}</p>
-            <p className="text-micro text-muted">
-              Example phrases (tap to add, then edit):
-            </p>
-            <div className="flex flex-col gap-1.5">
-              {content.examples.map((phrase) => (
-                <button
-                  key={phrase}
-                  type="button"
-                  onClick={() => {
-                    const text = value.text.trim();
-                    onChange({ text: text ? `${text}\n${phrase}` : phrase });
-                  }}
-                  className="rounded-md border border-line bg-surface px-2.5 py-1.5 text-left text-ink hover:border-muted/50"
-                >
-                  {phrase}
-                </button>
-              ))}
-            </div>
-            {content.note && (
-              <p className="text-micro text-muted">{content.note}</p>
-            )}
-          </div>
-        </details>
-      )}
-    </Section>
+      <FieldError message={error} />
+    </section>
   );
-}
-
-function Counter({ value, max }: { value: string; max: number }) {
-  const n = [...value.trim()].length;
-  return (
-    <p
-      className={`mt-1 text-right text-micro tabular-nums ${n > max ? "text-attention" : "text-muted/80"}`}
-    >
-      {n} / {max}
-    </p>
-  );
-}
-
-function summary(area: Area, o: ObservationInput) {
-  if (o.notInspected && areaAllowsNotInspected(area)) {
-    return o.reason.trim()
-      ? `${NOT_INSPECTED}: ${firstLine(o.reason, 80)}`
-      : `${NOT_INSPECTED}: (reason needed)`;
-  }
-  return o.text.trim() ? (
-    firstLine(o.text, 80)
-  ) : (
-    <span className="text-muted/80">Not written yet</span>
-  );
-}
-
-const FIELD_NAMES: Record<string, string> = {
-  reportDate: "date of report",
-  residents: "people living in the building",
-  constructionYear: "construction date",
-  constructionChangeReason: "reason for the change",
-  roof: "roof",
-  columns: "columns",
-  foundations: "foundations",
-  final: "final observation",
-  colour: "colour",
-};
-
-function missingList(errors: Record<string, string | undefined>) {
-  const names = Object.keys(errors)
-    .map((k) => FIELD_NAMES[k])
-    .filter(Boolean);
-  if (names.length === 0) return null;
-  const shown = names.slice(0, 3).join(", ");
-  return names.length > 3
-    ? `Still needed: ${shown} and ${names.length - 3} more.`
-    : `Still needed: ${shown}.`;
 }

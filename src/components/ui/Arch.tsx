@@ -9,10 +9,18 @@ const LEVEL: Record<Colour, number> = { green: 1, yellow: 2, red: 3 };
 
 const ARCH = "M1 13V6.5a3.5 3.5 0 0 1 7 0V13Z";
 
-export function RatingArches({ colour, className = "" }: { colour: Colour | null; className?: string }) {
+export function RatingArches({
+  colour,
+  large = false,
+  className = "",
+}: {
+  colour: Colour | null;
+  large?: boolean;
+  className?: string;
+}) {
   const level = colour ? LEVEL[colour] : 0;
   return (
-    <svg viewBox="0 0 29 14" className={`h-3.5 w-[29px] shrink-0 ${className}`} aria-hidden>
+    <svg viewBox="0 0 29 14" className={`${large ? "h-5 w-[41px]" : "h-3.5 w-[29px]"} shrink-0 ${className}`} aria-hidden>
       {[0, 1, 2].map((i) => (
         <path
           key={i}

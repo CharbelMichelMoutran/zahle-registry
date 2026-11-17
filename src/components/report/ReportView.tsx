@@ -1,111 +1,102 @@
-import { AREA_CONTENT, COLOUR_CONTENT, COLOUR_FIELD, DRAFT_BANNER, FIELDS, NOT_INSPECTED, NOT_YET_VERIFIED } from "@/lib/content";
+import { AREA_LABEL, NO_REMARKS, NOT_INSPECTED, NOT_YET_VERIFIED, REPORT_TEXT } from "@/lib/content";
 import { formatConstructionDate, formatDate, formatSaveTime } from "@/lib/format";
 import { AREAS, reportConstructionDate, type ConstructionDateChange, type Report } from "@/lib/report";
 import { ColourBadge } from "./ColourBadge";
-import { ReportByBox } from "./ReportByBox";
-import { DraftBanner, Section } from "./ui";
+import { ReportBy } from "./ReportBy";
+import { Row } from "./ui";
 
-/** A saved report, read-only, in the same order and with the same labels as the form. */
+/** A saved report, read-only, in the same calm layout as the form. */
 export default function ReportView({ report, change }: { report: Report; change?: ConstructionDateChange }) {
   const r = report;
   return (
-    <article className="space-y-5">
-      <DraftBanner text={DRAFT_BANNER} />
-      <p className="text-micro text-muted">
-        Saved {formatSaveTime(r.created_at)}. A saved report cannot be changed.
-      </p>
+    <article className="space-y-7 pb-6">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <ColourBadge colour={r.colour} long />
+        <p className="text-micro text-muted">
+          {REPORT_TEXT.saved} <span className="tabular">{formatSaveTime(r.created_at)}</span>
+        </p>
+      </div>
 
-      <ReportByBox
-        name={r.engineer_name}
-        discipline={r.engineer_discipline}
-        contact={r.engineer_contact}
-        oeaNumber={r.engineer_oea_number}
-      />
-      <Section label={FIELDS.reportDate.label}>
-        <Value>{formatDate(r.report_date)}</Value>
-      </Section>
-      <Section label={FIELDS.residents.label}>
-        <Value>
-          {r.residents_not_verified ? <NotYetVerified /> : <span className="tabular">{r.residents_count}</span>}
-        </Value>
-        <p className="mt-1 text-micro text-muted">{FIELDS.residents.caveat}</p>
-      </Section>
-      <Section label={FIELDS.construction.label}>
-        <Value>
-          {r.construction_not_verified ? (
-            <NotYetVerified />
-          ) : (
-            <span className="tabular">{formatConstructionDate(reportConstructionDate(r))}</span>
-          )}
-        </Value>
-        {change && (
-          <div className="mt-2 rounded-control border border-line bg-surface p-3 text-body text-ink">
-            <p>
-              Changed in this report. Previous value:{" "}
-              <span className="font-medium">
+      <div className="divide-y divide-line rounded-card border border-line bg-surface">
+        <Row label={REPORT_TEXT.date}>
+          <Value>{formatDate(r.report_date)}</Value>
+        </Row>
+        <Row label={REPORT_TEXT.residents}>
+          <Value>{r.residents_not_verified ? <NotYetVerified /> : r.residents_count}</Value>
+        </Row>
+        <Row
+          label={REPORT_TEXT.built}
+          hint={
+            change && (
+              <>
+                {REPORT_TEXT.previously}{" "}
                 {formatConstructionDate({
                   year: change.previous_year,
                   month: change.previous_month,
                   approximate: change.previous_approximate,
                   notVerified: change.previous_not_verified,
                 })}
-              </span>
-              .
-            </p>
-            <p className="mt-1">
-              Reason: <bdi dir="auto" className="whitespace-pre-wrap">{change.reason}</bdi>
-            </p>
-            <p className="mt-1 text-micro text-muted">
-              Changed by <bdi dir="auto">{change.changed_by}</bdi>, {formatSaveTime(change.changed_at)}
-            </p>
-          </div>
-        )}
-      </Section>
+                , changed by <bdi dir="auto">{change.changed_by}</bdi>
+                {change.reason?.trim() && (
+                  <>
+                    : <bdi dir="auto" className="whitespace-pre-wrap">{change.reason}</bdi>
+                  </>
+                )}
+              </>
+            )
+          }
+        >
+          <Value>
+            {r.construction_not_verified ? <NotYetVerified /> : formatConstructionDate(reportConstructionDate(r))}
+          </Value>
+        </Row>
+      </div>
 
-      {AREAS.map((area) => {
-        const text = r[`${area}_observation`];
-        const reason = r[`${area}_not_inspected_reason`];
-        return (
-          <Section key={area} label={AREA_CONTENT[area].label}>
-            {reason !== null ? <NotInspected reason={reason} /> : <Value multiline>{text}</Value>}
-          </Section>
-        );
-      })}
+      <div className="space-y-5">
+        {AREAS.map((area) => {
+          const text = r[`${area}_observation`]?.trim();
+          const reason = r[`${area}_not_inspected_reason`];
+          return (
+            <section key={area}>
+              <h3 className="flex min-h-11 items-center text-body font-semibold text-ink">{AREA_LABEL[area]}</h3>
+              {reason !== null ? (
+                <p className="text-lead text-ink">
+                  <span className="font-medium">{NOT_INSPECTED}</span>
+                  {reason.trim() && (
+                    <span dir="auto" className="mt-0.5 block whitespace-pre-wrap break-words text-muted">
+                      {reason}
+                    </span>
+                  )}
+                </p>
+              ) : text ? (
+                <p dir="auto" className="whitespace-pre-wrap break-words text-lead text-ink">
+                  {text}
+                </p>
+              ) : (
+                <p className="text-lead text-muted">{NO_REMARKS}</p>
+              )}
+            </section>
+          );
+        })}
+      </div>
 
-      <Section label={COLOUR_FIELD.label}>
-        <div className="rounded-control border border-line bg-surface-soft p-3">
-          <ColourBadge colour={r.colour} long />
-          <p className="mt-1 text-body text-muted">{COLOUR_CONTENT[r.colour].description}</p>
-        </div>
-      </Section>
+      <div className="border-t border-dashed border-line pt-4">
+        <ReportBy
+          name={r.engineer_name}
+          discipline={r.engineer_discipline}
+          oeaNumber={r.engineer_oea_number}
+          contact={r.engineer_contact}
+        />
+      </div>
     </article>
   );
 }
 
-function Value({ children, muted, multiline }: { children: React.ReactNode; muted?: boolean; multiline?: boolean }) {
+function Value({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      dir="auto"
-      className={[
-        "rounded-control border border-line bg-surface-soft px-3 py-2 text-body break-words",
-        multiline ? "whitespace-pre-wrap" : "",
-        muted ? "text-muted" : "text-ink",
-      ].join(" ")}
-    >
+    <span dir="auto" className="tabular py-2.5 text-lead break-words text-ink">
       {children}
-    </div>
-  );
-}
-
-/** Neutral label, in the place the observation would be. Never blank, never a warning. */
-export function NotInspected({ reason }: { reason: string }) {
-  return (
-    <div className="rounded-control border border-line bg-surface-soft px-3 py-2 text-body">
-      <span className="font-medium text-ink">{NOT_INSPECTED}</span>
-      <p dir="auto" className="mt-0.5 whitespace-pre-wrap break-words text-muted">
-        {reason}
-      </p>
-    </div>
+    </span>
   );
 }
 
