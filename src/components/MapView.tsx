@@ -2,7 +2,7 @@
 
 import { AnimatePresence } from "motion/react";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { Engineer } from "@/lib/account";
 import { apiFetch } from "@/lib/client-fetch";
 import { sortNewestFirst } from "@/lib/format";
@@ -80,10 +80,18 @@ function usePanelNavigation() {
   return { nav, navRef, push, goTo };
 }
 
+/** What the top bar can ask of the map. */
+export type MapViewHandle = {
+  /** Fly to a building, select it and open its preview tray, as if it had been tapped. */
+  showBuilding(id: string): void;
+};
+
 export default function MapView({
+  ref,
   engineer,
   onDraftsChange,
 }: {
+  ref?: Ref<MapViewHandle>;
   engineer: Engineer | null;
   onDraftsChange: (count: number) => void;
 }) {
@@ -164,6 +172,22 @@ export default function MapView({
     if (reportId) push({ ...navRef.current, openReportId: reportId, depth: 3 });
     else goTo(2, { ...navRef.current, openReportId: null });
   };
+  // "Locate building": once the tray shows this building's preview, the map flies to it.
+  const [locate, setLocate] = useState<{ id: string; key: number } | null>(null);
+  useImperativeHandle(
+    ref,
+    () => ({
+      showBuilding(id) {
+        setLocate({ id, key: Date.now() });
+        const current = navRef.current;
+        if (current.buildingId !== id || current.depth <= 1) selectBuilding(id);
+        else goTo(1); // already open in the full view: back to its preview
+      },
+    }),
+    [goTo, navRef, selectBuilding],
+  );
+  const focus = locate && nav.buildingId === locate.id && nav.depth === 1 ? locate : null;
+
   const onEmptyMapClick = useCallback(() => {
     const depth = navRef.current.depth;
     if (depth >= 2) goTo(1);
@@ -229,6 +253,7 @@ export default function MapView({
         selectedId={nav.buildingId}
         onSelect={selectBuilding}
         onEmptyClick={onEmptyMapClick}
+        focus={focus}
         coveredRect={coveredRect}
       />
       <AnimatePresence>

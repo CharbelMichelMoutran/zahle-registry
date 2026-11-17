@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import { animate } from "motion";
 import { motion } from "motion/react";
 import { apiFetch } from "@/lib/client-fetch";
+import { setLocatableBuildings } from "@/lib/location";
 import { prefersReducedMotion, springGentle, springSnappy } from "@/lib/motion";
 import type { Colour } from "@/lib/report";
 import { attachMapNavigation, type MapNavigation } from "./map-navigation";
@@ -16,6 +17,8 @@ const ZAHLE_CENTER: L.LatLngTuple = [33.8467, 35.9025];
 const OPEN_ZOOM = 16;
 const MIN_ZOOM = 14;
 const MAX_ZOOM = 19;
+/** "Locate building" zooms in at least this far, close enough to read one house. */
+const LOCATE_ZOOM = 17.5;
 /** The imported area plus a margin, so the map cannot be dragged away from Zahle. */
 const ZAHLE_BOUNDS = L.latLngBounds([33.82, 35.86], [33.875, 35.945]);
 
@@ -48,13 +51,15 @@ type Props = {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onEmptyClick: () => void;
+  /** Fly to this building and centre it beside the tray ("Locate building"). A new `key` flies again. */
+  focus: { id: string; key: number } | null;
   /** The area the tray covers, in map pixels, so a selected building is not hidden behind it. */
   coveredRect: () => { left: number; top: number; right: number; bottom: number } | null;
 };
 
 type Status = "loading" | "ready" | "error";
 
-export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClick, coveredRect }: Props) {
+export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClick, focus, coveredRect }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const navRef = useRef<MapNavigation | null>(null);
@@ -64,6 +69,7 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
   const coveredRef = useRef(coveredRect);
   const coloursRef = useRef(colours);
   const selectedRef = useRef(selectedId);
+  const focusedKeyRef = useRef<number | null>(null);
   const [status, setStatus] = useState<Status>("loading");
   const [attempt, setAttempt] = useState(0);
   const [zoom, setZoom] = useState(OPEN_ZOOM);
@@ -157,6 +163,12 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
             });
           },
         }).addTo(map);
+        setLocatableBuildings(
+          [...layers].map(([id, l]) => {
+            const c = l.getBounds().getCenter();
+            return { id, lat: c.lat, lng: c.lng };
+          }),
+        );
         setStatus("ready");
       })
       .catch((err: unknown) => {
@@ -169,6 +181,7 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
       controller.abort();
       layer?.remove();
       layers.clear();
+      setLocatableBuildings([]);
     };
   }, [attempt]);
 
@@ -184,6 +197,7 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
   }, [colours]);
 
   // Outline the selected building; pan only if it would sit behind the panel.
+  // A "Locate building" request flies to it instead, wherever it is.
   useEffect(() => {
     const previous = selectedRef.current;
     selectedRef.current = selectedId;
@@ -196,12 +210,20 @@ export default function BuildingMap({ colours, selectedId, onSelect, onEmptyClic
 
     layer.setStyle(styleFor(selectedId!, coloursRef.current, selectedId));
     layer.bringToFront();
-    if (previous !== selectedId) {
+    const locate = focus?.id === selectedId && focus.key !== focusedKeyRef.current;
+    if (locate) focusedKeyRef.current = focus.key;
+    if (locate || previous !== selectedId) {
       // Wait a frame so the tray is laid out, then move only if it would cover the building.
-      const frame = requestAnimationFrame(() => flyClearOfTray(map, layer, coveredRef.current()));
+      const frame = requestAnimationFrame(() => {
+        const tray = coveredRef.current();
+        if (locate) {
+          const { center, zoom } = viewBesideTray(map, layer, tray);
+          navRef.current?.flyTo(center, zoom);
+        } else flyClearOfTray(map, layer, tray);
+      });
       return () => cancelAnimationFrame(frame);
     }
-  }, [selectedId, status]);
+  }, [selectedId, status, focus]);
 
   return (
     <div className="relative h-full w-full">
@@ -307,6 +329,24 @@ function styleFor(id: string, colours: ReadonlyMap<string, Colour>, selectedId: 
 }
 
 const MARGIN = 24;
+type Rect = { left: number; top: number; right: number; bottom: number };
+
+/**
+ * Where to fly so the building sits in the middle of the map the tray leaves open:
+ * above the tray on phones, to its right on wide screens. Zooms in, never out.
+ */
+function viewBesideTray(map: L.Map, layer: L.Polygon, tray: Rect | null) {
+  const size = map.getSize();
+  const zoom = Math.max(map.getZoom(), LOCATE_ZOOM);
+  let spot = size.divideBy(2);
+  if (tray) {
+    if (size.x - tray.right > 320) spot = L.point((tray.right + size.x) / 2, size.y / 2);
+    else spot = L.point(size.x / 2, Math.max(MARGIN, tray.top / 2));
+  }
+  const point = map.project(layer.getBounds().getCenter(), zoom);
+  const center = map.unproject(point.subtract(spot.subtract(size.divideBy(2))), zoom);
+  return { center, zoom };
+}
 
 /**
  * If the tray covers the building, glide the map (spring-gentle) just far enough
@@ -316,7 +356,7 @@ const MARGIN = 24;
 function flyClearOfTray(
   map: L.Map,
   layer: L.Polygon,
-  tray: { left: number; top: number; right: number; bottom: number } | null,
+  tray: Rect | null,
 ) {
   const size = map.getSize();
   const p = map.latLngToContainerPoint(layer.getBounds().getCenter());
