@@ -10,7 +10,7 @@ import type { ConstructionDateChange, Report, ReportInput } from "@/lib/report";
 import { ColourBadge, NotYetInspectedBadge } from "./report/ColourBadge";
 import ReportForm, { INITIAL_SAVE_STATE, type SaveState } from "./report/ReportForm";
 import ReportView from "./report/ReportView";
-import { ArchHandle, ArchMark } from "./ui/Arch";
+import { ArchMark } from "./ui/Arch";
 import { Button, IconButton, Spinner } from "./ui/Button";
 
 export type Level = "preview" | "full";
@@ -157,24 +157,19 @@ const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(prop
           </div>
         </motion.header>
       ) : (
-        <>
-          <motion.div layout="position" className="flex shrink-0 justify-center pt-2" aria-hidden>
-            <ArchHandle />
-          </motion.div>
-          <motion.header layout="position" className="flex shrink-0 items-center gap-1 px-4 pt-1">
-            <p className="micro-label flex-1 pl-1">Building</p>
-            <IconButton label="Maximize" onClick={() => props.onMaximize()}>
-              <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-                <path d="M5 12l5-5 5 5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </IconButton>
-            <IconButton label="Close" onClick={onClose}>
-              <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-                <path d="M5 5l10 10M15 5L5 15" strokeLinecap="round" />
-              </svg>
-            </IconButton>
-          </motion.header>
-        </>
+        <motion.header layout="position" className="flex shrink-0 items-center gap-1 px-4 pt-3">
+          <p className="micro-label flex-1 pl-1">Building</p>
+          <IconButton label="Maximize" onClick={() => props.onMaximize()}>
+            <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+              <path d="M5 12l5-5 5 5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </IconButton>
+          <IconButton label="Close" onClick={onClose}>
+            <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+              <path d="M5 5l10 10M15 5L5 15" strokeLinecap="round" />
+            </svg>
+          </IconButton>
+        </motion.header>
       )}
 
       {/* Pinned under the header, so it is seen wherever the engineer has scrolled. */}

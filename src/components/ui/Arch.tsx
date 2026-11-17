@@ -46,11 +46,3 @@ export function ArchMark({ className = "" }: { className?: string }) {
   );
 }
 
-/** The tray's grab handle: a small arch, 40px wide. */
-export function ArchHandle() {
-  return (
-    <svg viewBox="0 0 40 10" className="h-2.5 w-10 text-line" aria-hidden>
-      <path d="M2 9V7a18 6 0 0 1 36 0v2" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-    </svg>
-  );
-}
