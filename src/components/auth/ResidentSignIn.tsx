@@ -12,7 +12,8 @@ const LABEL = "mb-1.5 block text-body font-semibold text-ink";
 
 /**
  * Resident sign-in (plan.md item 12, first version): name and the fixed phone
- * number, then the fixed code. Supabase Auth checks the code on the server.
+ * number, then the fixed code. Both are shown only; no code is sent or checked.
+ * "Log in" starts a resident session in our own login system.
  */
 export default function ResidentSignIn() {
   const router = useRouter();
@@ -40,32 +41,24 @@ export default function ResidentSignIn() {
     return null;
   };
 
-  async function post(url: string, body?: object) {
+  async function post(url: string, body: object) {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body ?? {}),
+      body: JSON.stringify(body),
     });
     const data = await res.json().catch(() => ({}));
     return { ok: res.ok, error: (data.error as string | undefined) ?? T.failed };
   }
 
-  async function sendCode(e: React.FormEvent) {
+  // A front-end show only (owner, 17 Nov 2026): no code is sent, so this just moves to the code step.
+  function sendCode(e: React.FormEvent) {
     e.preventDefault();
-    if (busy) return;
     const problem = checkName(name);
     setNameError(problem);
     if (problem) return;
-    setBusy(true);
     setError(null);
-    try {
-      const res = await post("/api/resident/send-code");
-      if (res.ok) setStep("code");
-      else setError(res.error);
-    } catch {
-      setError(T.failed);
-    }
-    setBusy(false);
+    setStep("code");
   }
 
   async function logIn(e: React.FormEvent) {
@@ -74,7 +67,7 @@ export default function ResidentSignIn() {
     setBusy(true);
     setError(null);
     try {
-      const res = await post("/api/resident/login", { name, code: T.codeShown });
+      const res = await post("/api/resident/login", { name });
       if (res.ok) {
         router.replace("/resident");
         return;
@@ -175,8 +168,8 @@ export default function ResidentSignIn() {
           className={`${lockedClass} tabular`}
         />
       </div>
-      <Button type="submit" disabled={busy} className="w-full">
-        {busy ? T.sending : T.sendCode}
+      <Button type="submit" className="w-full">
+        {T.sendCode}
       </Button>
     </form>
   );
