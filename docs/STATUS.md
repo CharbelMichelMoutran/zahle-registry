@@ -32,7 +32,7 @@ Last updated: 16 Nov 2026, when the project owner paused for the day. Read this 
 - The polished README with screenshots, and making the repo public.
 - **The owner's 12 new features, now in scope** (`plan.md` section 7, items 11 to 22; full text and how each conflict was resolved in `docs/feature-backlog.md`): location suggestion; residents (phone verification, inspection requests, building log, own-building-only map with row-level security); Claude sorting and flagging submissions; engineer verdicts; the learning rulebook; the Lebanon context file; plain-language engineer map query; the Cmd+K command bar. **None is built.**
 
-## Build order (the owner decides; step (a) is next)
+## Build order (the owner decides; step (a) is next; the owner said on 17 Nov 2026 that AI comes later, so steps c, e, f and g wait)
 
 (a) red for the worst rating, and the Cmd+K command bar; (b) location suggestion; (c) set up the Anthropic Console, then AI document-to-form and the context file; (d) unify login, then residents with phone codes, requests, log, and the own-building map; (e) Claude sorting and flagging with verdicts; (f) the rulebook and its reflection job; (g) engineer map query; (h) sample data, README, and the full test. The 30-hour estimate no longer holds. The order keeps a working demo at every step, so the owner can stop after any item.
 
