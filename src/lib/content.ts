@@ -165,10 +165,9 @@ export const RESIDENT_SIGN_IN = {
   title: "Log in as a resident",
   name: "Name",
   phone: "Phone number",
-  /** The one resident sign-in number, as shown. The server uses RESIDENT_PHONE. */
+  /** The one resident sign-in number, as shown. The resident login route uses RESIDENT_PHONE. */
   phoneShown: "+1 555 010 0000",
   sendCode: "Send code",
-  sending: "Sending…",
   codeTitle: "Enter the code",
   codeSent: "We sent a 6-digit code to ",
   code: "Code",

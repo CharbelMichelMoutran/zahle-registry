@@ -1,6 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { validateSignup, type SignupInput } from "@/lib/account";
-import { createSession, hashPassword, visitorHash } from "@/lib/session";
+import {
+  clearedResidentSessionCookie,
+  createSession,
+  deleteResidentSession,
+  hashPassword,
+  RESIDENT_SESSION_COOKIE,
+  visitorHash,
+} from "@/lib/session";
 import { createServerSupabase } from "@/lib/supabase-server";
 
 const MAX_BODY_BYTES = 4 * 1024;
@@ -52,6 +59,12 @@ export async function POST(req: NextRequest) {
 
     const res = json({ status: "pending" }, 201);
     res.cookies.set(await createSession(id as string));
+    // One role at a time: a leftover resident session on this browser ends here.
+    const residentToken = req.cookies.get(RESIDENT_SESSION_COOKIE)?.value;
+    if (residentToken) {
+      await deleteResidentSession(residentToken).catch(() => {});
+      res.cookies.set(clearedResidentSessionCookie());
+    }
     return res;
   } catch (err) {
     console.error("signup failed:", err instanceof Error ? err.message : err);

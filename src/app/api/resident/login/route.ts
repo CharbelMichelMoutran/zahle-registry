@@ -1,56 +1,57 @@
-import { cookies } from "next/headers";
+import { NextResponse, type NextRequest } from "next/server";
 import { RESIDENT_NAME_MAX, RESIDENT_SIGN_IN } from "@/lib/content";
-import { createResidentSupabase, RESIDENT_PHONE } from "@/lib/resident-auth";
-import { clearedSessionCookie, deleteSession, SESSION_COOKIE } from "@/lib/session";
+import {
+  clearedSessionCookie,
+  createResidentSession,
+  deleteResidentSession,
+  deleteSession,
+  RESIDENT_SESSION_COOKIE,
+  SESSION_COOKIE,
+} from "@/lib/session";
+import { createServerSupabase } from "@/lib/supabase-server";
+
+/** The one resident sign-in number. Every visitor is this same resident (plan.md item 12). */
+const RESIDENT_PHONE = "+15550100000";
 
 const json = (body: unknown, status = 200) =>
-  Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
+  NextResponse.json(body, { status, headers: { "Cache-Control": "no-store" } });
 
 /**
- * Check the one-time code, start the resident's Supabase session (httpOnly
- * cookies), and save the name they typed to their `residents` row.
+ * Log in as the resident. The phone number and code screens are a front-end
+ * show only (owner, 17 Nov 2026): no code is checked. Saves the name typed to
+ * the one resident row and starts a resident session in our own login system.
  */
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const raw = await req.text();
   if (raw.length > 2048) return json({ error: RESIDENT_SIGN_IN.failed }, 400);
   let name = "";
-  let code = "";
   try {
-    const body = JSON.parse(raw);
-    name = String(body.name ?? "").trim();
-    code = String(body.code ?? "");
+    name = String(JSON.parse(raw).name ?? "").trim();
   } catch {
     return json({ error: RESIDENT_SIGN_IN.failed }, 400);
   }
   if (!name) return json({ error: RESIDENT_SIGN_IN.missingName }, 400);
   if (name.length > RESIDENT_NAME_MAX) return json({ error: RESIDENT_SIGN_IN.nameTooLong(RESIDENT_NAME_MAX) }, 400);
-  if (!/^\d{6}$/.test(code)) return json({ error: RESIDENT_SIGN_IN.failed }, 400);
 
   try {
-    const supabase = await createResidentSupabase();
-    const { error } = await supabase.auth.verifyOtp({ phone: RESIDENT_PHONE, token: code, type: "sms" });
-    if (error) {
-      console.error("resident verify failed:", error.message);
-      return json({ error: RESIDENT_SIGN_IN.failed }, 401);
-    }
-    // Runs as the resident (row-level security), now that the client holds their session.
-    const saved = await supabase.rpc("save_resident_name", { p_name: name });
-    if (saved.error) {
-      console.error("save_resident_name failed:", saved.error.message);
-      await supabase.auth.signOut({ scope: "local" });
-      return json({ error: RESIDENT_SIGN_IN.failed }, 500);
-    }
+    const { data: residentId, error } = await createServerSupabase().rpc("resident_sign_in", {
+      p_phone: RESIDENT_PHONE,
+      p_name: name,
+    });
+    if (error || typeof residentId !== "string") throw new Error(`resident_sign_in: ${error?.message}`);
 
-    // One role at a time: a leftover engineer session on this browser ends here.
-    const store = await cookies();
-    const engineerToken = store.get(SESSION_COOKIE)?.value;
+    const res = json({ status: "signed in" });
+    // A login replaces this browser's earlier resident session, and ends a leftover engineer session (one role at a time).
+    await deleteResidentSession(req.cookies.get(RESIDENT_SESSION_COOKIE)?.value).catch(() => {});
+    const engineerToken = req.cookies.get(SESSION_COOKIE)?.value;
     if (engineerToken) {
       await deleteSession(engineerToken).catch(() => {});
-      store.set(clearedSessionCookie());
+      res.cookies.set(clearedSessionCookie());
     }
-    return json({ status: "signed in" });
+    res.cookies.set(await createResidentSession(residentId));
+    return res;
   } catch (err) {
-    console.error(err instanceof Error ? err.message : err);
+    console.error("resident login failed:", err instanceof Error ? err.message : err);
     return json({ error: RESIDENT_SIGN_IN.failed }, 500);
   }
 }

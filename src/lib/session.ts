@@ -6,6 +6,8 @@ import { createServerSupabase } from "./supabase-server";
 
 /** Session cookie: a random token. Only its SHA-256 hash is stored in the database. */
 export const SESSION_COOKIE = "zr_session";
+/** Resident session cookie. Separate from the engineer's, so one can never be read as the other. */
+export const RESIDENT_SESSION_COOKIE = "zr_resident";
 const SESSION_DAYS = 30;
 
 const scryptAsync = promisify(scrypt) as (pw: string, salt: Buffer, keylen: number, opts: object) => Promise<Buffer>;
@@ -46,9 +48,9 @@ export async function createSession(engineerId: string) {
   return sessionCookie(token, expires);
 }
 
-export function sessionCookie(value: string, expires: Date) {
+export function sessionCookie(value: string, expires: Date, name = SESSION_COOKIE) {
   return {
-    name: SESSION_COOKIE,
+    name,
     value,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -63,6 +65,38 @@ export const clearedSessionCookie = () => sessionCookie("", new Date(0));
 export async function deleteSession(token: string | undefined) {
   if (!token) return;
   await createServerSupabase().from("sessions").delete().eq("token_hash", hashToken(token));
+}
+
+/** Start a resident session (its own table and cookie); returns the cookie to set. */
+export async function createResidentSession(residentId: string) {
+  const token = randomBytes(32).toString("base64url");
+  const expires = new Date(Date.now() + SESSION_DAYS * 24 * 3600 * 1000);
+  const { error } = await createServerSupabase()
+    .from("resident_sessions")
+    .insert({ token_hash: hashToken(token), resident_id: residentId, expires_at: expires.toISOString() });
+  if (error) throw new Error(`createResidentSession: ${error.message}`);
+  return sessionCookie(token, expires, RESIDENT_SESSION_COOKIE);
+}
+
+export const clearedResidentSessionCookie = () => sessionCookie("", new Date(0), RESIDENT_SESSION_COOKIE);
+
+/** Ends only this browser's resident session: every visitor shares one resident. */
+export async function deleteResidentSession(token: string | undefined) {
+  if (!token) return;
+  await createServerSupabase().from("resident_sessions").delete().eq("token_hash", hashToken(token));
+}
+
+/** The resident id behind a resident session token, or null if there is no valid session. */
+export async function residentForToken(token: string | undefined): Promise<string | null> {
+  if (!token || token.length > 100) return null;
+  const { data, error } = await createServerSupabase()
+    .from("resident_sessions")
+    .select("resident_id")
+    .eq("token_hash", hashToken(token))
+    .gt("expires_at", new Date().toISOString())
+    .maybeSingle<{ resident_id: string }>();
+  if (error) throw new Error(`residentForToken: ${error.message}`);
+  return data?.resident_id ?? null;
 }
 
 type EngineerRow = {

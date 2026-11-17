@@ -1,15 +1,14 @@
-import { createResidentSupabase } from "@/lib/resident-auth";
+import { NextResponse, type NextRequest } from "next/server";
+import { clearedResidentSessionCookie, deleteResidentSession, RESIDENT_SESSION_COOKIE } from "@/lib/session";
 
-/**
- * End this browser's resident session. "local" scope: everyone signs in with the
- * same number, so a global sign-out would log out every other visitor too.
- */
-export async function POST() {
+/** End this browser's resident session only. Everyone shares one resident, so other visitors stay logged in. */
+export async function POST(req: NextRequest) {
   try {
-    const supabase = await createResidentSupabase();
-    await supabase.auth.signOut({ scope: "local" });
+    await deleteResidentSession(req.cookies.get(RESIDENT_SESSION_COOKIE)?.value);
   } catch (err) {
     console.error("resident logout failed:", err instanceof Error ? err.message : err);
   }
-  return Response.json({ status: "logged out" }, { headers: { "Cache-Control": "no-store" } });
+  const res = NextResponse.json({ status: "logged out" }, { headers: { "Cache-Control": "no-store" } });
+  res.cookies.set(clearedResidentSessionCookie());
+  return res;
 }

@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { hasResidentCookie, residentForProxy } from "@/lib/resident-auth";
-import { engineerForToken, SESSION_COOKIE } from "@/lib/session";
+import { engineerForToken, RESIDENT_SESSION_COOKIE, residentForToken, SESSION_COOKIE } from "@/lib/session";
 
 /**
  * Page access, checked on the server before any page renders (plan rule 2):
@@ -8,9 +7,10 @@ import { engineerForToken, SESSION_COOKIE } from "@/lib/session";
  * - engineer waiting for approval: only /waiting
  * - approved engineer: the engineer map at /; every other page sends them to it
  * - resident: only the resident map at /resident; every other page sends them to it
- * Data routes check the session themselves: engineer routes with src/lib/api-auth.ts
- * (a resident session is not an engineer session, so they are refused), resident
- * routes with requireResident in src/lib/resident-auth.ts.
+ * Engineers and residents have separate session cookies and tables, so one can
+ * never be read as the other. Data routes check the session themselves with
+ * src/lib/api-auth.ts: requireEngineer refuses a resident session, and
+ * requireResident scopes everything to the session's resident.
  */
 export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
@@ -31,22 +31,24 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  let finish = (res: NextResponse) => res;
-  if (hasResidentCookie(req)) {
+  const residentToken = req.cookies.get(RESIDENT_SESSION_COOKIE)?.value;
+  if (residentToken) {
+    let residentId = null;
     try {
-      const resident = await residentForProxy(req, () => NextResponse.next());
-      if (resident.userId) return resident.finish(isResidentPage ? NextResponse.next() : go("/resident"));
-      finish = (res) => resident.finish(res); // drops an ended session's cookies
+      residentId = await residentForToken(residentToken);
     } catch (err) {
       console.error(err instanceof Error ? err.message : err);
     }
+    if (residentId) return isResidentPage ? NextResponse.next() : go("/resident");
   }
 
   // Signed out. A cookie that no longer matches a session means the session ended: say so once, then drop it.
-  const stale = Boolean(req.cookies.get(SESSION_COOKIE)?.value);
+  const staleEngineer = Boolean(req.cookies.get(SESSION_COOKIE)?.value);
+  const stale = staleEngineer || Boolean(residentToken);
   const res = isAuthPage ? NextResponse.next() : go(stale ? "/login?expired=1" : "/login");
-  if (stale) res.cookies.delete(SESSION_COOKIE);
-  return finish(res);
+  if (staleEngineer) res.cookies.delete(SESSION_COOKIE);
+  if (residentToken) res.cookies.delete(RESIDENT_SESSION_COOKIE);
+  return res;
 }
 
 export const config = {
