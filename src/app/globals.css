@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 /*
- * Design tokens (DESIGN.md sections 3 to 6). Light only: no dark mode, no black, no red.
+ * Design tokens (DESIGN.md sections 3 to 6). Light only: no dark mode, no black.
+ * Red appears only as the "Imminent risk" rating; errors use the dark orange "attention".
  * Tailwind utilities are generated from these: bg-ground, text-ink, border-line, ...
  */
 @theme {
@@ -20,7 +21,7 @@
   /* Building ratings (data values green / yellow / red) and "not yet inspected" */
   --color-vine: #1fa971;
   --color-apricot: #f5a524;
-  --color-terracotta: #ee7a2f;
+  --color-rooftile: #d6402b; /* red: "Imminent risk" only, never errors or decoration */
   --color-stone: #a3a8b3;
 
   /* Gentle attention, never red: field messages and the triage note */

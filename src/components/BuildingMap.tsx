@@ -15,8 +15,8 @@ const OPEN_ZOOM = 16;
 /** The imported area plus a margin, so the map cannot be dragged away from Zahle. */
 const ZAHLE_BOUNDS = L.latLngBounds([33.82, 35.86], [33.875, 35.945]);
 
-/** Building fills (DESIGN.md section 3). Data values stay green / yellow / red; no red on screen. */
-const RATING_FILL: Record<Colour, string> = { green: "#1FA971", yellow: "#F5A524", red: "#EE7A2F" };
+/** Building fills (DESIGN.md section 3): vine green, apricot amber, roof-tile red. */
+const RATING_FILL: Record<Colour, string> = { green: "#1FA971", yellow: "#F5A524", red: "#D6402B" };
 const OUTLINE = { color: "#FFFFFF", weight: 1, opacity: 0.9 };
 const SELECTED_OUTLINE: L.PathOptions = { color: "#2F7CF6", weight: 3, opacity: 1 };
 

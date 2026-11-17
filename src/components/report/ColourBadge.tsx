@@ -2,21 +2,21 @@ import { COLOUR_CONTENT, NOT_YET_INSPECTED } from "@/lib/content";
 import type { Colour } from "@/lib/report";
 import { RatingArches } from "../ui/Arch";
 
-/** On-screen colour per rating (DESIGN.md section 3, option A): no red. */
+/** On-screen colour per rating (DESIGN.md section 3). Red is used for "Imminent risk" only. */
 export const STATUS_TEXT: Record<Colour, string> = {
   green: "text-vine",
   yellow: "text-apricot",
-  red: "text-terracotta",
+  red: "text-rooftile",
 };
 const STATUS_BG: Record<Colour, string> = {
   green: "bg-vine/12 border-vine/30",
   yellow: "bg-apricot/15 border-apricot/40",
-  red: "bg-terracotta/12 border-terracotta/35",
+  red: "bg-rooftile/12 border-rooftile/35",
 };
 export const DOT_CLASS: Record<Colour, string> = {
   green: "bg-vine",
   yellow: "bg-apricot",
-  red: "bg-terracotta",
+  red: "bg-rooftile",
 };
 
 /** A rating is never shown alone: arches, colour and the word together (plan rule 1). */
