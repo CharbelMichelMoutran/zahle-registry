@@ -221,7 +221,7 @@ The project owner chose to leave adoption out of this project. **Later test:** o
 - Real SMS through Twilio is allowed once, to the owner's own number.
 
 **Open technical question for the coder (bring it to the owner before building items 12 and 15):** engineer accounts today use our own login, while residents need Supabase Auth, and row-level security works best when everyone signs in the same way. The coder proposes how to unify the two without collecting emails (for example internal made-up addresses that never receive mail), and what it costs.
-**Answered by the owner's resident spec (17 Nov 2026):** engineers keep our own login unchanged; residents use Supabase Auth phone sign-in. Resident data is read with the resident's own Supabase session so row-level security applies.
+**Answered by the owner (17 Nov 2026):** the resident phone sign-in is a **front-end show only** for now: the locked number and code screens stay, but no Supabase Auth, no SMS provider and no real code check. "Log in" creates a resident session in our own login system, like engineers. Resident data goes only through our server, scoped to the session's resident; database row-level security stays on with no browser access. Real phone auth (Supabase Auth or Twilio) is on the Later list.
 
 ### Out (for a later version)
 
@@ -320,3 +320,4 @@ The current state, what is built, what is waiting on the owner, and how to resum
 - Real engineer accounts, verified by OEA membership number.
 - Assigning building reviews to engineers (the Order's role is now merged into engineers; assignment itself is still later).
 - On-site check: mark reports saved far from the building as "not filed on site."
+- Real resident phone verification (Supabase Auth phone codes or Twilio), replacing the front-end-only show.
