@@ -6,8 +6,10 @@ import { useEffect, useRef, useState } from "react";
 import type { Engineer } from "@/lib/account";
 import { approvedMessage, LOGIN_TEXT } from "@/lib/content";
 import { apiFetch, LOGGED_OUT_EVENT } from "@/lib/client-fetch";
+import { getCurrentLocation } from "@/lib/location";
 import { WELCOME_KEY } from "./auth/WaitingPanel";
-import MapView from "./MapView";
+import { LocateMenu } from "./LocateMenu";
+import MapView, { type MapViewHandle } from "./MapView";
 import { Button, IconButton } from "./ui/Button";
 import { Wordmark } from "./ui/Wordmark";
 import { springSnappy } from "@/lib/motion";
@@ -19,6 +21,7 @@ export default function RegistryApp() {
   const [welcome, setWelcome] = useState<string | null>(null);
   const [loggedOut, setLoggedOut] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
+  const mapRef = useRef<MapViewHandle>(null);
 
   useEffect(() => {
     apiFetch("/api/auth/me")
@@ -47,6 +50,11 @@ export default function RegistryApp() {
     return () => clearTimeout(t);
   }, [welcome]);
 
+  async function locate() {
+    const building = await getCurrentLocation();
+    if (building) mapRef.current?.showBuilding(building.id);
+  }
+
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
     router.replace("/login");
@@ -59,7 +67,11 @@ export default function RegistryApp() {
           <h1 className="shrink-0">
             <Wordmark size="small" />
           </h1>
-          <AccountMenu name={engineer?.fullName ?? null} onLogout={logout} />
+          {/* Positioned, so the Locate popover can hang from the right edge on phones. */}
+          <div className="relative ml-auto flex min-w-0 items-center gap-2">
+            <LocateMenu onLocate={locate} />
+            <AccountMenu name={engineer?.fullName ?? null} onLogout={logout} />
+          </div>
         </header>
 
         <main className="relative flex flex-1 flex-col overflow-hidden">
@@ -79,7 +91,7 @@ export default function RegistryApp() {
               </p>
             </div>
           )}
-          <MapView engineer={engineer} onDraftsChange={(n) => setHasDraft(n > 0)} />
+          <MapView ref={mapRef} engineer={engineer} onDraftsChange={(n) => setHasDraft(n > 0)} />
         </main>
 
         {loggedOut && (
@@ -115,7 +127,7 @@ function AccountMenu({ name, onLogout }: { name: string | null; onLogout: () => 
   }, [open]);
 
   return (
-    <div ref={ref} className="relative ml-auto flex min-w-0 justify-end">
+    <div ref={ref} className="relative flex min-w-0 justify-end">
       <motion.button
         type="button"
         aria-haspopup="menu"

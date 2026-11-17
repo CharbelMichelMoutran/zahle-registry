@@ -220,3 +220,10 @@ export const LOGIN_TEXT = {
 };
 
 export const approvedMessage = (name: string) => `Account approved. Welcome, ${name}.`;
+
+/** "Locate building" in the top bar (plan.md item 11, engineer version). */
+export const LOCATE = {
+  button: "Locate building",
+  typeAddress: "Type address",
+  currentLocation: "Use current location",
+} as const;
