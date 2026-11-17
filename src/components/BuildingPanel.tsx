@@ -1,14 +1,14 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DISCIPLINE_LABEL, DISCIPLINE_SHORT, SHOW_DISCIPLINE_IN_HISTORY, type Engineer } from "@/lib/account";
-import { NOT_INSPECTED } from "@/lib/content";
+import { NO_REMARKS, NOT_INSPECTED } from "@/lib/content";
 import { firstLine, formatDate } from "@/lib/format";
 import { fadeFast, springSnappy, springTray, staggerDelay } from "@/lib/motion";
 import type { ConstructionDateChange, Report, ReportInput } from "@/lib/report";
 import { ColourBadge, NotYetInspectedBadge } from "./report/ColourBadge";
-import ReportForm from "./report/ReportForm";
+import ReportForm, { INITIAL_SAVE_STATE, type SaveState } from "./report/ReportForm";
 import ReportView from "./report/ReportView";
 import { ArchHandle, ArchMark } from "./ui/Arch";
 import { Button, IconButton, Spinner } from "./ui/Button";
@@ -42,11 +42,25 @@ type Props = {
   onStale: () => Promise<void>;
 };
 
-/** Text of a report's final observation as shown beside its colour (rule 1). */
-const finalLine = (r: Report) =>
-  r.final_not_inspected_reason !== null
-    ? `${NOT_INSPECTED}: ${firstLine(r.final_not_inspected_reason)}`
-    : firstLine(r.final_observation ?? "");
+/** A report's final observation as shown beside its colour (rule 1): never blank. */
+function FinalLine({ report: r, className = "" }: { report: Report; className?: string }) {
+  if (r.final_not_inspected_reason !== null) {
+    const reason = firstLine(r.final_not_inspected_reason);
+    return (
+      <span dir="auto" className={`break-words text-ink ${className}`}>
+        {reason ? `${NOT_INSPECTED}: ${reason}` : NOT_INSPECTED}
+      </span>
+    );
+  }
+  const line = firstLine(r.final_observation ?? "");
+  return line ? (
+    <span dir="auto" className={`break-words text-ink ${className}`}>
+      {line}
+    </span>
+  ) : (
+    <span className={`text-muted ${className}`}>{NO_REMARKS}</span>
+  );
+}
 
 /**
  * The building tray (DESIGN.md section 7): springs up from the bottom (bottom-left
@@ -54,11 +68,22 @@ const finalLine = (r: Report) =>
  * with History and Create report tabs.
  */
 const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(props, ref) {
-  const { level, data, onClose, onMinimize } = props;
+  const { level, data, onClose, onMinimize, onOpenReport } = props;
   const full = level === "full";
+  const creating = full && props.tab === "create" && data.status === "ready" && !!props.draft;
+  const reading = full && props.tab === "history" && props.openReportId !== null;
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollPositions = useRef<Record<string, number>>({});
   const viewKey = `${props.buildingId}:${level}:${props.tab}:${props.openReportId ?? ""}`;
+  const formId = `report-form-${props.buildingId}`;
+  const [saveState, setSaveState] = useState<SaveState>(INITIAL_SAVE_STATE);
+  const onSaveState = useCallback(
+    (s: SaveState) =>
+      setSaveState((prev) =>
+        prev.disabled === s.disabled && prev.label === s.label && prev.error === s.error ? prev : s,
+      ),
+    [],
+  );
 
   // Keep each view's scroll position across tab switches and minimize/maximize.
   useLayoutEffect(() => {
@@ -69,69 +94,94 @@ const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(prop
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      if (full) onMinimize();
+      if (reading) onOpenReport(null);
+      else if (full) onMinimize();
       else onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [full, onClose, onMinimize]);
+  }, [full, reading, onClose, onMinimize, onOpenReport]);
 
   const reports = data.status === "ready" ? data.reports : [];
-  const [progress, setProgress] = useState(0);
-  const showProgress = full && props.tab === "create" && data.status === "ready" && !!props.draft;
+  const save = creating ? saveState : null;
 
   return (
     <motion.aside
       ref={ref}
       layout
       aria-label="Building"
-      initial={{ y: "110%" }}
-      animate={{ y: 0 }}
+      initial={{ y: "110%", borderRadius: 24 }}
+      animate={{ y: 0, borderRadius: full ? 0 : 24 }}
       exit={{ y: "110%", transition: { ...springTray, restDelta: 1 } }}
       transition={springTray}
-      style={{ borderRadius: 24 }}
       className={[
-        "absolute z-[1100] flex flex-col overflow-hidden border border-line bg-surface shadow-tray",
-        "inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] md:right-auto md:bottom-4 md:left-4 md:w-[440px]",
-        // Short screens (phone landscape): a narrower tray on the left, like desktop.
-        "[@media(max-height:500px)]:right-auto [@media(max-height:500px)]:w-[min(440px,62vw)]",
-        full ? "top-2 md:top-4" : "max-h-[70dvh] [@media(max-height:500px)]:max-h-[calc(100dvh-4.5rem)]",
+        "absolute z-[1100] flex flex-col overflow-hidden bg-surface",
+        full
+          ? // Maximized: the whole map area, edge to edge, on phone and desktop.
+            "inset-0"
+          : [
+              "border border-line shadow-tray",
+              "inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] max-h-[70dvh] md:right-auto md:bottom-4 md:left-4 md:w-[440px]",
+              // Short screens (phone landscape): a narrower tray on the left, like desktop.
+              "[@media(max-height:500px)]:right-auto [@media(max-height:500px)]:w-[min(440px,62vw)] [@media(max-height:500px)]:max-h-[calc(100dvh-4.5rem)]",
+            ].join(" "),
       ].join(" ")}
     >
-      <motion.div layout="position" className="flex shrink-0 justify-center pt-2" aria-hidden>
-        <ArchHandle />
-      </motion.div>
+      {full ? (
+        <motion.header layout="position" className="shrink-0 border-b border-line">
+          <div className="mx-auto grid h-14 w-full max-w-3xl grid-cols-[1fr_auto_1fr] items-center gap-1 px-2 sm:px-4">
+            <div className="flex justify-start">
+              {reading ? (
+                <IconButton label="Back to history" onClick={() => onOpenReport(null)}>
+                  <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                    <path d="M12 5l-5 5 5 5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </IconButton>
+              ) : (
+                <IconButton label="Minimize" onClick={onMinimize}>
+                  <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                    <path d="M5 8l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </IconButton>
+              )}
+            </div>
+            <Tabs {...props} count={data.status === "ready" ? reports.length : null} />
+            <div className="flex justify-end">
+              {save && (
+                // One Save at a time: here on wider screens, in the bottom bar on phones.
+                <Button type="submit" form={formId} disabled={save.disabled} className="hidden sm:inline-flex">
+                  {save.label}
+                </Button>
+              )}
+            </div>
+          </div>
+        </motion.header>
+      ) : (
+        <>
+          <motion.div layout="position" className="flex shrink-0 justify-center pt-2" aria-hidden>
+            <ArchHandle />
+          </motion.div>
+          <motion.header layout="position" className="flex shrink-0 items-center gap-1 px-4 pt-1">
+            <p className="micro-label flex-1 pl-1">Building</p>
+            <IconButton label="Maximize" onClick={() => props.onMaximize()}>
+              <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                <path d="M5 12l5-5 5 5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </IconButton>
+            <IconButton label="Close" onClick={onClose}>
+              <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                <path d="M5 5l10 10M15 5L5 15" strokeLinecap="round" />
+              </svg>
+            </IconButton>
+          </motion.header>
+        </>
+      )}
 
-      <motion.header layout="position" className="flex shrink-0 items-center gap-1 px-4 pt-1">
-        {full ? (
-          <Tabs {...props} count={data.status === "ready" ? reports.length : null} />
-        ) : (
-          <p className="micro-label flex-1 pl-1">Building</p>
-        )}
-        {full ? (
-          <IconButton label="Minimize" onClick={onMinimize}>
-            <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-              <path d="M5 8l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </IconButton>
-        ) : (
-          <IconButton label="Maximize" onClick={() => props.onMaximize()}>
-            <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-              <path d="M5 12l5-5 5 5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </IconButton>
-        )}
-        <IconButton label="Close" onClick={onClose}>
-          <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-            <path d="M5 5l10 10M15 5L5 15" strokeLinecap="round" />
-          </svg>
-        </IconButton>
-      </motion.header>
-      {/* Pinned under the tab bar; the form scrolls beneath it, never behind text. */}
-      {full && (
-        <div className="mx-4 h-0.5 shrink-0 overflow-hidden rounded-full bg-line" aria-hidden={!showProgress}>
-          {showProgress && <Progress value={progress} />}
-        </div>
+      {/* Pinned under the header, so it is seen wherever the engineer has scrolled. */}
+      {save?.error && (
+        <p role="alert" className="shrink-0 bg-attention-soft px-4 py-2.5 text-center text-micro text-attention">
+          {save.error}
+        </p>
       )}
 
       <div
@@ -140,8 +190,8 @@ const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(prop
           if (full) scrollPositions.current[viewKey] = e.currentTarget.scrollTop;
         }}
         className={[
-          "min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-3",
-          full && props.tab === "create" ? "scroll-pb-28" : "pb-5",
+          "min-h-0 flex-1 overflow-y-auto overscroll-contain",
+          full ? "px-4 pt-5 sm:px-6" : "px-5 pt-3 pb-5",
         ].join(" ")}
       >
         <AnimatePresence mode="wait" initial={false}>
@@ -151,6 +201,7 @@ const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(prop
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={fadeFast}
+            className={full ? "mx-auto w-full max-w-2xl" : undefined}
           >
             {data.status === "loading" && <Loading />}
             {data.status === "error" && (
@@ -163,21 +214,31 @@ const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(prop
             )}
             {data.status === "ready" &&
               (full ? (
-                <FullView {...props} data={data} onProgress={setProgress} />
+                <FullView {...props} data={data} formId={formId} onSaveState={onSaveState} />
               ) : (
                 <Preview {...props} reports={reports} />
               ))}
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {save && (
+        // Phones: Save within thumb reach. Wider screens use the header button.
+        <div className="shrink-0 border-t border-line bg-surface px-4 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] sm:hidden">
+          <Button type="submit" form={formId} disabled={save.disabled} className="w-full">
+            {save.label}
+          </Button>
+        </div>
+      )}
     </motion.aside>
   );
 });
 export default BuildingPanel;
 
+/** History | Create report, as a simple segmented control. The selected pill slides. */
 function Tabs({ tab, onTab, count }: Props & { count: number | null }) {
   return (
-    <div role="tablist" aria-label="Building record" className="flex flex-1 gap-1">
+    <div role="tablist" aria-label="Building record" className="flex rounded-full bg-surface-soft p-0.5">
       {(["history", "create"] as const).map((t) => (
         <button
           key={t}
@@ -185,7 +246,7 @@ function Tabs({ tab, onTab, count }: Props & { count: number | null }) {
           type="button"
           aria-selected={tab === t}
           onClick={() => onTab(t)}
-          className={`relative min-h-11 rounded-control px-3 text-body font-medium transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
+          className={`relative min-h-10 rounded-full px-3 text-body font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-accent sm:px-4 ${
             tab === t ? "text-ink" : "text-muted hover:text-ink"
           }`}
         >
@@ -193,16 +254,18 @@ function Tabs({ tab, onTab, count }: Props & { count: number | null }) {
             <motion.span
               layoutId="tray-tab-indicator"
               transition={springSnappy}
-              className="absolute inset-x-2 bottom-1 h-0.5 rounded-full bg-accent"
+              className="absolute inset-0 rounded-full border border-line bg-surface shadow-soft"
             />
           )}
-          {t === "history" ? (
-            <>
-              History{count !== null && <span className="tabular text-muted"> {count}</span>}
-            </>
-          ) : (
-            "Create report"
-          )}
+          <span className="relative">
+            {t === "history" ? (
+              <>
+                History{count !== null && <span className="tabular text-muted"> {count}</span>}
+              </>
+            ) : (
+              "Create report"
+            )}
+          </span>
         </button>
       ))}
     </div>
@@ -220,8 +283,8 @@ function Preview({ reports, onMaximize, celebrateKey }: Props & { reports: Repor
             Inspected <span className="tabular">{formatDate(latest.report_date)}</span>
           </h2>
           <ColourBadge colour={latest.colour} />
-          <p dir="auto" className="text-body break-words text-ink">
-            {finalLine(latest)}
+          <p className="text-body">
+            <FinalLine report={latest} />
           </p>
           <p className="text-micro text-muted">
             By <bdi dir="auto">{latest.engineer_name}</bdi>
@@ -274,7 +337,11 @@ function Celebration() {
 }
 
 function FullView(
-  props: Props & { data: Extract<BuildingData, { status: "ready" }>; onProgress: (v: number) => void },
+  props: Props & {
+    data: Extract<BuildingData, { status: "ready" }>;
+    formId: string;
+    onSaveState: (s: SaveState) => void;
+  },
 ) {
   const { data, tab, openReportId, onOpenReport, draft } = props;
   const opened = openReportId ? data.reports.find((r) => r.id === openReportId) : undefined;
@@ -283,6 +350,7 @@ function FullView(
     if (!draft) return <Loading />;
     return (
       <ReportForm
+        formId={props.formId}
         buildingId={props.buildingId}
         engineer={props.engineer}
         draft={draft}
@@ -290,20 +358,13 @@ function FullView(
         latest={data.reports[0] ?? null}
         onSaved={props.onSaved}
         onStale={props.onStale}
-        onProgress={props.onProgress}
+        onSaveState={props.onSaveState}
       />
     );
   }
 
   if (opened) {
-    return (
-      <div>
-        <Button variant="ghost" className="-ml-3 mb-2" onClick={() => onOpenReport(null)}>
-          <span aria-hidden>←</span> Back to history
-        </Button>
-        <ReportView report={opened} change={data.changes.find((c) => c.report_id === opened.id)} />
-      </div>
-    );
+    return <ReportView report={opened} change={data.changes.find((c) => c.report_id === opened.id)} />;
   }
 
   if (data.reports.length === 0) {
@@ -311,7 +372,6 @@ function FullView(
       <div className="flex flex-col items-center py-8 text-center">
         <ArchMark className="h-10 w-9 text-muted" />
         <p className="mt-3 font-serif text-title font-medium text-ink">No reports yet. Create the first one.</p>
-        <p className="mt-1 text-body text-muted">Past reports will be listed here, newest first.</p>
         <Button className="mt-5" onClick={() => props.onTab("create")}>
           Create report
         </Button>
@@ -320,8 +380,7 @@ function FullView(
   }
 
   return (
-    <div className="space-y-2">
-      <p className="micro-label">History</p>
+    <div className="pb-6">
       <ul className="overflow-hidden rounded-card border border-line">
         {data.reports.map((r, i) => (
           <motion.li
@@ -350,9 +409,7 @@ function FullView(
                 <span className="shrink-0">
                   <ColourBadge colour={r.colour} />
                 </span>
-                <span dir="auto" className="min-w-0 pt-0.5 text-body break-words text-ink">
-                  {finalLine(r)}
-                </span>
+                <FinalLine report={r} className="min-w-0 pt-0.5 text-body" />
               </div>
             </button>
           </motion.li>
@@ -389,19 +446,5 @@ function Loading() {
       <div className="motion-safe-only h-5 w-4/5 animate-pulse rounded-control bg-surface-soft" />
       <div className="motion-safe-only h-11 w-full animate-pulse rounded-control bg-surface-soft" />
     </div>
-  );
-}
-
-function Progress({ value }: { value: number }) {
-  return (
-    <div
-      role="progressbar"
-      aria-label="Report completion"
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={Math.round(value * 100)}
-      className="h-full origin-left bg-accent transition-transform duration-300 ease-out"
-      style={{ transform: `scaleX(${value})` }}
-    />
   );
 }
