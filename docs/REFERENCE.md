@@ -1,5 +1,7 @@
 # Project reference — Zahle Building Registry
 
+> **Update, 17 Nov 2026 (evening):** much was built after this file was written (map navigation, Locate building, the simpler full-screen report, resident login and map). `docs/STATUS.md` has the current state and wins where this file is older.
+
 **For any Claude that logs in to this project.** This is the long, complete picture: what the project is, who does what, what is built, what is left, how to operate everything, and the traps to avoid. It was written on 17 Nov 2026. `docs/STATUS.md` is the short "where are we right now" file and may be newer. `plan.md` is the source of truth for scope and rules. If this file and `plan.md` disagree, `plan.md` wins.
 
 ## 0. Read this first (five minutes)

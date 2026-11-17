@@ -1,98 +1,62 @@
 # Status and handoff — Zahle Building Registry
 
-Last updated: 16 Nov 2026, when the project owner paused for the day. Read this first when work resumes, then `plan.md` (the source of truth) and `DESIGN.md`.
+Last updated: 17 Nov 2026, when the owner took a break. Read this first, then `plan.md` (the source of truth) and `DESIGN.md`. `docs/REFERENCE.md` is the long reference; where it is older than this file, this file wins.
 
 ## Snapshot
 
-- **Live site:** https://zahle-registry.vercel.app (everything is behind login).
-- **Repo:** https://github.com/CharbelMichelMoutran/zahle-registry. **Private.** The owner wants it to stay private until fully ready.
-- **Git:** `main`, 42 commits, everything pushed. Last commit `21d106d` "Label ratings by meaning, not colour name". The working folder is clean.
-- **Agents running:** none. All were stopped or finished.
-- **Last deploy:** a production deploy about 4 minutes before the pause. It most likely includes the last commit, but **I did not confirm the new rating labels in the live app**. Check first thing.
+- **Live site:** https://zahle-registry.vercel.app (everything behind login). Last production deploy is commit `6be74a9`, confirmed Ready and aliased.
+- **Repo:** https://github.com/CharbelMichelMoutran/zahle-registry. **Private. Keep it private until the owner says.**
+- **Git:** `main`, everything committed and pushed. Working folder clean.
+- **Database:** all 8 migrations applied (last: `20261119000000_residents.sql`). Append-only triggers on reports and construction-date changes checked enabled after the 17 Nov migration.
+- **Data now:** 4 engineer accounts, 4 reports, 1 resident, 1 resident building (from the owner's own testing on 17 Nov; the reports are permanent unless the owner approves a cleanup).
+- **Agents running:** none.
 
-## What is built and live
+## How the owner wants to work (17 Nov 2026)
 
-| Area | State |
+- Replies in **concise Standard Technical English**.
+- **Only the coder runs.** No devil's-advocate or browser tests unless the owner asks.
+- The coder commits locally only; the orchestrator pushes, applies migrations and deploys **after the owner says so** ("push and deploy", "apply and deploy").
+- **Start Claude Code inside `~/zahle-registry`.** Otherwise the project agents in `.claude/agents/` do not load; the workaround used on 17 Nov was a general-purpose Opus agent briefed with the contents of `coder.md`.
+
+## Built on 17 Nov 2026 (live, built without browser tests; the owner tried the site and said it looks great)
+
+| Feature | What it does |
 |---|---|
-| Map | 4,595 Zahle buildings copied once from OpenStreetMap into our own database. Smoother pan and zoom (zoom stops where you let go, capped flick speed, min zoom 14, tap tolerance 6px). |
-| Building window | Click a building and a preview opens (latest report, or "Not yet inspected"). Maximize gives **History** and **Create report** tabs. Minimize returns. |
-| Reports | Date (day/month/year), residents, construction date (autofilled, editable, an edit needs a reason and keeps the old value), roof, columns, foundations, final observation (each with a "Not inspected" box with reason, except the final one), then the rating. Add-only: the database refuses edits and deletes (triggers). |
-| Map colour | Grey with a fine hatch until inspected. After a report, the building takes the latest report's colour. |
-| Accounts (simulated) | Sign-up with full name, contact, OEA number, discipline, username, password. No email. "Waiting for OEA approval." then Refresh approves automatically and goes into the map. Name, discipline, contact and OEA number are locked onto each report from the account, on the server. Passwords stored as salted hashes. All data routes need login. |
-| Design pass | Done from `DESIGN.md`: Zahle theme, stacked bilingual wordmark with زحلة, Source Serif display type, springy Motion tray, arch icons, hatch for unknowns, reduced-motion support, 375px phone layout. |
-| Ratings | Labelled by meaning ("Good condition", "Needs some work", "Imminent risk") with colour and arches beside them. Data values stay `green`, `yellow`, `red`. **The live site still draws the worst rating orange.** The owner decided on 16 Nov 2026 that it must be **red** (`#D6402B` to start, the coder checks it against amber and orange). Not built yet: it is the first step in the build order below. |
-| Server region | Pinned to Vercel's Portland region (`vercel.json`), next to the database (US West), so loading is about 450ms. |
+| Red worst rating | "Imminent risk" is roof-tile red `#D6402B`. |
+| Map navigation | Two-finger trackpad scroll pans smoothly and slowly and never zooms; pinch zooms around the cursor; + and − buttons (bottom-right desktop, top-right phone). Engine in `src/components/map-navigation.ts` uses private Leaflet methods (`_rawPanBy`, `_move`); a Leaflet upgrade could break it. Tuning constants at the top of that file. |
+| Locate building (engineer) | Top-bar button, popover: "Type address" (disabled, no explanation) and "Use current location". All location logic in `getCurrentLocation()` (`src/lib/location.ts`), which for now returns a random real Zahle building. Map spring-flies to it and opens its tray. |
+| Simpler full-screen report | Preview unchanged; maximize fills the whole map. One calm page: rating chips (only required field, any order), date (defaults to today), residents, built, four free-text areas with "Not inspected". No help text; one line "Used for triage after an earthquake." No minimum lengths (database relaxed by `20261118000100_report_freedom.sql`). |
+| Arch removed | The arch grab handle on the preview tray is gone. |
+| Resident login (front-end show) | Login asks Resident or Engineer. Resident: name, locked +1 555 010 0000, "Send code", locked 000000, "Log in". **No real phone check**: Log in creates a resident session in our own login system (`zr_resident` cookie, `resident_sessions` table). Everyone shares one resident. |
+| Resident map | Real browser location prompt. Allow: `getCurrentLocation()` picks the resident's building (saved add-only in `resident_buildings`; an existing building is kept) and the map flies to it. Deny: map with Locate building, no building; "Use current location" shows "Location is off. Turn it on in your browser settings to find your building." Other buildings are faint outlines, not clickable. Tray: "Your building", status chip or "Not yet inspected", **"Request inspection"**, which calls the empty `openInspectionChat()` in `src/lib/inspection-chat.ts`. |
 
-## Not built yet
+Resident privacy is enforced by our server (scoped to the session's resident) with database RLS on and no browser access, not by RLS policies per user. Real phone verification is on the Later list.
 
-- Ctrl+K / Cmd+K command bar and search by address, street or landmark.
-- Sample buildings with realistic history (plan item 6).
-- Photos in reports. Floors, structure type, seismic measures, units (all on the Later list).
-- AI document-to-form (plan item 5). Needs the Anthropic Console and key, which the owner deferred.
-- The polished README with screenshots, and making the repo public.
-- **The owner's 12 new features, now in scope** (`plan.md` section 7, items 11 to 22; full text and how each conflict was resolved in `docs/feature-backlog.md`): location suggestion; residents (phone verification, inspection requests, building log, own-building-only map with row-level security); Claude sorting and flagging submissions; engineer verdicts; the learning rulebook; the Lebanon context file; plain-language engineer map query; the Cmd+K command bar. **None is built.**
+## Next
 
-## Build order (the owner decides; step (a) is next; the owner said on 17 Nov 2026 that AI comes later, so steps c, e, f and g wait)
-
-(a) red for the worst rating, and the Cmd+K command bar; (b) location suggestion; (c) set up the Anthropic Console, then AI document-to-form and the context file; (d) unify login, then residents with phone codes, requests, log, and the own-building map; (e) Claude sorting and flagging with verdicts; (f) the rulebook and its reflection job; (g) engineer map query; (h) sample data, README, and the full test. The 30-hour estimate no longer holds. The order keeps a working demo at every step, so the owner can stop after any item.
-
-## How the work is divided
-
-The main session is the **orchestrator**: it talks to the owner, keeps `plan.md` current, writes the briefs, commits plan and docs, runs the loop, and reports honestly. It writes no app code.
-
-| Agent | Model | Job | Writes |
-|---|---|---|---|
-| `civil-engineer` | Sonnet | Engineering content: fields, rating wording (aligned with the US post-earthquake tags), the Lebanese codes (all still "not verified"), questions for the owner's OEA contact | Only `docs/engineering.md` |
-| `coder` | Opus | All app code, database migrations, deployment | App code |
-| `devils-advocate` | Session default | Tries to break features in a real browser; reports ranked problems; never fixes | Nothing |
-
-**Loop:** civil-engineer (if engineering content is needed) → coder → devils-advocate → coder fixes what matters → owner reviews. The owner makes every decision, and the orchestrator brings choices with a recommendation.
-
-Files that carry the work: `plan.md` (decisions, scope), `DESIGN.md` (look and motion), `docs/engineering.md` (Part A is the demo spec the coder builds from, Part B is Later), `docs/devils-advocate-checklist.md` (8 test sections), `docs/feature-backlog.md`, and this file.
-
-## Decisions the owner has made (all recorded in `plan.md`)
-
-- Engineers only. Nothing public. Everything behind login.
-- The "Demo — fictional data" label was removed. **No "demo" wording anywhere in the app** unless the owner asks.
-- Anthropic Console deferred. No AI features until it is set up.
-- Report format as above; colour is a required last field with no default; history rows show the date, name, discipline, colour word and the first line of the final observation.
-- Simulated accounts: no email, OEA number stored and shown on reports, no login attempt limit, discipline is trusted not checked, all signed-in engineers see each other's data (so a new engineer can call the previous one).
-- Rating colours: first option A (no red), then **reversed on 16 Nov 2026: the worst rating is red**. Labels by meaning (A1), no colour names. Orange is now free for Claude's flags.
-- **Scope widened (16 Nov 2026):** all 12 features from the owner's list are in. Conflicts were resolved in the owner's favour: two roles (engineer, resident), the Order merged into engineers, nothing public but residents see only their own building, the Anthropic Console is needed, one real SMS through Twilio to the owner's number, and "Demo location" and "Demo code" labels allowed because the owner asked for them.
-- Design references: Family (main), Raycast, and the Beirut Urban Lab family (Beirut Built Environment Database, Precarious Homes, the lab's home page). Zahle theme is a hard rule.
-- Repo stays private until the owner says.
-- Settings: auto-compact window set to 400,000 tokens in the owner's personal Claude settings.
+1. **The owner's next feature:** the Claude inspection chat behind "Request inspection" (`openInspectionChat()`). It needs the **Anthropic Console** (sign up, $50 credit, $50 hard limit, API key into Vercel and `.env.local`). Ask the owner for the spec first.
+2. Then, in the plan's order: the resident building log and requests (items 13, 14), Claude sorting and flagging (16 to 18), the rulebook (19), engineer map query (21), Cmd+K command bar (22), sample data, README, full test (h). The owner decides the order.
 
 ## Waiting on the owner
 
-1. **Connect Vercel to GitHub** (vercel.com/account → Connections → GitHub). Until then, deploys go by a workaround (deploying a clean copy of the committed files), because Vercel cannot match the commit email.
-2. **Arch icons:** keep "more filled = more concern" (green 1, amber 2, red 3)? The coder chose it. The orchestrator recommends keeping it.
-3. **Waiting-screen text:** the civil-engineer's true version ("Your account has been created. Press Refresh to check.") is in use. The coder's alternative claimed the OEA confirms membership, which the app does not do.
-4. **Send the OEA questions** (questions 1 to 15 at the end of `docs/engineering.md`) to the owner's senior OEA contact.
-5. **Set up the Anthropic Console** (sign up, add $50, set a $50 hard limit, create a key). The AI features cannot start without it. The owner signs in; Claude does the rest from the command line.
-6. **Set up Twilio** (free trial) for the one real SMS to the owner's US number. Only needed at step (d).
-7. **Approve the order of work** above, or change it.
-8. **Decide the login question** before step (d): engineer accounts use our own login, residents need Supabase Auth, and row-level security works best with one system. The coder proposes how to unify them without collecting emails, and what it costs.
-9. **Safety review:** the civil-engineer drafts the protected list and the context file; the owner's OEA contact should read them before the AI goes live.
+1. Anthropic Console setup (for the chat and every AI feature).
+2. Connect Vercel to GitHub (vercel.com/account → Connections → GitHub). Until then deploys use the workaround: `git archive HEAD` into a scratchpad folder, copy `.vercel/`, `vercel deploy --prod --yes`.
+3. Send questions 1 to 15 at the end of `docs/engineering.md` to the OEA contact.
+4. Optional: rename the Supabase project to `zahle-registry` (dashboard only). Delete the unused `SUPABASE_PUBLISHABLE_KEY` line from `.env.local`.
+5. Optional: a cleanup of the 17 Nov test reports and accounts before real use (needs the append-only triggers switched off and on in one transaction, owner approval required).
 
-## Data and accounts
+## Known gaps and risks
 
-- The database was cleaned on 16 Nov 2026 after testing. Reports: 0. Construction-date changes: 0. Sessions and rate-limit counters cleared. **One account remains: the owner's "Charbel".** All test accounts were deleted. The password is the owner's own and is not recorded anywhere.
-- The cleanup was a one-off owner action: append-only triggers were switched off, rows deleted, triggers switched back on in one transaction, and checked afterwards (all four are enabled). The app itself can never delete reports.
-- Sign-up limit: 5 accounts per hour per visitor, 500 per day for everyone. Report saves: 10 per hour per engineer, 300 per day overall.
-- Secrets live only in Vercel settings and `.env.local` (git-ignored). The Supabase project is named "CharbelMichelMoutran's Project" (the owner wanted it renamed `zahle-registry`; the CLI cannot rename it, so it is a 10-second dashboard change). Region: US West.
-
-## Testing so far, and what is not yet verified
-
-- **Short devil's-advocate test (about 17 steps, no Critical or High findings):** signed-out and pending accounts are refused everywhere, a forged report author is ignored, edits and deletes are refused, bad or reused cookies are refused, oversized bodies are refused. Findings: anyone can approve themselves (intended, and means rule 2 is not enforced in this version), reports can be backdated, and every engineer sees every contact (intended).
-- **Not done:** the full 8-section test (stopped by the owner), the formal ui-design-review and ux-audit skill runs (the orchestrator only reviewed some screenshots by eye), a real-device check on iOS Safari, landscape phones, two tabs saving at once, and Arabic right-to-left rendering checked visually by a tester.
-- **Known:** map tiles are filtered OpenStreetMap (the light CARTO tiles need a paid key). Church-cross and hospital icons show faintly.
-- **Playwright MCP:** it was changed to use bundled Chromium in `.mcp.json`, but the running session never reloaded it. A scripted browser is installed in the session scratchpad. In a new session the MCP should start normally; if it does not, say so.
+- **Nothing built on 17 Nov was tested by an agent in a browser.** A devil's-advocate pass is owed when the owner allows it: trackpad pan and pinch in Chrome, Safari and Firefox; mouse wheel; zoom buttons on phones; the full-screen report on a 375px phone; resident cannot reach engineer data; Arabic text.
+- Plan rule 1: the resident tray shows the rating word and arches without remarks (owner accepted).
+- Shared demo resident: the first visitor who allows location picks the building for everyone; the name shown is the last one typed.
+- If a resident denies location, no building is shown even if one is saved (owner accepted).
+- The 000000 code is one locked field, not six boxes as `DESIGN.md` describes.
+- A plain mouse wheel pans instead of zooming; ctrl+wheel page zoom is blocked on the map screen.
+- Earlier known items still stand: anyone can self-approve as an engineer; reports can be backdated; canvas buildings are not keyboard-selectable; filtered OSM tiles.
 
 ## How to resume
 
-1. Read this file, `plan.md`, `DESIGN.md`.
-2. Open the live site and confirm the three rating labels read "Good condition", "Needs some work", "Imminent risk". If they still say Green / Yellow / Red, ask the coder to deploy commit `21d106d`.
-3. Ask the owner the questions under "Waiting on the owner".
-4. Then, in this order: a focused devil's-advocate test, the formal UI review, then the next feature group the owner picks.
-5. Keep the repo private. Keep "no demo wording". Keep adding features to the checklist as they are built.
+1. `cd ~/zahle-registry`, start Claude Code there.
+2. Read this file, `plan.md`, `DESIGN.md`. Check `git status`, `git log --oneline | head`, and `supabase migration list --remote`.
+3. Ask the owner for the next feature's spec and whether the Anthropic Console is ready.
