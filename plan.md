@@ -100,7 +100,7 @@ Hiding dangerous buildings is **not** the answer. Silence is what lets them coll
 
 ### Rules every agent must follow
 
-1. **A colour never stands alone.** Every inspection shows the engineer's remarks next to its colour.
+1. **A colour never stands alone.** Every inspection shows its word and the engineer's remarks next to its colour. If the engineer wrote no remarks, the report says "No remarks". (Owner, 17 Nov 2026: remarks are optional.)
 2. **Nothing is public, and each role sees only what it should.** Signed out, nothing about any building is reachable. Engineers see every building and report. **A resident sees only their own building.** This is enforced in the database with row-level security, not only in the screens. (Rule changed by the owner, 16 Nov 2026; before, it read "only engineers see reports".)
 3. **Mark unknowns as "Not yet verified,"** never as findings.
 4. **The record is separate from enforcement.** The registry records facts. Fines and evacuations stay with the authorities. The app is not the punisher.
@@ -119,7 +119,7 @@ The engineer picks one colour per report:
 | Yellow | Needs some work |
 | Red | Imminent risk |
 
-The form must make clear to the engineer that **after an earthquake these colours are used for triage, so choose carefully.**
+The form must make clear to the engineer that **after an earthquake these colours are used for triage, so choose carefully.** (Owner, 17 Nov 2026: one short line by the rating, no longer text.)
 
 **On screen the worst rating is red** (owner, 16 Nov 2026, reversing the earlier "no red" decision), so engineers read the colours the way they already know them. Orange is kept free for Claude's flags (section 7, item 17).
 
@@ -185,6 +185,7 @@ The project owner chose to leave adoption out of this project. **Later test:** o
    - **Window behaviour (owner, 16 Nov 2026):** clicking a building opens a small **preview** (latest report summary: date, colour word, first line of final observation, or "Not yet inspected"). A **maximize** button expands it to a full view with two tabs, **History** and **Create report**; **minimize** returns to the preview.
    - **Map colour:** a building with no report is **grey** (not yet inspected). After a report is submitted, the building takes the colour of its **latest** report. The colour always appears with its word and remarks in the panel (rule 1), never as colour alone.
    - **Map navigation:** smooth panning and comfortable zoom, without being imprecise or shifty.
+   - **Report redesign (owner, 17 Nov 2026), overriding the points above where they differ.** First rule: **the report gives the engineer maximum freedom.** The app never tells the engineer what to write and never forces an order. (1) The preview stays as it is; **maximize fills the whole map** (full screen). (2) **Only the rating is required to save.** The date defaults to today. Residents, construction date, all four observations, "Not inspected" reasons and the construction-date change reason are optional, with no minimum length. The rating can be chosen at any time, in any order. (3) **One calm page:** short labels, no help text, examples, "look at" lists or prompts; only one line by the rating, "Used for triage after an earthquake." Rating as three big chips near the top. One "Save report" button. Every existing feature stays (locked author, autofilled construction date that keeps the old value, "Not inspected" per area, add-only). The "draft template" banner is removed. Like an iPhone: few buttons, little text.
    - Floors, structure type, seismic measures, and units are **not** in the demo report. Photos are not in the demo report. Both go on the Later list.
 5. AI document-to-form: one uploaded image, AI fills the building facts, engineer confirms. **Built right after the form, not last.** It is what sets the project apart and the main reason engineers would want to use it. Tested on the real document in week 1 (a quick check, no UI).
 6. Sample data with history: several buildings with past inspections and scanned documents, so the demo shows the record paying off
