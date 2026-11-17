@@ -1,5 +1,6 @@
 import L from "leaflet";
-import { mapGlide } from "@/lib/motion";
+import { animate, type AnimationPlaybackControls } from "motion";
+import { mapGlide, springGentle } from "@/lib/motion";
 
 /*
  * Trackpad and wheel navigation for the Leaflet map (plan.md item 22).
@@ -7,6 +8,7 @@ import { mapGlide } from "@/lib/motion";
  *   - Pinch zooms around the cursor: `wheel` + ctrlKey in Chrome, Firefox and Edge,
  *     `gesture*` events in Safari. The page itself never zooms over the map screen.
  *   - The + / − buttons step one whole level through the same easing.
+ *   - `flyTo` springs the map to a place (spring-gentle); any new input takes over from it.
  * Reduced motion: the same input is applied in one frame, still clamped.
  */
 
@@ -31,7 +33,7 @@ const REDRAW_SHARE = 0.2;
 type MapInternals = L.Map & {
   _stop(): L.Map;
   _rawPanBy(offset: L.Point): void;
-  _move(center: L.LatLng, zoom: number, data?: { pinch?: boolean }): L.Map;
+  _move(center: L.LatLng, zoom: number, data?: { pinch?: boolean; flyTo?: boolean }): L.Map;
   _moveStart(zoomChanged: boolean, noMoveStart: boolean): L.Map;
   _moveEnd(zoomChanged: boolean): L.Map;
   _limitOffset(offset: L.Point, bounds: L.LatLngBounds): L.Point;
@@ -44,6 +46,10 @@ type SafariGestureEvent = UIEvent & { scale: number; clientX: number; clientY: n
 export type MapNavigation = {
   /** One whole zoom level in or out, around the centre of the map. */
   zoomStep(direction: 1 | -1): void;
+  /** Spring the map to `center` at `zoom` (an instant jump under reduced motion). */
+  flyTo(center: L.LatLng, zoom: number): void;
+  /** Drop any eased pan or zoom still running, so another move can take over. */
+  stop(): void;
   destroy(): void;
 };
 
@@ -62,11 +68,13 @@ export function attachMapNavigation(leafletMap: L.Map, bounds: L.LatLngBounds): 
   let frame = 0;
   let lastTime = 0;
   let gestureStartZoom: number | null = null; // Safari pinch in progress
+  let flight: AnimationPlaybackControls | null = null;
 
   const clampZoom = (z: number) => Math.min(map.getMaxZoom(), Math.max(map.getMinZoom(), z));
   const overMap = (e: Event) => e.target instanceof Node && container.contains(e.target);
 
   function schedule() {
+    endFlight(); // the user's own scroll, pinch or + / − wins over a fly-to
     if (!frame) frame = requestAnimationFrame(tick);
   }
 
@@ -161,6 +169,40 @@ export function attachMapNavigation(leafletMap: L.Map, bounds: L.LatLngBounds): 
     }
   }
 
+  function endFlight() {
+    if (!flight) return;
+    flight.stop();
+    flight = null;
+    map._moveEnd(true);
+  }
+
+  function flyTo(target: L.LatLng, targetZoom: number) {
+    stop();
+    endFlight();
+    const zoom = clampZoom(targetZoom);
+    const center = map._limitCenter(target, zoom, bounds);
+    if (reducedMotion.matches) {
+      map.setView(center, zoom, { animate: false });
+      return;
+    }
+    map._stop();
+    // Centre glides in pixels at the starting zoom while the zoom springs alongside,
+    // the same frame-by-frame `_move` Leaflet's own flyTo uses.
+    const z0 = map.getZoom();
+    const from = map.project(map.getCenter(), z0);
+    const delta = map.project(center, z0).subtract(from);
+    map._moveStart(true, false);
+    flight = animate(0, 1, {
+      ...springGentle,
+      onUpdate: (v) => map._move(map.unproject(from.add(delta.multiplyBy(v)), z0), z0 + (zoom - z0) * v, { flyTo: true }),
+      onComplete: () => {
+        flight = null;
+        map._move(center, zoom, { flyTo: true });
+        map._moveEnd(true);
+      },
+    });
+  }
+
   function zoomTo(target: number, point: L.Point) {
     zoomTarget = clampZoom(target);
     anchor = point;
@@ -209,8 +251,8 @@ export function attachMapNavigation(leafletMap: L.Map, bounds: L.LatLngBounds): 
     gestureStartZoom = null;
   }
 
-  // A drag takes over: let go of any eased motion so the two never fight.
-  function onDragStart() {
+  // A drag or a fly-to takes over: let go of any eased motion so the two never fight.
+  function stop() {
     pendingX = pendingY = 0;
     zoomTarget = null;
     cancelAnimationFrame(frame);
@@ -224,7 +266,11 @@ export function attachMapNavigation(leafletMap: L.Map, bounds: L.LatLngBounds): 
   document.addEventListener("gesturestart", onGestureStart, capture);
   document.addEventListener("gesturechange", onGestureChange, capture);
   document.addEventListener("gestureend", onGestureEnd, capture);
-  map.on("dragstart", onDragStart);
+  const onDrag = () => {
+    stop();
+    endFlight();
+  };
+  map.on("dragstart", onDrag);
 
   return {
     zoomStep(direction) {
@@ -233,13 +279,16 @@ export function attachMapNavigation(leafletMap: L.Map, bounds: L.LatLngBounds): 
       const to = direction > 0 ? Math.floor(from + 0.01) + 1 : Math.ceil(from - 0.01) - 1;
       zoomTo(to, map.getSize().divideBy(2));
     },
+    flyTo,
+    stop,
     destroy() {
       cancelAnimationFrame(frame);
+      flight?.stop();
       document.removeEventListener("wheel", onWheel, capture);
       document.removeEventListener("gesturestart", onGestureStart, capture);
       document.removeEventListener("gesturechange", onGestureChange, capture);
       document.removeEventListener("gestureend", onGestureEnd, capture);
-      map.off("dragstart", onDragStart);
+      map.off("dragstart", onDrag);
     },
   };
 }
