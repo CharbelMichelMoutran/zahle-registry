@@ -35,7 +35,7 @@ function deferred() {
  * The signed-in resident (plan.md items 12 and 15): a quiet map where only their
  * own building has colour. After login the browser asks for location; if allowed,
  * their building is found (or the saved one is used), the map flies to it, and
- * its tray opens. If not, the map waits with "Locate building".
+ * its tray opens. If not, the map waits with "Go to building".
  */
 export default function ResidentApp() {
   const [name, setName] = useState<string | null>(null);

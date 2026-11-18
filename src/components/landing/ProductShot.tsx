@@ -45,12 +45,8 @@ function MapWindow() {
     >
       <div className="flex h-12 items-center gap-3 border-b border-line bg-surface px-4">
         <Logo cut="small" className="h-7" title={null} />
-        <span className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-control border border-line px-2.5 text-micro font-medium text-ink">
-          <svg viewBox="0 0 20 20" className="h-4 w-4 text-muted" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-            <circle cx="10" cy="10" r="5.5" />
-            <path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3" strokeLinecap="round" />
-          </svg>
-          Locate building
+        <span className="ml-auto inline-flex h-8 items-center rounded-control border border-line px-2.5 text-micro font-medium text-ink">
+          Go to building
         </span>
         <span className="h-8 w-8 rounded-full border border-line bg-surface-soft" />
       </div>

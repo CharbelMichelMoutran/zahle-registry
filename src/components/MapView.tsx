@@ -173,7 +173,7 @@ export default function MapView({
     if (reportId) push({ ...navRef.current, openReportId: reportId, depth: 3 });
     else goTo(2, { ...navRef.current, openReportId: null });
   };
-  // "Locate building": once the tray shows this building's preview, the map flies to it.
+  // "Go to building": once the tray shows this building's preview, the map flies to it.
   const [locate, setLocate] = useState<{ id: string; key: number } | null>(null);
   useImperativeHandle(
     ref,

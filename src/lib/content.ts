@@ -140,14 +140,14 @@ export const LOGIN_TEXT = {
 
 export const approvedMessage = (name: string) => `Account approved. Welcome, ${name}.`;
 
-/** "Locate building" in the top bar (plan.md item 11, engineer version). */
 /** The small map key in the corner of the engineer map (DESIGN.md 14.10). */
 export const MAP_KEY = {
   title: "Map key",
 };
 
+/** "Go to building" in the top bar (plan.md item 11, engineer version). Text only, no icon (DESIGN.md 15.2). */
 export const LOCATE = {
-  button: "Locate building",
+  button: "Go to building",
   typeAddress: "Type address",
   currentLocation: "Use current location",
 } as const;
@@ -193,7 +193,7 @@ export const RESIDENT_TRAY = {
   requestInspection: "Request inspection",
 } as const;
 
-/** Shown in the Locate menu when the browser will not share location. */
+/** Shown in the "Go to building" menu when the browser will not share location. */
 export const LOCATION_OFF = "Location is off. Turn it on in your browser settings to find your building.";
 
 // ---------------------------------------------------------------------------

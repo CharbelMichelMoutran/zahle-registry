@@ -1,5 +1,5 @@
 /**
- * "Locate building" (plan.md item 11, engineer version). All location logic lives in
+ * "Go to building" (plan.md item 11, engineer version). All location logic lives in
  * `getCurrentLocation()`: the rest of the app only calls it, so real GPS (nearest
  * building) and address search can replace its body later with no other changes.
  */

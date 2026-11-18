@@ -39,7 +39,7 @@ function saveOpen(open: boolean) {
  * The map key (DESIGN.md 14.10): the three ratings with their words, and the
  * hatch for "Not yet inspected". Top-left of the map: clear of the zoom buttons
  * (bottom-right on laptops, top-right on phones), the attribution (bottom-right),
- * the tray (bottom), and the Locate menu (in the top bar). Folds to one button.
+ * the tray (bottom), and the "Go to building" menu (in the top bar). Folds to one button.
  * Claude's orange ring joins the key only once flags exist.
  * Rendered only in the browser (BuildingMap loads with ssr: false), so reading storage here is safe.
  */

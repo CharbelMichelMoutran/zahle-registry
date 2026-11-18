@@ -65,7 +65,7 @@ export default function RegistryApp() {
           <h1 className="shrink-0">
             <Logo cut="small" className="h-8" />
           </h1>
-          {/* Positioned, so the Locate popover can hang from the right edge on phones. */}
+          {/* Positioned, so the "Go to building" popover can hang from the right edge on phones. */}
           <div className="relative ml-auto flex min-w-0 items-center gap-2">
             <LocateMenu onLocate={locate} />
             <AccountMenu name={engineer?.fullName ?? null} onLogout={logout} />

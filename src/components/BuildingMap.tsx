@@ -20,7 +20,7 @@ const ZAHLE_CENTER: L.LatLngTuple = [33.8467, 35.9025];
 const OPEN_ZOOM = 16;
 const MIN_ZOOM = 14;
 const MAX_ZOOM = 19;
-/** "Locate building" zooms in at least this far, close enough to read one house. */
+/** "Go to building" zooms in at least this far, close enough to read one house. */
 const LOCATE_ZOOM = 17.5;
 /** The imported area plus a margin, so the map cannot be dragged away from Zahle. */
 const ZAHLE_BOUNDS = L.latLngBounds([33.82, 35.86], [33.875, 35.945]);
@@ -68,7 +68,7 @@ type Props = {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onEmptyClick: () => void;
-  /** Fly to this building and centre it beside the tray ("Locate building"). A new `key` flies again. */
+  /** Fly to this building and centre it beside the tray ("Go to building"). A new `key` flies again. */
   focus: { id: string; key: number } | null;
   /** The area the tray covers, in map pixels, so a selected building is not hidden behind it. */
   coveredRect: () => { left: number; top: number; right: number; bottom: number } | null;
@@ -79,7 +79,7 @@ type Props = {
    * and can be tapped; every other one is a faint outline. Undefined: engineer map.
    */
   residentOwnId?: string | null;
-  /** Called once the outlines are on the map (so "Locate building" can pick one). */
+  /** Called once the outlines are on the map (so "Go to building" can pick one). */
   onReady?: () => void;
 };
 
@@ -351,7 +351,7 @@ export default function BuildingMap({
   }, [residentOwnId]);
 
   // Outline the selected building; pan only if it would sit behind the panel.
-  // A "Locate building" request flies to it instead, wherever it is.
+  // A "Go to building" request flies to it instead, wherever it is.
   useEffect(() => {
     const previous = selectedRef.current;
     selectedRef.current = selectedId;

@@ -9,8 +9,9 @@ const ROW =
   "flex min-h-11 w-full items-center gap-3 rounded-control px-3 text-left text-body focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent";
 
 /**
- * "Locate building" in the top bar: a small popover with "Type address" (not yet
- * available, so inert) and "Use current location". Icon-only below md.
+ * "Go to building" in the top bar: a small popover with "Type address" (not yet
+ * available, so inert) and "Use current location". Text only at every width, no
+ * icon (DESIGN.md 15.2: a crosshair reads as a gun sight).
  * On phones the popover hangs from the right edge of the top bar (the nearest
  * positioned parent), so it never runs off the left of a 375px screen.
  *
@@ -75,7 +76,6 @@ export function LocateMenu({
       <motion.button
         ref={buttonRef}
         type="button"
-        aria-label={LOCATE.button}
         aria-haspopup="menu"
         aria-expanded={open}
         whileTap={{ scale: 0.97 }}
@@ -91,12 +91,9 @@ export function LocateMenu({
             setOpen(true);
           }
         }}
-        className="relative flex h-10 min-w-10 items-center justify-center gap-2 rounded-control md:px-3 after:-inset-x-0.5 border border-line-strong bg-surface text-body font-medium text-ink shadow-[0_1px_2px_rgb(31_42_55/0.05)] transition-[background-color,border-color] duration-150 ease-out hover:border-[#bcc3cb] hover:bg-surface-soft after:absolute after:-inset-y-0.5 after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className="relative flex h-10 items-center justify-center rounded-control px-3 whitespace-nowrap after:-inset-x-0.5 border border-line-strong bg-surface text-body font-medium text-ink shadow-[0_1px_2px_rgb(31_42_55/0.05)] transition-[background-color,border-color] duration-150 ease-out hover:border-[#bcc3cb] hover:bg-surface-soft after:absolute after:-inset-y-0.5 after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
-        <LocateIcon className="h-5 w-5 shrink-0 text-muted" />
-        <span aria-hidden className="hidden whitespace-nowrap md:inline">
-          {LOCATE.button}
-        </span>
+        {LOCATE.button}
       </motion.button>
       <AnimatePresence>
         {open && (
@@ -151,16 +148,5 @@ export function LocateMenu({
         )}
       </AnimatePresence>
     </div>
-  );
-}
-
-/** A crosshair: the usual "find where I am" mark. */
-function LocateIcon({ className }: { className: string }) {
-  return (
-    <svg viewBox="0 0 20 20" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-      <circle cx="10" cy="10" r="5.5" />
-      <circle cx="10" cy="10" r="1.5" fill="currentColor" stroke="none" />
-      <path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3" strokeLinecap="round" />
-    </svg>
   );
 }
