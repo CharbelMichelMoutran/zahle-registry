@@ -1,33 +1,34 @@
-import { useId } from "react";
-import { LOGO_ARABIC, LOGO_BLUE, LOGO_CUTS } from "./logo-data";
+import { LOGO_CUTS, LOGO_RECORD } from "./logo-data";
 
 export type LogoCut = keyof typeof LOGO_CUTS;
 
 /**
- * "Zahle on Record" (DESIGN.md section 15). Arabic زحلة flows into the English
- * "on record": the line leaves the lower stroke of the ح, runs through the tail
- * of ز, turns from ink to river blue, and becomes the line "on record" sits on.
+ * "Zahle on Record" (DESIGN.md section 15.2). The word "Record" in IBM Plex
+ * Serif is the solid mark; behind it, larger, the Arabic زحلة in river blue at
+ * low opacity, its tall strokes above the English and the ز tail sweeping under.
+ *
+ * Cuts: `large` (landing, sign-in), `small` (top bar, reads at about 30 px
+ * tall), `footer` (the landing footer, where the Arabic waits fainter until the
+ * ribbon ties back into the ز; see Ribbon.tsx).
  *
  * Outlined letters (scripts/render-logo.ts), so the Arabic joins correctly and
- * the logo looks the same everywhere. The visible name for assistive tech is
+ * the logo looks the same everywhere. The name for assistive tech is
  * "Zahle on Record". Height is set by the caller (className), width follows.
  *
- * `lineClassName` styles the line alone: the landing footer hides it until the
- * ribbon arrives and becomes the line (Ribbon.tsx).
+ * `arabicClassName` styles the Arabic layer alone.
  */
 export function Logo({
   cut = "large",
   className = "",
-  lineClassName = "",
+  arabicClassName = "",
   title = "Zahle on Record",
 }: {
   cut?: LogoCut;
   className?: string;
-  lineClassName?: string;
+  arabicClassName?: string;
   title?: string | null;
 }) {
   const c = LOGO_CUTS[cut];
-  const gradient = `logo-line-${useId().replace(/:/g, "")}`;
   return (
     <svg
       viewBox={c.viewBox.join(" ")}
@@ -38,15 +39,14 @@ export function Logo({
       focusable="false"
       data-logo-cut={cut}
     >
-      <defs>
-        <linearGradient id={gradient} gradientUnits="userSpaceOnUse" x1={LOGO_BLUE.from} x2={LOGO_BLUE.to} y1="0" y2="0">
-          <stop offset="0" stopColor="var(--color-ink)" />
-          <stop offset="1" stopColor="var(--color-accent)" />
-        </linearGradient>
-      </defs>
-      <path d={c.line} fill={`url(#${gradient})`} className={lineClassName} data-logo-line />
-      <path d={LOGO_ARABIC} fill="var(--color-ink)" />
-      <path d={c.en} transform={`translate(${c.enX} ${c.enY})`} fill="var(--color-ink)" />
+      <path
+        d={c.arabic}
+        fill="var(--color-accent)"
+        fillOpacity={c.opacity}
+        className={arabicClassName}
+        data-logo-arabic
+      />
+      <path d={LOGO_RECORD} fill="var(--color-ink)" />
     </svg>
   );
 }
