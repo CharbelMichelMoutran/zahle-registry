@@ -3,17 +3,18 @@
 import { animate, motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { LANDING } from "@/lib/content";
-import { LOGO_BLUE, LOGO_CUTS } from "../ui/logo-data";
+import { LOGO_CUTS } from "../ui/logo-data";
 
 /**
  * The river-blue ribbon on the landing page (DESIGN.md section 15).
  *
- * It grows out of the end of the logo's line, top left, and runs down the text
- * column: beside the text, never over it, swinging into the open space between
- * blocks and passing behind the product pictures. It draws as the visitor
- * scrolls and never undraws (the record is kept). At the bottom it ties into the
- * footer logo and becomes the logo's line, with Zahle's altitude and coordinates
- * written along it.
+ * It grows out of the tip of the ز tail in the logo, top left (the Arabic زحلة
+ * behind "Record"), and runs down the text column: beside the text, never over
+ * it, swinging into the open space between blocks and passing behind the
+ * product pictures. It draws as the visitor scrolls and never undraws (the
+ * record is kept). At the bottom it sweeps under the footer logo, with Zahle's
+ * altitude and coordinates written along that stretch, loops back and returns
+ * into the tip of the footer logo's ز, whose Arabic then comes up to full tone.
  *
  * The route is measured from the page (data-ribbon marks in Landing.tsx), so it
  * follows the real layout at every width. Under reduced motion it is shown
@@ -29,24 +30,26 @@ type Geometry = {
   /** The stretch the coordinates are written along, left to right. */
   words: string;
   samples: { len: number; y: number }[];
-  /** Ink at the ز, river blue a little way out: the ribbon starts as part of the letter. */
+  /** The Arabic's own pale blue at the ز, full river blue a little way out: the ribbon starts as part of the letter. */
   shade: { x1: number; y1: number; x2: number; y2: number };
 };
 
 const LARGE = LOGO_CUTS.large;
-const [VX, VY, , VH] = LARGE.viewBox;
+const FOOTER = LOGO_CUTS.footer;
 /**
- * The tip of the ز's tail and the way it points (down and to the left), in logo
- * units, measured from the Markazi outline. The ribbon leaves the logo here, as
- * a hairline from the end of the stroke, the way a pen lifts off a Naskh tail.
+ * The tip of the ز's tail (from render-logo.ts) and the way it points: left and
+ * very slightly down, as the Naskh tail thins out. The ribbon leaves the logo
+ * here, as a hairline from the end of the stroke, the way a pen lifts off.
  */
-const ZAY_TAIL = { x: 243.4, y: 38.6, dx: -0.85, dy: 0.53 };
+const TAIL_DIR = { dx: -1, dy: 0.12 };
+const STROKE = 1.75;
 
 /** A point given in logo drawing units, placed on the page via the logo's own box. */
-function logoPoint(svg: Element, origin: DOMRect, x: number, y: number) {
+function logoPoint(svg: Element, origin: DOMRect, cut: { viewBox: readonly number[] }, x: number, y: number) {
+  const [vx, vy, , vh] = cut.viewBox;
   const r = svg.getBoundingClientRect();
-  const s = r.height / VH;
-  return { x: r.left - origin.left + (x - VX) * s, y: r.top - origin.top + (y - VY) * s, s };
+  const s = r.height / vh;
+  return { x: r.left - origin.left + (x - vx) * s, y: r.top - origin.top + (y - vy) * s, s };
 }
 
 /** The box around an element's content (its children), so padding does not count as text. */
@@ -85,8 +88,8 @@ function measure(root: HTMLElement): Geometry | null {
   const aboutBody = box(q("about-body")[0], o);
   if (!headSvg || !footSvg || !heroText || !showText || !cards || !aboutTitle || !aboutBody) return null;
 
-  const start = logoPoint(headSvg, o, ZAY_TAIL.x, ZAY_TAIL.y);
-  const stroke = Math.max(1.75, LARGE.thickness * start.s);
+  const start = logoPoint(headSvg, o, LARGE, LARGE.tail.x, LARGE.tail.y);
+  const stroke = STROKE;
   const left = heroText.left;
   // The lane beside the text: halfway into the margin, at most 44px from the text.
   const lane = Math.max(stroke + 3, left - Math.min(44, left / 2));
@@ -99,9 +102,9 @@ function measure(root: HTMLElement): Geometry | null {
   const top = heroText.top - 8;
   // It settles into the lane before the text starts, in one even curve.
   const drop = top - start.y;
-  const k = Math.min(56, drop * 0.25);
+  const k = Math.min(Math.max(24, (start.x - lane) * 0.6), drop * 0.6);
   let d = `M${f(start.x)} ${f(start.y)} `;
-  d += `C${f(start.x + ZAY_TAIL.dx * k)} ${f(start.y + ZAY_TAIL.dy * k)} ${f(lane)} ${f(top - drop * 0.5)} ${f(lane)} ${f(top)} `;
+  d += `C${f(start.x + TAIL_DIR.dx * k)} ${f(start.y + TAIL_DIR.dy * k)} ${f(lane)} ${f(top - drop * 0.5)} ${f(lane)} ${f(top)} `;
   d += `L${f(lane)} ${f(heroText.bottom)} `;
   // Between the hero and "The record": out into the open column and back.
   const gapTop = heroText.bottom;
@@ -117,26 +120,31 @@ function measure(root: HTMLElement): Geometry | null {
   const footTop = Math.max(aboutTitle.bottom, aboutBody.bottom) + 24;
   d += `L${f(lane2)} ${f(footTop)} `;
 
-  // The tie. Down beside the footer logo, a sweep under it (the coordinates ride on
-  // this stretch), a loop at the far end, and back in along the logo's baseline.
-  const r = logoPoint(footSvg, o, LARGE.end.x, LARGE.end.y);
-  const blue = logoPoint(footSvg, o, LOGO_BLUE.to, LARGE.end.y);
-  const base = r.y + 44 * (r.s / 0.3);
-  const fall = lane2 + 64;
+  // The tie. Down beside the footer logo, a sweep under it (the coordinates ride
+  // just below this stretch), a narrow loop past its right end, back in above the
+  // sweep, and a small hook that rises into the tip of the ز tail, heading right,
+  // so the ribbon carries on as the tail itself: back into the letter it left.
+  const foot = footSvg.getBoundingClientRect();
+  const logoLeft = foot.left - o.left;
+  const logoRight = foot.right - o.left;
+  const logoBottom = foot.bottom - o.top;
+  const tip = logoPoint(footSvg, o, FOOTER, FOOTER.tail.x, FOOTER.tail.y);
+  const back = logoBottom + 8; // the way back, just under the tail
+  const base = logoBottom + 22; // the sweep
+  const fall = Math.min(lane2 + 28, logoLeft);
   const textW = 188;
-  const loopX = Math.max(r.x + 44, fall + 12 + textW);
-  // Down, a turn into the sweep, then a cursive loop under the sweep that crosses
-  // it on the way up and lands on the logo's baseline, heading back into the ز.
-  const lx = loopX;
+  const lx = Math.max(logoRight + 28, fall + 16 + textW + 24);
   let t = `M${f(lane2)} ${f(footTop)} `;
-  t += `L${f(lane2)} ${f(base - 64)} `;
-  t += `C${f(lane2)} ${f(base - 18)} ${f(lane2 + 18)} ${f(base)} ${f(fall)} ${f(base)} `;
-  t += `L${f(lx - 24)} ${f(base)} `;
-  t += `C${f(lx + 2)} ${f(base)} ${f(lx + 14)} ${f(base + 26)} ${f(lx - 4)} ${f(base + 27)} `;
-  t += `C${f(lx - 20)} ${f(base + 28)} ${f(lx - 22)} ${f(base + 8)} ${f(lx - 12)} ${f(base - 8)} `;
-  t += `C${f(lx - 2)} ${f(base - 24)} ${f(lx - 8)} ${f(r.y)} ${f(lx - 30)} ${f(r.y)} `;
-  t += `L${f(blue.x)} ${f(r.y)}`;
-  const words = `M${f(fall + 4)} ${f(base - 6)} L${f(loopX - 20)} ${f(base - 6)}`;
+  t += `L${f(lane2)} ${f(base - 28)} `;
+  t += `C${f(lane2)} ${f(base - 8)} ${f(lane2 + 10)} ${f(base)} ${f(fall)} ${f(base)} `;
+  t += `L${f(lx - 12)} ${f(base)} `;
+  // The loop: round the far end and back, above the sweep.
+  t += `C${f(lx + 4)} ${f(base)} ${f(lx + 4)} ${f(back)} ${f(lx - 12)} ${f(back)} `;
+  t += `L${f(tip.x - 34)} ${f(back)} `;
+  // The hook: out a little past the tip, then up and in, arriving heading right.
+  t += `C${f(tip.x - 52)} ${f(back)} ${f(tip.x - 50)} ${f(tip.y)} ${f(tip.x - 26)} ${f(tip.y)} `;
+  t += `L${f(tip.x)} ${f(tip.y)}`;
+  const words = `M${f(fall + 4)} ${f(base + 16)} L${f(lx - 16)} ${f(base + 16)}`;
 
   // Sample the main ribbon, so scrolling can be turned into "drawn as far as here".
   const probe = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -146,7 +154,7 @@ function measure(root: HTMLElement): Geometry | null {
   for (let len = 0; len <= total; len += 6) samples.push({ len, y: probe.getPointAtLength(len).y });
   samples.push({ len: total, y: probe.getPointAtLength(total).y });
 
-  const shade = { x1: start.x, y1: start.y, x2: start.x + ZAY_TAIL.dx * 34, y2: start.y + 56 };
+  const shade = { x1: start.x, y1: start.y, x2: Math.min(start.x - 24, lane), y2: start.y + 72 };
   return { w: root.clientWidth, h: root.scrollHeight, stroke, main: d, tie: t, words, samples, shade };
 }
 
@@ -220,17 +228,18 @@ export function Ribbon() {
     return () => controls.stop();
   }, [tied, reduced, tie, progress]);
 
-  // The footer logo's own line fades in as the ribbon lays itself along it.
+  // The footer logo's Arabic comes up to full tone as the ribbon returns into its ز.
   useEffect(() => {
-    const line = ref.current?.parentElement?.querySelector<SVGPathElement>('[data-ribbon="footer-logo"] [data-logo-line]');
-    if (!line) return;
+    const arabic = ref.current?.parentElement?.querySelector<SVGPathElement>('[data-ribbon="footer-logo"] [data-logo-arabic]');
+    if (!arabic) return;
     if (reduced) {
-      line.style.opacity = "1";
+      arabic.style.opacity = "1";
       return;
     }
-    line.style.opacity = "0";
+    const wait = 0.45;
+    arabic.style.opacity = String(wait);
     return tie.on("change", (v) => {
-      line.style.opacity = String(Math.min(1, Math.max(0, (v - 0.82) / 0.18)));
+      arabic.style.opacity = String(wait + (1 - wait) * Math.min(1, Math.max(0, (v - 0.86) / 0.14)));
     });
   }, [reduced, tie, geo]);
 
@@ -248,7 +257,7 @@ export function Ribbon() {
         <>
           <defs>
             <linearGradient id="ribbon-shade" gradientUnits="userSpaceOnUse" {...geo.shade}>
-              <stop offset="0" stopColor="var(--color-ink)" />
+              <stop offset="0" stopColor="var(--color-accent)" stopOpacity={LARGE.opacity} />
               <stop offset="1" stopColor="var(--color-accent)" />
             </linearGradient>
             <mask id="ribbon-words" maskUnits="userSpaceOnUse">

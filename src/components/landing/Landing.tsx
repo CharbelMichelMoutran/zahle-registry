@@ -13,8 +13,8 @@ import { Ribbon } from "./Ribbon";
  * database or API call, and its map is a flat picture drawn from open
  * OpenStreetMap outlines by scripts/render-landing-map.ts, every footprint grey.
  *
- * The river-blue ribbon (Ribbon.tsx) grows out of the logo's line, runs down the
- * text column and ties into the footer logo. It finds its way by the
+ * The river-blue ribbon (Ribbon.tsx) grows out of the ز tail in the logo, runs
+ * down the text column and ties back into the ز of the footer logo. It finds its way by the
  * data-ribbon marks below: it runs beside text, never over it, and passes
  * behind the product pictures.
  */
@@ -60,7 +60,7 @@ function Hero() {
             className="-m-1 rounded-control p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             <span data-ribbon="logo" className="block">
-              <Logo className="h-12 sm:h-14" title={null} />
+              <Logo className="h-[72px] sm:h-24" title={null} />
             </span>
           </Link>
           <LinkButton href="/login" className="relative z-[2]">
@@ -134,13 +134,13 @@ function About() {
   );
 }
 
-/** The logo only. Its line is left for the ribbon to bring (Ribbon.tsx). */
+/** The logo only. Its Arabic waits fainter until the ribbon ties back into the ز (Ribbon.tsx). */
 function Footer() {
   return (
     <footer className="mx-auto max-w-[1200px] px-4 pt-10 pb-[max(4rem,env(safe-area-inset-bottom))] sm:px-8 md:grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-24 md:pt-12 md:pb-20">
       <div className="md:col-start-2">
         <span data-ribbon="footer-logo" className="inline-block">
-          <Logo className="h-12 sm:h-14" lineClassName="ribbon-footer-line" />
+          <Logo cut="footer" className="h-[72px] sm:h-24" arabicClassName="ribbon-footer-arabic" />
         </span>
       </div>
     </footer>

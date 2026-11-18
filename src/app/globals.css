@@ -182,9 +182,9 @@ p {
   .landing-fade {
     animation: landing-fade 480ms cubic-bezier(0.23, 1, 0.32, 1) both;
   }
-  /* The footer logo's line waits for the ribbon (Ribbon.tsx sets it as the ribbon ties). */
-  .ribbon-footer-line {
-    opacity: 0;
+  /* The footer logo's Arabic waits in a fainter tone for the ribbon (Ribbon.tsx raises it as the ribbon ties). */
+  .ribbon-footer-arabic {
+    opacity: 0.45;
   }
   .landing-rise {
     animation: landing-rise 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
