@@ -189,7 +189,6 @@ export const RESIDENT_NAME_MAX = 100;
 
 /** The resident's own building tray (plan.md item 12). */
 export const RESIDENT_TRAY = {
-  label: "Building",
   title: "Your building",
   requestInspection: "Request inspection",
 } as const;

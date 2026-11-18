@@ -3,10 +3,10 @@
 import { AnimatePresence, motion } from "motion/react";
 import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DISCIPLINE_LABEL, DISCIPLINE_SHORT, SHOW_DISCIPLINE_IN_HISTORY, type Engineer } from "@/lib/account";
-import { NO_REMARKS, NOT_INSPECTED } from "@/lib/content";
-import { firstLine, formatDate } from "@/lib/format";
+import { NO_REMARKS, NOT_INSPECTED, NOT_YET_VERIFIED } from "@/lib/content";
+import { firstLine, formatConstructionDate, formatDate } from "@/lib/format";
 import { fadeFast, springSnappy, springTray, staggerDelay } from "@/lib/motion";
-import type { ConstructionDateChange, Report, ReportInput } from "@/lib/report";
+import { reportConstructionDate, type ConstructionDateChange, type Report, type ReportInput } from "@/lib/report";
 import { ColourBadge, NotYetInspectedBadge } from "./report/ColourBadge";
 import ReportForm, { INITIAL_SAVE_STATE, type SaveState } from "./report/ReportForm";
 import ReportView from "./report/ReportView";
@@ -149,9 +149,12 @@ const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(prop
             <div className="flex justify-end">
               {save && (
                 // One Save at a time: here on wider screens, in the bottom bar on phones.
-                <Button type="submit" form={formId} disabled={save.disabled} className="hidden sm:inline-flex">
-                  {save.label}
-                </Button>
+                // The wrapper hides it: Button's own inline-flex would beat a "hidden" class on it.
+                <span className="hidden sm:block">
+                  <Button type="submit" form={formId} disabled={save.disabled} className="whitespace-nowrap">
+                    {save.label}
+                  </Button>
+                </span>
               )}
             </div>
           </div>
@@ -267,18 +270,38 @@ function Tabs({ tab, onTab, count }: Props & { count: number | null }) {
   );
 }
 
+/**
+ * The preview, in a fixed order (DESIGN.md 14.9 item 7): the status chip first
+ * and largest, then year built and the latest report date, then one line of
+ * the final observation, then who wrote it. Buildings have no name or number
+ * in the registry yet, so that line is left out rather than invented.
+ */
 function Preview({ reports, onMaximize, celebrateKey }: Props & { reports: Report[] }) {
   const latest = reports[0];
   return (
     <div className="space-y-4">
       {celebrateKey !== null && latest && <Celebration key={celebrateKey} />}
       {latest ? (
-        <div className="space-y-2">
-          <h2 className="font-serif text-title font-medium text-ink">
-            Inspected <span className="tabular">{formatDate(latest.report_date)}</span>
-          </h2>
-          <ColourBadge colour={latest.colour} />
-          <p className="text-body">
+        <div className="space-y-3">
+          <h2 className="sr-only">Latest report</h2>
+          <ColourBadge colour={latest.colour} size="large" />
+          <dl className="tabular flex flex-wrap gap-x-4 gap-y-1 text-body">
+            <div className="flex gap-1.5">
+              <dt className="text-muted">Built</dt>
+              <dd className="text-ink">
+                {latest.construction_not_verified || latest.construction_year === null ? (
+                  <span className="text-muted">{NOT_YET_VERIFIED}</span>
+                ) : (
+                  formatConstructionDate(reportConstructionDate(latest))
+                )}
+              </dd>
+            </div>
+            <div className="flex gap-1.5">
+              <dt className="text-muted">Inspected</dt>
+              <dd className="text-ink">{formatDate(latest.report_date)}</dd>
+            </div>
+          </dl>
+          <p dir="auto" className="line-clamp-2 text-body">
             <FinalLine report={latest} />
           </p>
           <p className="text-micro text-muted">
@@ -287,8 +310,8 @@ function Preview({ reports, onMaximize, celebrateKey }: Props & { reports: Repor
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
-          <NotYetInspectedBadge />
+        <div className="space-y-3">
+          <NotYetInspectedBadge size="large" />
           <h2 className="font-serif text-title font-medium text-ink">No reports yet. Create the first one.</h2>
         </div>
       )}
@@ -400,11 +423,12 @@ function FullView(
                   )}
                 </span>
               </div>
-              <div className="mt-1.5 flex items-start gap-2">
-                <span className="shrink-0">
-                  <ColourBadge colour={r.colour} />
-                </span>
-                <FinalLine report={r} className="min-w-0 pt-0.5 text-body" />
+              {/* Chip, then the observation under it at full width: never a narrow column beside the chip. */}
+              <div className="mt-2 space-y-1.5">
+                <ColourBadge colour={r.colour} />
+                <p dir="auto" className="line-clamp-2 text-body">
+                  <FinalLine report={r} />
+                </p>
               </div>
             </button>
           </motion.li>

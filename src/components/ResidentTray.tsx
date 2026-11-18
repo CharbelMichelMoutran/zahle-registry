@@ -11,7 +11,8 @@ import { Button, IconButton } from "./ui/Button";
 
 /**
  * The resident's tray (plan.md item 12): their building, its rating as word and
- * arches (rule 1) or "Not yet inspected", and one action, "Request inspection".
+ * arches (rule 1) or "Not yet inspected", first and largest, and one action,
+ * "Request inspection".
  * Placed like the engineer's preview tray: bottom on phones, bottom-left on desktop.
  */
 const ResidentTray = forwardRef<HTMLElement, { building: OwnBuilding; onClose: () => void }>(function ResidentTray(
@@ -39,7 +40,7 @@ const ResidentTray = forwardRef<HTMLElement, { building: OwnBuilding; onClose: (
       ].join(" ")}
     >
       <header className="flex shrink-0 items-center gap-1 px-4 pt-3">
-        <p className="micro-label flex-1 pl-1">{RESIDENT_TRAY.label}</p>
+        <h2 className="micro-label flex-1 pl-1">{RESIDENT_TRAY.title}</h2>
         <IconButton label="Close" onClick={onClose}>
           <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
             <path d="M5 5l10 10M15 5L5 15" strokeLinecap="round" />
@@ -47,10 +48,8 @@ const ResidentTray = forwardRef<HTMLElement, { building: OwnBuilding; onClose: (
         </IconButton>
       </header>
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 pt-1 pb-5">
-        <div className="space-y-2">
-          <h2 className="font-serif text-title font-medium text-ink">{RESIDENT_TRAY.title}</h2>
-          {building.colour ? <ColourBadge colour={building.colour} /> : <NotYetInspectedBadge />}
-        </div>
+        {/* The status leads, as on the engineer's preview (DESIGN.md 14.9 item 7). */}
+        {building.colour ? <ColourBadge colour={building.colour} size="large" /> : <NotYetInspectedBadge size="large" />}
         <div className="border-t border-dashed border-line pt-4">
           <Button className="w-full" onClick={() => openInspectionChat()}>
             {RESIDENT_TRAY.requestInspection}
