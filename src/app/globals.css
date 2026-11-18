@@ -7,10 +7,11 @@
  */
 @theme {
   /* Colours */
-  --color-ground: #f7f6f2; /* limestone */
+  --color-ground: #f6f7f8; /* cool off-white (DESIGN.md 15) */
   --color-surface: #ffffff;
-  --color-surface-soft: #f1efea;
-  --color-line: #e6e3dc;
+  --color-surface-soft: #eff1f4;
+  --color-line: #e2e5e9;
+  --color-line-strong: #cfd4da; /* secondary button edge */
   --color-ink: #1f2a37;
   --color-muted: #5b6472;
   --color-accent: #1e5a8c; /* Berdawni dusk: 7.25:1 with white text */
@@ -29,12 +30,11 @@
   --color-attention-soft: #fdf1e7;
 
   /* Type: 13 / 15 / 17 / 20 / 24 / 32 */
-  --font-sans: var(--nf-inter), var(--nf-arabic), system-ui, sans-serif;
-  --font-heading: var(--nf-inter-tight), var(--nf-arabic), system-ui, sans-serif;
-  --font-serif: var(--nf-serif), var(--nf-arabic), Georgia, serif;
+  /* IBM Plex Sans for UI and body, IBM Plex Serif for display (DESIGN.md 15). Arabic falls back to Plex Sans Arabic. */
+  --font-sans: var(--nf-plex-sans), var(--nf-arabic), system-ui, sans-serif;
+  --font-heading: var(--nf-plex-sans), var(--nf-arabic), system-ui, sans-serif;
+  --font-serif: var(--nf-plex-serif), var(--nf-arabic), Georgia, serif;
   --font-arabic: var(--nf-arabic), system-ui, sans-serif;
-  /* Arabic display (DESIGN.md 14.7): Markazi Text 500, for زحلة and Arabic display lines only. */
-  --font-arabic-display: var(--nf-arabic-display), var(--nf-arabic), serif;
   --text-micro: 13px;
   --text-micro--line-height: 18px;
   --text-body: 15px;
@@ -53,8 +53,9 @@
 
   /* Shape and depth: shadows stay under 0.08 alpha */
   --radius-tray: 24px;
-  --radius-card: 16px;
-  --radius-control: 12px;
+  --radius-card: 12px;
+  --radius-chip: 6px; /* rating chips, small tags */
+  --radius-control: 8px; /* buttons, inputs, segmented controls */
   --shadow-tray: 0 8px 32px rgb(31 42 55 / 0.07), 0 1px 2px rgb(31 42 55 / 0.04);
   --shadow-soft: 0 2px 8px rgb(31 42 55 / 0.05);
 }
@@ -77,16 +78,6 @@ p {
   text-wrap: pretty;
 }
 
-/*
- * Arabic is never tracked, slanted or bolded synthetically (DESIGN.md 14.5, 14.7):
- * letter-spacing breaks the joins. Weight stays at the loaded 500.
- */
-.font-arabic-display {
-  letter-spacing: 0 !important;
-  font-style: normal;
-  font-synthesis: none;
-}
-
 /* Dates, years and counts never shift width. */
 .tabular {
   font-variant-numeric: tabular-nums;
@@ -104,7 +95,7 @@ p {
 
 /* The one functional texture: "not yet inspected" / "not yet verified". */
 .hatch {
-  background-color: #eceae4;
+  background-color: #eceef1;
   background-image: repeating-linear-gradient(
     135deg,
     transparent 0 3px,
@@ -188,6 +179,13 @@ p {
  * nothing loops. With reduced motion everything is simply there.
  */
 @media (prefers-reduced-motion: no-preference) {
+  .landing-fade {
+    animation: landing-fade 480ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+  /* The footer logo's line waits for the ribbon (Ribbon.tsx sets it as the ribbon ties). */
+  .ribbon-footer-line {
+    opacity: 0;
+  }
   .landing-rise {
     animation: landing-rise 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -207,5 +205,11 @@ p {
   from {
     opacity: 0;
     transform: scale(1.03);
+  }
+}
+
+@keyframes landing-fade {
+  from {
+    opacity: 0;
   }
 }

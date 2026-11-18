@@ -14,7 +14,7 @@ import { coveredRectOf } from "./tray-rect";
 // Leaflet needs `window`, so the map renders only in the browser.
 const BuildingMap = dynamic(() => import("./BuildingMap"), {
   ssr: false,
-  loading: () => <div className="h-full w-full bg-slate-100" />,
+  loading: () => <div className="h-full w-full bg-ground" />,
 });
 
 /**

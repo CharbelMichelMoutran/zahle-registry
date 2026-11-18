@@ -391,11 +391,11 @@ export default function BuildingMap({
       {status !== "ready" && (
         <div className="pointer-events-none absolute inset-x-0 top-4 z-[1000] flex justify-center px-4">
           {status === "loading" ? (
-            <p className="rounded-full bg-white/95 px-4 py-2 text-sm text-slate-700 shadow-md">
+            <p className="rounded-control border border-line bg-surface px-4 py-2 text-body text-ink shadow-soft">
               Loading buildings…
             </p>
           ) : (
-            <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-white px-4 py-2 text-sm text-slate-700 shadow-md">
+            <div className="pointer-events-auto flex items-center gap-3 rounded-control border border-line bg-surface px-4 py-2 text-body text-ink shadow-soft">
               <span>Could not load buildings.</span>
               <button
                 type="button"
