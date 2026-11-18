@@ -8,8 +8,10 @@ import { animate } from "motion";
 import { motion } from "motion/react";
 import { apiFetch } from "@/lib/client-fetch";
 import { setLocatableBuildings } from "@/lib/location";
+import { CALM_FILL_OPACITY, RATING_EDGE, RATING_EDGE_WEIGHT, RATING_FILL } from "@/lib/map-style";
 import { prefersReducedMotion, springGentle, springSnappy } from "@/lib/motion";
 import type { Colour } from "@/lib/report";
+import HILLSHADE from "@/lib/hillshade-bounds.json";
 import { attachMapNavigation, type MapNavigation } from "./map-navigation";
 
 /** Central Zahle, Lebanon. */
@@ -22,10 +24,19 @@ const LOCATE_ZOOM = 17.5;
 /** The imported area plus a margin, so the map cannot be dragged away from Zahle. */
 const ZAHLE_BOUNDS = L.latLngBounds([33.82, 35.86], [33.875, 35.945]);
 
-/** Building fills (DESIGN.md section 3): vine green, apricot amber, roof-tile red. */
-const RATING_FILL: Record<Colour, string> = { green: "#1FA971", yellow: "#F5A524", red: "#D6402B" };
+/** Below this zoom a red building also gets a dot, so it stays visible zoomed out. */
+const RED_DOT_BELOW_ZOOM = 16;
+
 const OUTLINE = { color: "#FFFFFF", weight: 1, opacity: 0.9 };
-const SELECTED_OUTLINE: L.PathOptions = { color: "#1E5A8C", weight: 3, opacity: 1 };
+const ACCENT = "#1E5A8C";
+
+/**
+ * Map layers, bottom to top (DESIGN.md 14.6 and 14.9). Every footprint tap is
+ * handled by the default overlay canvas; the panes above it only draw, and let
+ * pointer events through (globals.css), so a red or selected building is
+ * tapped through its base footprint like any other.
+ */
+const PANES = { hillshade: 250, red: 410, redDot: 420, selected: 430 } as const;
 /**
  * Resident map (DESIGN.md section 3): every building but their own is barely
  * visible, a faint outline with no fill, and cannot be tapped.
@@ -88,6 +99,10 @@ export default function BuildingMap({
   const mapRef = useRef<L.Map | null>(null);
   const navRef = useRef<MapNavigation | null>(null);
   const layersRef = useRef(new Map<string, L.Polygon>());
+  const renderersRef = useRef<Record<"red" | "redDot" | "selected", L.Canvas> | null>(null);
+  /** Red buildings: the solid footprint and the zoomed-out dot, drawn above the rest. */
+  const redRef = useRef(new Map<string, L.Layer[]>());
+  const selectedLayerRef = useRef<L.LayerGroup | null>(null);
   const handlersRef = useRef({ onSelect, onEmptyClick, onReady });
   const viewRef = useRef<View>(residentOwnId === undefined ? null : { ownId: residentOwnId });
   const buildingClickRef = useRef<MouseEvent | null>(null);
@@ -108,6 +123,7 @@ export default function BuildingMap({
   useEffect(() => {
     if (!containerRef.current) return;
     const layers = layersRef.current;
+    const red = redRef.current;
 
     const map = L.map(containerRef.current, {
       center: ZAHLE_CENTER,
@@ -135,15 +151,32 @@ export default function BuildingMap({
       inertiaMaxSpeed: 1500,
       easeLinearity: 0.25,
     });
-    // OpenStreetMap tiles, muted and lightened in CSS (.leaflet-tile-pane in globals.css)
-    // so the map stays quiet and the coloured footprints carry the meaning (DESIGN.md section 7).
+    for (const [name, zIndex] of Object.entries(PANES)) map.createPane(name).style.zIndex = String(zIndex);
+    renderersRef.current = {
+      red: L.canvas({ pane: "red", padding: 0.25 }),
+      redDot: L.canvas({ pane: "redDot", padding: 0.25 }),
+      selected: L.canvas({ pane: "selected", padding: 0.25 }),
+    };
+
+    // OpenStreetMap tiles, toned to limestone grey in CSS (.leaflet-tile-pane in
+    // globals.css) so the map stays quiet and the footprints carry the colour.
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       keepBuffer: 4, // keep nearby tiles, fewer blank squares when panning back
       updateWhenZooming: false, // no half-loaded tiles mid-pinch
       attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · Terrain: SRTM (USGS) via Mapzen',
     }).addTo(map);
+    // The Zahle hillshade, rendered once by scripts/render-hillshade.ts, laid over
+    // the tiles in multiply (globals.css) so Sannine's slopes and the valley show.
+    L.imageOverlay(
+      "/map/hillshade-zahle.webp",
+      [
+        [HILLSHADE.south, HILLSHADE.west],
+        [HILLSHADE.north, HILLSHADE.east],
+      ],
+      { pane: "hillshade", interactive: false, alt: "" },
+    ).addTo(map);
 
     // A click on empty map minimises or closes the panel. Building clicks on the
     // canvas also reach the map, so skip the DOM event a building already handled.
@@ -159,15 +192,88 @@ export default function BuildingMap({
       navRef.current = null;
       map.remove();
       mapRef.current = null;
+      renderersRef.current = null;
+      selectedLayerRef.current = null;
       layers.clear();
+      red.clear();
     };
   }, []);
+
+  /** Draw or remove the standout copy of a red building (DESIGN.md 14.9, item 2). */
+  const syncRed = (id: string) => {
+    const map = mapRef.current;
+    const renderers = renderersRef.current;
+    const base = layersRef.current.get(id);
+    const red = redRef.current;
+    const isRed = coloursRef.current.get(id) === "red" && (!viewRef.current || viewRef.current.ownId === id);
+    if (!map || !renderers || !base || isRed === red.has(id)) return;
+    if (!isRed) {
+      for (const l of red.get(id)!) l.remove();
+      red.delete(id);
+      return;
+    }
+    const footprint = L.polygon(base.getLatLngs() as L.LatLng[][], {
+      renderer: renderers.red,
+      interactive: false,
+      color: RATING_EDGE.red,
+      weight: RATING_EDGE_WEIGHT.red,
+      opacity: 1,
+      fillColor: RATING_FILL.red,
+      fillOpacity: 1,
+    });
+    const dot = L.circleMarker(base.getBounds().getCenter(), {
+      renderer: renderers.redDot,
+      interactive: false,
+      radius: 4,
+      color: "#FFFFFF",
+      weight: 2,
+      opacity: 1,
+      fillColor: RATING_FILL.red,
+      fillOpacity: 1,
+    });
+    red.set(id, [footprint.addTo(map), dot.addTo(map)]);
+  };
+
+  /** The selected building, drawn on top: its own fill, a 3px accent outline and a 2px white halo. */
+  const drawSelected = () => {
+    const map = mapRef.current;
+    const renderers = renderersRef.current;
+    selectedLayerRef.current?.remove();
+    selectedLayerRef.current = null;
+    const id = selectedRef.current;
+    const base = id ? layersRef.current.get(id) : undefined;
+    if (!map || !renderers || !id || !base) return;
+    const shape = base.getLatLngs() as L.LatLng[][];
+    const style = styleFor(id, coloursRef.current, viewRef.current);
+    const fill = coloursRef.current.get(id) === "red" ? { fillColor: RATING_FILL.red, fillOpacity: 1 } : style;
+    selectedLayerRef.current = L.layerGroup([
+      // Canvas strokes are centred on the edge: 7px of white under 3px of blue leaves 2px of halo outside.
+      L.polygon(shape, { renderer: renderers.selected, interactive: false, fill: false, color: "#FFFFFF", weight: 7, opacity: 1 }),
+      L.polygon(shape, {
+        renderer: renderers.selected,
+        interactive: false,
+        fill: true,
+        fillColor: fill.fillColor,
+        fillOpacity: fill.fillOpacity,
+        color: ACCENT,
+        weight: 3,
+        opacity: 1,
+      }),
+    ]).addTo(map);
+  };
+  const syncRedRef = useRef(syncRed);
+  const drawSelectedRef = useRef(drawSelected);
+  useEffect(() => {
+    syncRedRef.current = syncRed;
+    drawSelectedRef.current = drawSelected;
+  });
 
   // Load building outlines from our database.
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
     const layers = layersRef.current;
+    const red = redRef.current;
     const controller = new AbortController();
     let layer: L.GeoJSON | null = null;
 
@@ -178,7 +284,7 @@ export default function BuildingMap({
       })
       .then((data) => {
         layer = L.geoJSON(data, {
-          style: (f) => styleFor(f!.properties.id, coloursRef.current, selectedRef.current, viewRef.current),
+          style: (f) => styleFor(f!.properties.id, coloursRef.current, viewRef.current),
           onEachFeature: (feature, featureLayer) => {
             const id = feature.properties.id;
             layers.set(id, featureLayer as L.Polygon);
@@ -188,6 +294,8 @@ export default function BuildingMap({
             });
           },
         }).addTo(map);
+        for (const id of layers.keys()) syncRedRef.current(id);
+        drawSelectedRef.current();
         setLocatableBuildings(
           [...layers].map(([id, l]) => {
             const c = l.getBounds().getCenter();
@@ -207,6 +315,10 @@ export default function BuildingMap({
       controller.abort();
       layer?.remove();
       layers.clear();
+      for (const l of [...red.values()].flat()) l.remove();
+      red.clear();
+      selectedLayerRef.current?.remove();
+      selectedLayerRef.current = null;
       setLocatableBuildings([]);
     };
   }, [attempt, outlinesUrl]);
@@ -218,7 +330,9 @@ export default function BuildingMap({
     const changed = new Set([...before.keys(), ...colours.keys()]);
     for (const id of changed) {
       if (before.get(id) === colours.get(id)) continue;
-      layersRef.current.get(id)?.setStyle(styleFor(id, colours, selectedRef.current, viewRef.current));
+      layersRef.current.get(id)?.setStyle(styleFor(id, colours, viewRef.current));
+      syncRedRef.current(id);
+      if (id === selectedRef.current) drawSelectedRef.current();
     }
   }, [colours]);
 
@@ -228,8 +342,11 @@ export default function BuildingMap({
     if (residentOwnId === undefined || before?.ownId === residentOwnId) return;
     viewRef.current = { ownId: residentOwnId };
     for (const id of [before?.ownId, residentOwnId]) {
-      if (id) layersRef.current.get(id)?.setStyle(styleFor(id, coloursRef.current, selectedRef.current, viewRef.current));
+      if (!id) continue;
+      layersRef.current.get(id)?.setStyle(styleFor(id, coloursRef.current, viewRef.current));
+      syncRedRef.current(id);
     }
+    drawSelectedRef.current();
   }, [residentOwnId]);
 
   // Outline the selected building; pan only if it would sit behind the panel.
@@ -237,15 +354,10 @@ export default function BuildingMap({
   useEffect(() => {
     const previous = selectedRef.current;
     selectedRef.current = selectedId;
-    if (previous && previous !== selectedId) {
-      layersRef.current.get(previous)?.setStyle(styleFor(previous, coloursRef.current, null, viewRef.current));
-    }
+    drawSelectedRef.current();
     const map = mapRef.current;
     const layer = selectedId ? layersRef.current.get(selectedId) : undefined;
     if (!map || !layer) return;
-
-    layer.setStyle(styleFor(selectedId!, coloursRef.current, selectedId, viewRef.current));
-    layer.bringToFront();
     const locate = focus?.id === selectedId && focus.key !== focusedKeyRef.current;
     if (locate) focusedKeyRef.current = focus.key;
     if (locate || previous !== selectedId) {
@@ -261,8 +373,12 @@ export default function BuildingMap({
     }
   }, [selectedId, status, focus]);
 
+  // While a tray is open on the engineer map, the other footprints step back (globals.css).
+  const dimmed = selectedId !== null && residentOwnId === undefined;
+  const far = zoom < RED_DOT_BELOW_ZOOM;
+
   return (
-    <div className="relative h-full w-full">
+    <div className={`relative h-full w-full ${dimmed ? "zr-map-dimmed" : ""} ${far ? "zr-map-far" : ""}`}>
       <div ref={containerRef} className="h-full w-full" aria-label="Map of Zahle buildings" />
       <ZoomButtons
         canZoomIn={zoom < MAX_ZOOM - 0.01}
@@ -358,16 +474,22 @@ function ZoomButton({
 /** Null on the engineer map; on the resident map, which building is theirs. */
 type View = { ownId: string | null } | null;
 
-function styleFor(id: string, colours: ReadonlyMap<string, Colour>, selectedId: string | null, view: View): L.PathOptions {
+/**
+ * The base footprint, on the overlay canvas that handles every tap. A red
+ * building's base is invisible but still tappable: its solid copy is drawn in
+ * the red pane above (syncRed).
+ */
+function styleFor(id: string, colours: ReadonlyMap<string, Colour>, view: View): L.PathOptions {
   if (view && id !== view.ownId) return FAINT;
   const rating = colours.get(id);
-  const base: L.PathOptions = rating
-    ? { ...OUTLINE, fillColor: RATING_FILL[rating], fillOpacity: 0.85 }
-    : // Leaflet's canvas renderer passes fillColor straight to ctx.fillStyle, so a pattern works.
-      { ...OUTLINE, fillColor: hatchFill() as unknown as string, fillOpacity: 1 };
-  // `fill` and `interactive` are set back explicitly in case this building was drawn faint before.
-  const styled = view ? { ...base, fill: true, interactive: true } : base;
-  return id === selectedId ? { ...styled, ...SELECTED_OUTLINE } : styled;
+  // `fill`, `stroke` and `interactive` are always set, in case the building was drawn differently before.
+  if (rating === "red") return { fill: false, stroke: false, interactive: true };
+  const shown = { fill: true, stroke: true, interactive: true };
+  if (rating) {
+    return { ...shown, color: RATING_EDGE[rating], weight: RATING_EDGE_WEIGHT[rating], opacity: 1, fillColor: RATING_FILL[rating], fillOpacity: CALM_FILL_OPACITY };
+  }
+  // Leaflet's canvas renderer passes fillColor straight to ctx.fillStyle, so a pattern works.
+  return { ...shown, ...OUTLINE, fillColor: hatchFill() as unknown as string, fillOpacity: 1 };
 }
 
 const MARGIN = 24;

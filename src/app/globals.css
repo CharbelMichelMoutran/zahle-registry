@@ -102,10 +102,46 @@ p {
   background: var(--color-ground);
 }
 
-/* Muted, light base map: desaturated and lifted towards limestone. */
+/*
+ * The map's layers (DESIGN.md 14.6 and 14.9). Base tiles toned to limestone
+ * grey; the Zahle hillshade on top in multiply, so flat ground is untouched and
+ * only slopes darken. Footprints stay outside every filter: they carry the colour.
+ */
 .leaflet-tile-pane {
-  filter: grayscale(0.85) brightness(1.08) contrast(0.82);
-  opacity: 0.85;
+  filter: grayscale(1) sepia(0.12) brightness(1.06) contrast(0.85);
+  opacity: 0.75;
+}
+
+.leaflet-hillshade-pane {
+  mix-blend-mode: multiply;
+  opacity: 0.35; /* tuned between 0.3 and 0.5: felt at zoom 14, quiet at 16 */
+}
+
+/* These panes only draw; taps reach the footprint canvas underneath. */
+.leaflet-red-pane canvas,
+.leaflet-redDot-pane canvas,
+.leaflet-selected-pane canvas {
+  pointer-events: none !important;
+}
+
+/* Red dots only when zoomed out, below zoom 16 (BuildingMap.tsx). */
+.leaflet-redDot-pane {
+  opacity: 0;
+}
+.zr-map-far .leaflet-redDot-pane {
+  opacity: 1;
+}
+
+/* While a tray is open, other footprints step back. Red and the selection do not. */
+.zr-map-dimmed .leaflet-overlay-pane {
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .leaflet-overlay-pane,
+  .leaflet-redDot-pane {
+    transition: opacity 200ms ease-out;
+  }
 }
 
 .leaflet-control-attribution {
