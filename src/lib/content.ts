@@ -204,15 +204,14 @@ export const LOCATION_OFF = "Location is off. Turn it on in your browser setting
 
 export const LANDING = {
   place: "Zahle · Bekaa · Lebanon",
-  headline: "Every building in Zahle, remembered.",
+  headline: "Every building in Zahle, inspected.",
   problem:
-    "Building records in Lebanon sit on paper no one can reach, or were never made, so the same buildings are inspected from scratch, again and again.",
-  signInEngineer: "Sign in as engineer",
-  signInResident: "Sign in as resident",
-  logIn: "Log in",
+    "In Lebanon, building records sit on paper no one can reach. Every inspection starts from scratch. We made records accessible so Zahle could be the first city to adequately meet its citizens' needs.",
+  /** The one sign-in control, top right (DESIGN.md 15). Opens the role choice. */
+  signIn: "Sign in",
   showcase: {
     label: "The record",
-    title: "The next engineer starts from the record, not from scratch.",
+    title: "No engineer has to start from scratch.",
     points: [
       { label: "One history", text: "Every inspection is added to the building's history. Nothing is overwritten." },
       { label: "Colour with words", text: "A rating always comes with its word and the engineer's remarks." },
@@ -228,11 +227,10 @@ export const LANDING = {
       "The registry records facts. Decisions on use, repair or evacuation stay with the authorities.",
     ],
   },
-  closing: "Sign in to the registry.",
-  footer: {
-    line: "A building registry for Zahle, Lebanon.",
-    attribution: "Map data © OpenStreetMap contributors · Terrain: SRTM (USGS) via Mapzen",
-  },
+  /** Written along the ribbon when it ties into the footer logo. */
+  coordinates: "945 m · 33.85° N, 35.90° E",
+  /** Credit for the hero picture, on the picture itself. Required by the OSM licence. */
+  mapCredit: "Map data © OpenStreetMap contributors · Terrain: SRTM (USGS) via Mapzen",
 } as const;
 
 /** Invented example content for the landing page's product visuals. Not a real building or engineer. */
