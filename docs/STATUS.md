@@ -1,6 +1,6 @@
 # Status and handoff — Zahle Building Registry
 
-Last updated: 17 Nov 2026, when the owner took a break. Read this first, then `plan.md` (the source of truth) and `DESIGN.md`. `docs/REFERENCE.md` is the long reference; where it is older than this file, this file wins.
+Last updated: 18 Nov 2026 (see the session section below). Read this first, then `plan.md` (the source of truth) and `DESIGN.md`. `docs/REFERENCE.md` is the long reference; where it is older than this file, this file wins.
 
 ## Snapshot
 
@@ -31,6 +31,13 @@ Last updated: 17 Nov 2026, when the owner took a break. Read this first, then `p
 | Resident map | Real browser location prompt. Allow: `getCurrentLocation()` picks the resident's building (saved add-only in `resident_buildings`; an existing building is kept) and the map flies to it. Deny: map with Locate building, no building; "Use current location" shows "Location is off. Turn it on in your browser settings to find your building." Other buildings are faint outlines, not clickable. Tray: "Your building", status chip or "Not yet inspected", **"Request inspection"**, which calls the empty `openInspectionChat()` in `src/lib/inspection-chat.ts`. |
 
 Resident privacy is enforced by our server (scoped to the session's resident) with database RLS on and no browser access, not by RLS policies per user. Real phone verification is on the Later list.
+
+## Session of 18 Nov 2026 (no app code changed)
+
+- **Pivot: the owner wants to work on UI next, not features.** Ask which screen first.
+- **Design skills installed** in `.claude/skills/` (git-ignored, 42 MB; sources pinned in `skills-lock.json`; reinstall with `npx skills add <source> -a claude-code`): Benji Taylor `stageshow` (faux product UI for README/demo video), Emil Kowalski's set (`apple-design`, `emil-design-eng`, `animate`, `gestures`, `mobile-native`, `break-ui`, `review-animations`, `learn-taste`, and more), Leon Lin `design-taste-frontend` (aimed at public websites; use selectively). Scanned for risky commands: none found. **Impeccable** is not installed yet: the owner runs `/plugin marketplace add pbakaus/impeccable` then `/plugin install impeccable`. To do: add the skills to `DESIGN.md` section 9 (DESIGN.md wins on conflicts) and name the right skill in each UI brief. `learn-taste` writes to `DESIGN.md`: review its edits before committing.
+- **AI direction, open decision (devil's-advocate review given to the owner):** the owner proposed that Claude interviews residents, picks a rating colour shown with a Claude-orange outline, and engineers query Claude for triage. The orchestrator recommended that Claude rates **visit urgency** (Urgent / Soon / Routine, orange ring), **never the condition colour**; intake is photo-first with 4 to 6 questions; engineers get a ranked queue (urgency x residents) with Claude's summary and evidence; learning is measured by a fixed test set, protected list in code, rulebook with engineer approval; ask the OEA contact whether they would use the ranked list. **The owner has not decided.** `plan.md` is unchanged on this.
+- **Teaching Claude engineering, proposed:** context file, fixed output schema, protected list in code, similar past cases, rulebook later, and a 30 to 50 case test set (civil-engineer drafts, OEA contact checks). Not started; waits for the owner.
 
 ## Next
 

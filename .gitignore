@@ -43,3 +43,6 @@ next-env.d.ts
 # supabase cli
 supabase/.temp/
 supabase/.branches/
+
+# Third-party agent skills (reinstall from skills-lock.json)
+.claude/skills/
