@@ -4,7 +4,7 @@ Last updated: 17 Nov 2026, night (see "UI pass" below). Read this first, then `p
 
 ## Snapshot
 
-- **Live site:** https://zahle-registry.vercel.app (everything behind login). Last production deploy is commit `67a87b6` (UI pass stages 0 to 3), confirmed Ready and aliased on 17 Nov 2026.
+- **Live site:** https://zahle-registry.vercel.app (everything behind login). Last production deploy is commit `70c994a` (UI pass stages 0 to 3, plus the sign-in fix: full page load across the sign-in boundary, because the router cache kept the landing page at /), confirmed Ready and aliased on 17 Nov 2026.
 - **Repo:** https://github.com/CharbelMichelMoutran/zahle-registry. **Private. Keep it private until the owner says.**
 - **Git:** `main`, everything committed and pushed.
 - **Database:** all 8 migrations applied (last: `20261119000000_residents.sql`). Append-only triggers on reports and construction-date changes checked enabled after the 17 Nov migration.
