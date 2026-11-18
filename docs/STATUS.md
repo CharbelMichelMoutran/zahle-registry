@@ -1,6 +1,6 @@
 # Status and handoff — Zahle Building Registry
 
-Last updated: 18 Nov 2026 (see the session section below). Read this first, then `plan.md` (the source of truth) and `DESIGN.md`. `docs/REFERENCE.md` is the long reference; where it is older than this file, this file wins.
+Last updated: 17 Nov 2026, evening (see the later session section below). Read this first, then `plan.md` (the source of truth) and `DESIGN.md`. `docs/REFERENCE.md` is the long reference; where it is older than this file, this file wins.
 
 ## Snapshot
 
@@ -32,7 +32,7 @@ Last updated: 18 Nov 2026 (see the session section below). Read this first, then
 
 Resident privacy is enforced by our server (scoped to the session's resident) with database RLS on and no browser access, not by RLS policies per user. Real phone verification is on the Later list.
 
-## Session of 18 Nov 2026 (no app code changed)
+## Later session, 17 Nov 2026 evening (no app code changed)
 
 - **Pivot: the owner wants to work on UI next, not features.** Ask which screen first.
 - **Design skills installed** in `.claude/skills/` (git-ignored, 42 MB; sources pinned in `skills-lock.json`; reinstall with `npx skills add <source> -a claude-code`): Benji Taylor `stageshow` (faux product UI for README/demo video), Emil Kowalski's set (`apple-design`, `emil-design-eng`, `animate`, `gestures`, `mobile-native`, `break-ui`, `review-animations`, `learn-taste`, and more), Leon Lin `design-taste-frontend` (aimed at public websites; use selectively). Scanned for risky commands: none found. **Impeccable** is not installed yet: the owner runs `/plugin marketplace add pbakaus/impeccable` then `/plugin install impeccable`. To do: add the skills to `DESIGN.md` section 9 (DESIGN.md wins on conflicts) and name the right skill in each UI brief. `learn-taste` writes to `DESIGN.md`: review its edits before committing.
