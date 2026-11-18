@@ -236,7 +236,7 @@ export default BuildingPanel;
 /** History | Create report, as a simple segmented control. The selected pill slides. */
 function Tabs({ tab, onTab, count }: Props & { count: number | null }) {
   return (
-    <div role="tablist" aria-label="Building record" className="flex rounded-full bg-surface-soft p-0.5">
+    <div role="tablist" aria-label="Building record" className="flex rounded-control bg-surface-soft p-0.5">
       {(["history", "create"] as const).map((t) => (
         <button
           key={t}
@@ -244,7 +244,7 @@ function Tabs({ tab, onTab, count }: Props & { count: number | null }) {
           type="button"
           aria-selected={tab === t}
           onClick={() => onTab(t)}
-          className={`relative min-h-10 rounded-full px-3 text-body font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-accent sm:px-4 ${
+          className={`relative min-h-10 rounded-[6px] px-3 text-body font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-accent sm:px-4 ${
             tab === t ? "text-ink" : "text-muted hover:text-ink"
           }`}
         >
@@ -252,7 +252,7 @@ function Tabs({ tab, onTab, count }: Props & { count: number | null }) {
             <motion.span
               layoutId="tray-tab-indicator"
               transition={springSnappy}
-              className="absolute inset-0 rounded-full border border-line bg-surface shadow-soft"
+              className="absolute inset-0 rounded-[6px] border border-line bg-surface shadow-soft"
             />
           )}
           <span className="relative">

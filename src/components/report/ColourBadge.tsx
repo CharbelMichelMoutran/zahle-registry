@@ -37,7 +37,7 @@ export function ColourBadge({
 }) {
   const c = COLOUR_CONTENT[colour];
   return (
-    <span className={`inline-flex items-center rounded-full border font-medium text-ink ${SIZE[size]} ${STATUS_BG[colour]}`}>
+    <span className={`inline-flex items-center rounded-chip border font-medium text-ink ${SIZE[size]} ${STATUS_BG[colour]}`}>
       <RatingArches colour={colour} large={size === "large"} className={STATUS_TEXT[colour]} />
       {long ? c.label : c.word}
     </span>
@@ -47,7 +47,7 @@ export function ColourBadge({
 /** Neutral, with the "unknown" hatch; never styled as a warning (plan rule 3). */
 export function NotYetInspectedBadge({ size = "small" }: { size?: keyof typeof SIZE }) {
   return (
-    <span className={`inline-flex items-center rounded-full border border-line bg-surface font-medium text-muted ${SIZE[size]}`}>
+    <span className={`inline-flex items-center rounded-chip border border-line bg-surface font-medium text-muted ${SIZE[size]}`}>
       <span className={`hatch shrink-0 rounded-[4px] border border-line ${size === "large" ? "h-5 w-5" : "h-3.5 w-3.5"}`} aria-hidden />
       {NOT_YET_INSPECTED}
     </span>

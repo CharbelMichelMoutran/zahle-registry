@@ -2,34 +2,20 @@
 
 import { motion, type HTMLMotionProps } from "motion/react";
 import { springSnappy } from "@/lib/motion";
+import { buttonClass, type ButtonVariant } from "./button-styles";
 
-type Variant = "primary" | "secondary" | "ghost";
-
-const VARIANT: Record<Variant, string> = {
-  primary:
-    "bg-accent text-white hover:bg-accent-strong disabled:bg-surface-soft disabled:text-muted disabled:border-line border border-transparent",
-  secondary: "border border-line bg-surface text-ink hover:bg-surface-soft",
-  ghost: "border border-transparent text-muted hover:bg-surface-soft hover:text-ink",
-};
-
-/** Every button presses to 0.97 and springs back (DESIGN.md section 6). */
+/** Every button presses to 0.97 and springs back (DESIGN.md section 6). Looks: ./button-styles.ts. */
 export function Button({
   variant = "primary",
   className = "",
   ...props
-}: HTMLMotionProps<"button"> & { variant?: Variant }) {
+}: HTMLMotionProps<"button"> & { variant?: ButtonVariant }) {
   return (
     <motion.button
       type="button"
       whileTap={props.disabled ? undefined : { scale: 0.97 }}
       transition={springSnappy}
-      className={[
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-control px-4 text-body font-medium",
-        "transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-        "disabled:cursor-not-allowed",
-        VARIANT[variant],
-        className,
-      ].join(" ")}
+      className={buttonClass(variant, className)}
       {...props}
     />
   );
