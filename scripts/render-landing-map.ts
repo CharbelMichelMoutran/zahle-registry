@@ -30,11 +30,11 @@ const OVERPASS = [
   "https://overpass.private.coffee/api/interpreter",
 ];
 
-// Look: limestone ground, quiet relief, white roads, a pale river, grey footprints.
-const GROUND = "#F7F6F2";
+// Look: cool off-white ground, quiet relief, white roads, a pale river, grey footprints.
+const GROUND = "#F6F7F8"; // the page ground (DESIGN.md 15)
 const RELIEF_STRENGTH = 0.42; // 0 = no relief, 1 = the hillshade at full strength
 const ROAD = "#FFFFFF";
-const ROAD_CASING = "#E4E0D7";
+const ROAD_CASING = "#DDE1E6";
 const RIVER = "#A9BFD2";
 const FOOTPRINT_FILL = "#CDD0D5";
 const FOOTPRINT_LINE = "#A3A8B3";
