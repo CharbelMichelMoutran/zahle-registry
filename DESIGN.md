@@ -62,8 +62,8 @@ Light and warm. Dark text is a deep slate, never pure black.
 | `border` | `#E6E3DC` | | Fine 1px borders (Raycast precision) |
 | `text` | `#1F2A37` | | Main text |
 | `text-muted` | `#5B6472` | | Secondary text. Must pass 4.5:1 on white |
-| `accent` | `#2F7CF6` | Berdawni | Main buttons, links, selected states |
-| `accent-soft` | `#E6F0FE` | | Selected backgrounds, focus glow |
+| `accent` | `#1E5A8C` | Berdawni dusk | Main buttons, links, selected states, focus ring (7.25:1 with white text; owner, 17 Nov 2026) |
+| `accent-soft` | `#E8EFF7` | | Selected backgrounds, focus glow |
 | `sun` | `#FFC94D` | Bekaa sun | Celebration moment only |
 
 Share of the screen: about 60% ground and map, 30% trays and surfaces, 10% accent and status colours.

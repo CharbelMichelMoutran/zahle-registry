@@ -25,7 +25,7 @@ const ZAHLE_BOUNDS = L.latLngBounds([33.82, 35.86], [33.875, 35.945]);
 /** Building fills (DESIGN.md section 3): vine green, apricot amber, roof-tile red. */
 const RATING_FILL: Record<Colour, string> = { green: "#1FA971", yellow: "#F5A524", red: "#D6402B" };
 const OUTLINE = { color: "#FFFFFF", weight: 1, opacity: 0.9 };
-const SELECTED_OUTLINE: L.PathOptions = { color: "#2F7CF6", weight: 3, opacity: 1 };
+const SELECTED_OUTLINE: L.PathOptions = { color: "#1E5A8C", weight: 3, opacity: 1 };
 /**
  * Resident map (DESIGN.md section 3): every building but their own is barely
  * visible, a faint outline with no fill, and cannot be tapped.
@@ -285,7 +285,7 @@ export default function BuildingMap({
                   setStatus("loading");
                   setAttempt((n) => n + 1);
                 }}
-                className="font-medium text-blue-700 hover:underline"
+                className="font-medium text-accent hover:underline"
               >
                 Try again
               </button>

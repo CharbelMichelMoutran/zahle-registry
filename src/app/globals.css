@@ -13,9 +13,9 @@
   --color-line: #e6e3dc;
   --color-ink: #1f2a37;
   --color-muted: #5b6472;
-  --color-accent: #2f7cf6; /* Berdawni */
-  --color-accent-strong: #1f67da;
-  --color-accent-soft: #e6f0fe;
+  --color-accent: #1e5a8c; /* Berdawni dusk: 7.25:1 with white text */
+  --color-accent-strong: #174a70; /* pressed and hover */
+  --color-accent-soft: #e8eff7;
   --color-sun: #ffc94d; /* Bekaa sun: celebration only */
 
   /* Building ratings (data values green / yellow / red) and "not yet inspected" */
