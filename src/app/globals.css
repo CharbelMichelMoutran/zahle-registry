@@ -47,6 +47,9 @@
   --text-heading--line-height: 30px;
   --text-display: 32px;
   --text-display--line-height: 38px;
+  /* Landing page headline only: one size above the app's scale. */
+  --text-hero: 56px;
+  --text-hero--line-height: 60px;
 
   /* Shape and depth: shadows stay under 0.08 alpha */
   --radius-tray: 24px;
@@ -176,5 +179,33 @@ p {
   .motion-safe-only {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/*
+ * The landing page's one entrance (DESIGN.md 13): the map settles in while the
+ * place, headline, line and buttons rise in one short sequence. Plays once;
+ * nothing loops. With reduced motion everything is simply there.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .landing-rise {
+    animation: landing-rise 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .landing-map {
+    animation: landing-map 1200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@keyframes landing-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes landing-map {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
   }
 }

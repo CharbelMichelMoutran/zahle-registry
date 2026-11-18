@@ -3,7 +3,8 @@ import { engineerForToken, RESIDENT_SESSION_COOKIE, residentForToken, SESSION_CO
 
 /**
  * Page access, checked on the server before any page renders (plan rule 2):
- * - signed out: only /login and /signup
+ * - signed out: the public landing page at / (served from /welcome, a static
+ *   page that reads nothing from the registry), /login and /signup
  * - engineer waiting for approval: only /waiting
  * - approved engineer: the engineer map at /; every other page sends them to it
  * - resident: only the resident map at /resident; every other page sends them to it
@@ -24,10 +25,11 @@ export async function proxy(req: NextRequest) {
   const go = (to: string) => NextResponse.redirect(new URL(to, req.url));
   const isAuthPage = path === "/login" || path === "/signup";
   const isResidentPage = path === "/resident";
+  const isLanding = path === "/welcome";
 
   if (engineer) {
     if (!engineer.approved) return path === "/waiting" ? NextResponse.next() : go("/waiting");
-    if (isAuthPage || path === "/waiting" || isResidentPage) return go("/");
+    if (isAuthPage || isLanding || path === "/waiting" || isResidentPage) return go("/");
     return NextResponse.next();
   }
 
@@ -45,12 +47,15 @@ export async function proxy(req: NextRequest) {
   // Signed out. A cookie that no longer matches a session means the session ended: say so once, then drop it.
   const staleEngineer = Boolean(req.cookies.get(SESSION_COOKIE)?.value);
   const stale = staleEngineer || Boolean(residentToken);
-  const res = isAuthPage ? NextResponse.next() : go(stale ? "/login?expired=1" : "/login");
+  let res: NextResponse;
+  if (isAuthPage || isLanding) res = NextResponse.next();
+  else if (path === "/" && !stale) res = NextResponse.rewrite(new URL("/welcome", req.url));
+  else res = go(stale ? "/login?expired=1" : "/login");
   if (staleEngineer) res.cookies.delete(SESSION_COOKIE);
   if (residentToken) res.cookies.delete(RESIDENT_SESSION_COOKIE);
   return res;
 }
 
 export const config = {
-  matcher: ["/", "/login", "/signup", "/waiting", "/resident"],
+  matcher: ["/", "/welcome", "/login", "/signup", "/waiting", "/resident"],
 };

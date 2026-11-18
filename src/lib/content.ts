@@ -196,3 +196,54 @@ export const RESIDENT_TRAY = {
 
 /** Shown in the Locate menu when the browser will not share location. */
 export const LOCATION_OFF = "Location is off. Turn it on in your browser settings to find your building.";
+
+// ---------------------------------------------------------------------------
+// Public landing page (plan.md item 23, DESIGN.md 13 and 14.9 item 9). Calm and
+// plain; no demo wording, no disclaimer. Problem and about lines follow plan.md
+// section 1; the product visuals use example phrases from docs/engineering.md D3.
+// ---------------------------------------------------------------------------
+
+export const LANDING = {
+  place: "Zahle · Bekaa · Lebanon",
+  headline: "Every building in Zahle, remembered.",
+  problem:
+    "Building records in Lebanon sit on paper no one can reach, or were never made, so the same buildings are inspected from scratch, again and again.",
+  signInEngineer: "Sign in as engineer",
+  signInResident: "Sign in as resident",
+  logIn: "Log in",
+  showcase: {
+    label: "The record",
+    title: "The next engineer starts from the record, not from scratch.",
+    points: [
+      { label: "One history", text: "Every inspection is added to the building's history. Nothing is overwritten." },
+      { label: "Colour with words", text: "A rating always comes with its word and the engineer's remarks." },
+      { label: "Each role its own view", text: "Engineers see every building. A resident sees only their own." },
+    ],
+  },
+  about: {
+    label: "About the registry",
+    title: "A lasting record, made by engineers.",
+    body: [
+      "Inspections happen in Lebanon, but their results rarely build into a record anyone can find. The Order of Engineers and Architects and the municipalities end up inspecting buildings from scratch.",
+      "The registry keeps every inspection of every building in Zahle, written by engineers, with residents adding what they see. It matters most after a disaster, such as the 2023 earthquakes, when unstable buildings must be found and checked again quickly.",
+      "The registry records facts. Decisions on use, repair or evacuation stay with the authorities.",
+    ],
+  },
+  closing: "Sign in to the registry.",
+  footer: {
+    line: "A building registry for Zahle, Lebanon.",
+    credit: "Designed and built by Charbel Moutran.",
+    attribution: "Map data © OpenStreetMap contributors · Terrain: SRTM (USGS) via Mapzen",
+  },
+} as const;
+
+/** Invented example content for the landing page's product visuals. Not a real building or engineer. */
+export const LANDING_EXAMPLE = {
+  built: "1968",
+  inspected: "12/03/2026",
+  final: "Needs repair of roof waterproofing and two columns within the year.",
+  roof: "Damp stains on top-floor ceiling, north-east corner. Waterproofing worn. Needs repair before winter.",
+  columns: "Rusted rebar exposed on two ground-floor columns, concrete spalling. Needs repair.",
+  engineer: "Dana Haddad",
+  residents: "14",
+} as const;
