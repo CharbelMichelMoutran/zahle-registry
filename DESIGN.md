@@ -383,3 +383,7 @@ The owner likes the layout, the map and the predominant grey. The beige ground a
 - **Map credit.** On the hero picture itself, bottom right, 12px muted: "Map data © OpenStreetMap contributors · Terrain: SRTM (USGS) via Mapzen".
 
 - **Words (owner, 17 Nov 2026):** "Sign in" / "Sign out" everywhere, never "Log in" / "Log out". "The registry" stays as an ordinary word in body text and headings.
+
+### 15.2 Logo and top-bar changes (owner, 17 Nov 2026, later)
+- **Logo:** the word **Record** (IBM Plex Serif), with **زحلة** overlapping it in a lighter, semi-transparent Arabic display face (layered, not side by side). More aesthetic and calmer than the line-through version. The product name in text stays "Zahle on Record" (tab titles, screen-reader label). The ribbon and the footer tie adapt to the new logo.
+- **"Locate building" becomes "Go to building"**, and its crosshair icon is removed: a crosshair reads as a gun sight. Text only, also on phones. No target, crosshair or pin-on-a-person icons anywhere.
