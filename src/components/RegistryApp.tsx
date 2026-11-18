@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { MotionConfig } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { Engineer } from "@/lib/account";
@@ -16,7 +15,6 @@ import { Wordmark } from "./ui/Wordmark";
 
 /** The signed-in app: header with the engineer's name and Log out, and the map. */
 export default function RegistryApp() {
-  const router = useRouter();
   const [engineer, setEngineer] = useState<Engineer | null>(null);
   const [welcome, setWelcome] = useState<string | null>(null);
   const [loggedOut, setLoggedOut] = useState(false);
@@ -57,7 +55,7 @@ export default function RegistryApp() {
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
-    router.replace("/login");
+    window.location.replace("/login");
   }
 
   return (
@@ -99,7 +97,7 @@ export default function RegistryApp() {
             <div role="alertdialog" aria-modal aria-labelledby="logged-out-title" className="w-full max-w-sm rounded-card border border-line bg-surface p-5 shadow-tray">
               <p id="logged-out-title" className="text-lead font-semibold text-ink">{LOGIN_TEXT.loggedOut}</p>
               {hasDraft && <p className="mt-1 text-body text-muted">{LOGIN_TEXT.draftLost}</p>}
-              <Button className="mt-4 w-full" autoFocus onClick={() => router.replace("/login")}>
+              <Button className="mt-4 w-full" autoFocus onClick={() => window.location.replace("/login")}>
                 Log in
               </Button>
             </div>

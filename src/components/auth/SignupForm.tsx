@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import { DISCIPLINE_LABEL, DISCIPLINES, validateSignup, type SignupInput } from "@/lib/account";
@@ -13,7 +12,6 @@ type Field = keyof SignupInput;
 const EMPTY: SignupInput = { fullName: "", discipline: "", contact: "", oeaNumber: "", username: "", password: "" };
 
 export default function SignupForm() {
-  const router = useRouter();
   const [input, setInput] = useState<SignupInput>(EMPTY);
   const [touched, setTouched] = useState<Set<Field>>(new Set());
   const [serverFields, setServerFields] = useState<Partial<Record<Field, string>>>({});
@@ -46,7 +44,7 @@ export default function SignupForm() {
       });
       const body = await res.json().catch(() => ({}));
       if (res.ok) {
-        router.replace("/waiting");
+        window.location.replace("/waiting");
         return;
       }
       if (body.fields) setServerFields(body.fields);

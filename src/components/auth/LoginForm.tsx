@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { LOGIN_TEXT } from "@/lib/content";
 import { Button } from "../ui/Button";
@@ -9,7 +9,6 @@ import { authInputClass } from "./AuthShell";
 import { PasswordInput } from "./PasswordInput";
 
 export default function LoginForm() {
-  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +32,7 @@ export default function LoginForm() {
       });
       const body = await res.json().catch(() => ({}));
       if (res.ok) {
-        router.replace(body.status === "approved" ? "/" : "/waiting");
+        window.location.replace(body.status === "approved" ? "/" : "/waiting");
         return;
       }
       setError(body.error ?? LOGIN_TEXT.failed);

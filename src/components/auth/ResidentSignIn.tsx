@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { RESIDENT_NAME_MAX, RESIDENT_SIGN_IN as T } from "@/lib/content";
 import { Button } from "../ui/Button";
@@ -16,7 +15,6 @@ const LABEL = "mb-1.5 block text-body font-semibold text-ink";
  * "Log in" starts a resident session in our own login system.
  */
 export default function ResidentSignIn() {
-  const router = useRouter();
   const [step, setStep] = useState<"details" | "code">("details");
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);
@@ -69,7 +67,7 @@ export default function ResidentSignIn() {
     try {
       const res = await post("/api/resident/login", { name });
       if (res.ok) {
-        router.replace("/resident");
+        window.location.replace("/resident");
         return;
       }
       setError(res.error);

@@ -2,7 +2,6 @@
 
 import { AnimatePresence, MotionConfig } from "motion/react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch, LOGGED_OUT_EVENT } from "@/lib/client-fetch";
 import { LOGIN_TEXT } from "@/lib/content";
@@ -39,7 +38,6 @@ function deferred() {
  * its tray opens. If not, the map waits with "Locate building".
  */
 export default function ResidentApp() {
-  const router = useRouter();
   const [name, setName] = useState<string | null>(null);
   const [own, setOwn] = useState<OwnBuilding | null>(null);
   const [trayOpen, setTrayOpen] = useState(false);
@@ -97,7 +95,7 @@ export default function ResidentApp() {
 
   async function logout() {
     await fetch("/api/resident/logout", { method: "POST" }).catch(() => {});
-    router.replace("/login");
+    window.location.replace("/login");
   }
 
   // Only their own building has a colour; nothing else is ever sent to a resident.
@@ -145,7 +143,7 @@ export default function ResidentApp() {
           <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-ink/30 px-4">
             <div role="alertdialog" aria-modal aria-labelledby="logged-out-title" className="w-full max-w-sm rounded-card border border-line bg-surface p-5 shadow-tray">
               <p id="logged-out-title" className="text-lead font-semibold text-ink">{LOGIN_TEXT.loggedOut}</p>
-              <Button className="mt-4 w-full" autoFocus onClick={() => router.replace("/login?as=resident")}>
+              <Button className="mt-4 w-full" autoFocus onClick={() => window.location.replace("/login?as=resident")}>
                 Log in
               </Button>
             </div>

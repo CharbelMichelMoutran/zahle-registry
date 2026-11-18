@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { WAITING } from "@/lib/content";
 import { ArchMark } from "../ui/Arch";
@@ -10,7 +9,6 @@ export const WELCOME_KEY = "zr:welcome";
 
 /** D9.3. Refresh approves the account and goes straight to the map. */
 export default function WaitingPanel() {
-  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,12 +17,12 @@ export default function WaitingPanel() {
     setError(null);
     try {
       const res = await fetch("/api/auth/approve", { method: "POST" });
-      if (res.status === 401) return router.replace("/login?expired=1");
+      if (res.status === 401) return window.location.replace("/login?expired=1");
       if (!res.ok) throw new Error();
       try {
         sessionStorage.setItem(WELCOME_KEY, "1");
       } catch {}
-      router.replace("/");
+      window.location.replace("/");
     } catch {
       setError("Something went wrong. Please try again.");
       setBusy(false);
@@ -48,7 +46,7 @@ export default function WaitingPanel() {
       <Button onClick={refresh} disabled={busy} className="w-full">
         {busy ? "Refreshing…" : "Refresh"}
       </Button>
-      <LogoutLink onDone={() => router.replace("/login")} />
+      <LogoutLink onDone={() => window.location.replace("/login")} />
     </div>
   );
 }
