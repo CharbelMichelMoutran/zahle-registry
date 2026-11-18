@@ -51,7 +51,7 @@ Owner decisions: no engineer side panel (Later list), no mockups, review the rea
 | 3 Fonts and polish | Done: Markazi Text for زحلة, tray order (status, built, date, one line), report and sign-in polish |
 | 4 Final check (`break-ui`, `emil-design-eng`) | Not started |
 
-Not seen in a browser by any agent: the real signed-in map, tray and save with real data (no logins were made). Owner to confirm: footer credit "Designed and built by Charbel Moutran."; 56px landing headline; river and roads on the hero map. Later list candidate: a building name or number field.
+Not seen in a browser by any agent: the real signed-in map, tray and save with real data (no logins were made). Owner to confirm: 56px landing headline; river and roads on the hero map. Later list candidate: a building name or number field.
 
 ## Next
 
