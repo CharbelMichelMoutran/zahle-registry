@@ -4,7 +4,7 @@ Last updated: 17 Nov 2026, night (see "UI pass" below). Read this first, then `p
 
 ## Snapshot
 
-- **Live site:** https://zahle-registry.vercel.app (everything behind login). Last production deploy is commit `7e32249` (second UI pass, Zahle on Record, Sign in wording), confirmed Ready and aliased on 17 Nov 2026.
+- **Live site:** https://zahle-registry.vercel.app (everything behind login). Last production deploy is commit `744e8ea` (second UI pass, Zahle on Record, Sign in wording, Record logo with Amiri زحلة, Go to building), confirmed Ready and aliased on 17 Nov 2026.
 - **Repo:** https://github.com/CharbelMichelMoutran/zahle-registry. **Private. Keep it private until the owner says.**
 - **Git:** `main`, everything committed and pushed.
 - **Database:** all 8 migrations applied (last: `20261119000000_residents.sql`). Append-only triggers on reports and construction-date changes checked enabled after the 17 Nov migration.
@@ -82,3 +82,8 @@ Not seen in a browser by any agent: the real signed-in map, tray and save with r
 1. `cd ~/zahle-registry`, start Claude Code there.
 2. Read this file, `plan.md`, `DESIGN.md`. Check `git status`, `git log --oneline | head`, and `supabase migration list --remote`.
 3. Ask the owner for the next feature's spec and whether the Anthropic Console is ready.
+
+## Open owner choices (17 Nov 2026, late)
+- Top-bar logo: the Arabic is too faint at 32px. Orchestrator recommends "Record" alone in the top bar.
+- Footer tie: the loop reads a little like a paperclip. Orchestrator recommends a single sweep into the ز.
+- DESIGN.md 15.1 still describes the earlier logo construction; 15.2 is current.
