@@ -13,7 +13,7 @@ import MapView, { type MapViewHandle } from "./MapView";
 import { Button, IconButton } from "./ui/Button";
 import { Logo } from "./ui/Logo";
 
-/** The signed-in app: header with the engineer's name and Log out, and the map. */
+/** The signed-in app: header with the engineer's name and Sign out, and the map. */
 export default function RegistryApp() {
   const [engineer, setEngineer] = useState<Engineer | null>(null);
   const [welcome, setWelcome] = useState<string | null>(null);
@@ -98,7 +98,7 @@ export default function RegistryApp() {
               <p id="logged-out-title" className="text-lead font-semibold text-ink">{LOGIN_TEXT.loggedOut}</p>
               {hasDraft && <p className="mt-1 text-body text-muted">{LOGIN_TEXT.draftLost}</p>}
               <Button className="mt-4 w-full" autoFocus onClick={() => window.location.replace("/login")}>
-                Log in
+                Sign in
               </Button>
             </div>
           </div>

@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { springSnappy } from "@/lib/motion";
 
-/** The signed-in person's name with a small menu holding "Log out" (DESIGN.md section 7). */
+/** The signed-in person's name with a small menu holding "Sign out" (DESIGN.md section 7). */
 export function AccountMenu({ name, onLogout }: { name: string | null; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -52,7 +52,7 @@ export function AccountMenu({ name, onLogout }: { name: string | null; onLogout:
               onClick={onLogout}
               className="flex min-h-11 w-full items-center rounded-control px-3 text-left text-body text-ink hover:bg-surface-soft focus-visible:bg-surface-soft focus-visible:outline-none"
             >
-              Log out
+              Sign out
             </button>
           </motion.div>
         )}

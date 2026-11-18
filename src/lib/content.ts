@@ -102,7 +102,7 @@ export const SIGNUP_FIELDS = {
   },
   username: {
     label: "Username",
-    help: "You will use this to log in. It is not shown on reports. Letters, numbers, dot, dash and underscore only.",
+    help: "You will use this to sign in. It is not shown on reports. Letters, numbers, dot, dash and underscore only.",
   },
   password: {
     label: "Password",
@@ -134,7 +134,7 @@ export const LOGIN_TEXT = {
   failed: "Something went wrong. Please try again.",
   missing: "Enter your username and password.",
   forgot: "Forgot your password? There is no reset. Create a new account.",
-  loggedOut: "You have been logged out. Please log in again.",
+  loggedOut: "You have been signed out. Please sign in again.",
   draftLost: "Your draft was not saved.",
 };
 
@@ -159,7 +159,7 @@ export const LOCATE = {
 
 /** The first screen: who is signing in. */
 export const ROLE_TEXT = {
-  title: "Log in",
+  title: "Sign in",
   lead: "Choose how you use the registry.",
   resident: { label: "Resident", detail: "See your own building and ask for an inspection." },
   engineer: { label: "Engineer", detail: "Inspect buildings and write reports." },
@@ -167,7 +167,7 @@ export const ROLE_TEXT = {
 } as const;
 
 export const RESIDENT_SIGN_IN = {
-  title: "Log in as a resident",
+  title: "Sign in as a resident",
   name: "Name",
   phone: "Phone number",
   /** The one resident sign-in number, as shown. The resident login route uses RESIDENT_PHONE. */
@@ -177,8 +177,8 @@ export const RESIDENT_SIGN_IN = {
   codeSent: "We sent a 6-digit code to ",
   code: "Code",
   codeShown: "000000",
-  logIn: "Log in",
-  loggingIn: "Logging in…",
+  logIn: "Sign in",
+  loggingIn: "Signing in…",
   changeName: "Change name",
   missingName: "Enter your name.",
   nameTooLong: (max: number) => `Use at most ${max} characters.`,

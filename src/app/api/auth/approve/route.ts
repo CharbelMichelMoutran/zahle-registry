@@ -11,7 +11,7 @@ const json = (body: unknown, status = 200) => Response.json(body, { status, head
 export async function POST(req: NextRequest) {
   try {
     const engineer = await engineerForToken(req.cookies.get(SESSION_COOKIE)?.value);
-    if (!engineer) return json({ error: "Please log in." }, 401);
+    if (!engineer) return json({ error: "Please sign in." }, 401);
     if (!engineer.approved) {
       const { error } = await createServerSupabase()
         .from("engineers")

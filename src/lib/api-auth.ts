@@ -16,7 +16,7 @@ export async function requireEngineer(
   await connection(); // always checked at request time, never prerendered
   try {
     const engineer = await engineerForToken(req.cookies.get(SESSION_COOKIE)?.value);
-    if (!engineer) return deny(401, "Please log in.");
+    if (!engineer) return deny(401, "Please sign in.");
     if (!engineer.approved) return deny(403, "Your account is waiting for approval.");
     return { engineer };
   } catch (err) {
@@ -38,7 +38,7 @@ export async function requireResident(
   await connection();
   try {
     const residentId = await residentForToken(req.cookies.get(RESIDENT_SESSION_COOKIE)?.value);
-    if (!residentId) return deny(401, "Please log in.");
+    if (!residentId) return deny(401, "Please sign in.");
     return { residentId };
   } catch (err) {
     console.error(err instanceof Error ? err.message : err);

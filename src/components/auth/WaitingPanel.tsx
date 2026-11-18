@@ -62,7 +62,7 @@ function LogoutLink({ onDone }: { onDone: () => void }) {
         }}
         className="min-h-11 px-3 font-medium text-muted underline underline-offset-2 hover:text-ink"
       >
-        Log out
+        Sign out
       </button>
     </p>
   );

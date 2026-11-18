@@ -183,7 +183,7 @@ On open, if the person allows location, a tray rises with the closest building h
 
 ## 8. Words
 - Calm, accurate, kind. Rating wording comes from `docs/engineering.md`.
-- Buttons start with a verb: "Save report", "Create report", "Log in", "Refresh". Never "OK" or "Submit".
+- Buttons start with a verb: "Save report", "Create report", "Sign in", "Refresh". Never "OK" or "Submit".
 
 ## 9. Skills to use
 - **While building:** frontend-design, make-interfaces-feel-better, web-animation-design, emil-design-engineering, and VectorLab's motion, transitions, typography, spacing, colour-palette, anti-slop, viewports, forms, keyboard, labels.
@@ -382,3 +382,4 @@ The owner likes the layout, the map and the predominant grey. The beige ground a
 - **Footer tie.** The footer logo shows without its line. When the visitor reaches the bottom, the ribbon comes down beside the logo, sweeps under it with "945 m · 33.85° N, 35.90° E" written along that stretch and revealed as the ribbon passes, makes one loop, and lays itself along the logo's baseline, where the logo's own line fades in. Under reduced motion it is shown drawn and tied.
 - **Map credit.** On the hero picture itself, bottom right, 12px muted: "Map data © OpenStreetMap contributors · Terrain: SRTM (USGS) via Mapzen".
 
+- **Words (owner, 17 Nov 2026):** "Sign in" / "Sign out" everywhere, never "Log in" / "Log out". "The registry" stays as an ordinary word in body text and headings.

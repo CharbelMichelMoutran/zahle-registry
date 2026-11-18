@@ -144,7 +144,7 @@ export default function ResidentApp() {
             <div role="alertdialog" aria-modal aria-labelledby="logged-out-title" className="w-full max-w-sm rounded-card border border-line bg-surface p-5 shadow-tray">
               <p id="logged-out-title" className="text-lead font-semibold text-ink">{LOGIN_TEXT.loggedOut}</p>
               <Button className="mt-4 w-full" autoFocus onClick={() => window.location.replace("/login?as=resident")}>
-                Log in
+                Sign in
               </Button>
             </div>
           </div>

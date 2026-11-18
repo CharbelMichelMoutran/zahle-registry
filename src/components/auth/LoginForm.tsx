@@ -46,7 +46,7 @@ export default function LoginForm() {
     <form onSubmit={submit} noValidate className="space-y-4">
       <div>
         <p className="micro-label">Engineer</p>
-        <h1 className="mt-1 font-serif text-heading font-medium text-ink">Log in</h1>
+        <h1 className="mt-1 font-serif text-heading font-medium text-ink">Sign in</h1>
       </div>
       {expired && (
         <p role="status" className="rounded-control bg-surface-soft px-3 py-2.5 text-body text-ink">
@@ -84,7 +84,7 @@ export default function LoginForm() {
         disabled={busy}
         className="w-full"
       >
-        {busy ? "Logging in…" : "Log in"}
+        {busy ? "Signing in…" : "Sign in"}
       </Button>
       <p className="text-center text-body text-muted">{LOGIN_TEXT.forgot}</p>
       <p className="text-center text-body text-muted">
