@@ -81,7 +81,10 @@ export default function SignupForm() {
 
   return (
     <form onSubmit={submit} noValidate className="space-y-5">
-      <h1 className="font-serif text-heading font-medium text-ink">Create account</h1>
+      <div>
+        <p className="micro-label">Engineer</p>
+        <h1 className="mt-1 font-serif text-heading font-medium text-ink">Create account</h1>
+      </div>
 
       {field("fullName", { dir: "auto", autoComplete: "name", maxLength: 120 })}
 
@@ -139,7 +142,7 @@ export default function SignupForm() {
       </div>
 
       {error && (
-        <p role="alert" className="rounded-control bg-attention-soft px-3 py-2 text-micro text-attention">
+        <p role="alert" className="rounded-control bg-attention-soft px-3 py-2.5 text-body text-attention">
           {error}
         </p>
       )}

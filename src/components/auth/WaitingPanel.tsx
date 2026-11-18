@@ -41,7 +41,7 @@ export default function WaitingPanel() {
         </p>
       ))}
       {error && (
-        <p role="alert" className="rounded-control bg-attention-soft px-3 py-2 text-micro text-attention">
+        <p role="alert" className="rounded-control bg-attention-soft px-3 py-2.5 text-body text-attention">
           {error}
         </p>
       )}

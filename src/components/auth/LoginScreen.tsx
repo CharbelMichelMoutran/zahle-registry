@@ -45,13 +45,13 @@ function RoleChoice() {
           <li key={role} className="border-t border-line first:border-t-0">
             <Link
               href={`/login?as=${role}`}
-              className="flex min-h-16 items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-soft focus-visible:bg-accent-soft focus-visible:outline-none active:bg-surface-soft"
+              className="group flex min-h-16 touch-manipulation items-center gap-3 px-4 py-3 transition-colors select-none hover:bg-surface-soft focus-visible:bg-accent-soft focus-visible:outline-none active:bg-accent-soft"
             >
               <span className="min-w-0 flex-1">
                 <span className="block text-lead font-semibold text-ink">{ROLE_TEXT[role].label}</span>
                 <span className="block text-body text-muted">{ROLE_TEXT[role].detail}</span>
               </span>
-              <svg viewBox="0 0 20 20" className="h-5 w-5 shrink-0 text-muted" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+              <svg viewBox="0 0 20 20" className="h-5 w-5 shrink-0 text-muted transition-[transform,color] duration-150 ease-out group-hover:translate-x-0.5 group-hover:text-accent motion-reduce:transition-none" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
                 <path d="M8 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>

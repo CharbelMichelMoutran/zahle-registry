@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Wordmark } from "../ui/Wordmark";
 
 /**
@@ -7,7 +8,10 @@ import { Wordmark } from "../ui/Wordmark";
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col items-center bg-ground px-4 pt-12 pb-10 sm:pt-20">
-      <Wordmark />
+      {/* Back to the start: the landing page when signed out; the proxy routes everyone else. */}
+      <Link href="/" aria-label="Zahle Building Registry" className="rounded-control focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">
+        <Wordmark />
+      </Link>
       <main className="mt-10 w-full max-w-[440px]">
         <div className="rounded-card border border-line bg-surface p-5 shadow-tray sm:p-7">{children}</div>
       </main>
