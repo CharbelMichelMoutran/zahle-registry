@@ -141,6 +141,11 @@ export const LOGIN_TEXT = {
 export const approvedMessage = (name: string) => `Account approved. Welcome, ${name}.`;
 
 /** "Locate building" in the top bar (plan.md item 11, engineer version). */
+/** The small map key in the corner of the engineer map (DESIGN.md 14.10). */
+export const MAP_KEY = {
+  title: "Map key",
+};
+
 export const LOCATE = {
   button: "Locate building",
   typeAddress: "Type address",

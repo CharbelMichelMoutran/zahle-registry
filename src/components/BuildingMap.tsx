@@ -13,6 +13,7 @@ import { prefersReducedMotion, springGentle, springSnappy } from "@/lib/motion";
 import type { Colour } from "@/lib/report";
 import HILLSHADE from "@/lib/hillshade-bounds.json";
 import { attachMapNavigation, type MapNavigation } from "./map-navigation";
+import { MapKey } from "./MapKey";
 
 /** Central Zahle, Lebanon. */
 const ZAHLE_CENTER: L.LatLngTuple = [33.8467, 35.9025];
@@ -380,6 +381,7 @@ export default function BuildingMap({
   return (
     <div className={`relative h-full w-full ${dimmed ? "zr-map-dimmed" : ""} ${far ? "zr-map-far" : ""}`}>
       <div ref={containerRef} className="h-full w-full" aria-label="Map of Zahle buildings" />
+      {residentOwnId === undefined && <MapKey />}
       <ZoomButtons
         canZoomIn={zoom < MAX_ZOOM - 0.01}
         canZoomOut={zoom > MIN_ZOOM + 0.01}
