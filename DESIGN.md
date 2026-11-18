@@ -24,8 +24,8 @@ The owner wants these relied on heavily: the **Beirut Built Environment Database
 | **Precarious Homes** | **Serif display type** for titles and one-line statements: it feels human, serious and literary. Plain, honest, human wording about housing. Full-bleed photography. | Dark top bar. We have no photography in the demo. |
 
 How they change this design:
-1. **Wordmark.** Stacked and bilingual like the lab's logo: "zahle / building / registry" on the left in Inter Tight 600 lower-case, **زحلة** on the right in IBM Plex Sans Arabic, large. Use it on the login, sign-up and waiting screens, and small (one line) in the top bar.
-2. **Display serif.** Add one serif for display moments only: **Source Serif 4**, weight 500. Use it for the sign-up and waiting screen titles, the empty-state line, and the preview tray's building heading. Everything else stays Inter. This is where the "City of Poetry" voice lives.
+1. **Wordmark.** *(Superseded by the logo in section 15.)* Stacked and bilingual like the lab's logo: "zahle / building / registry" on the left in Inter Tight 600 lower-case, **زحلة** on the right in IBM Plex Sans Arabic, large. Use it on the login, sign-up and waiting screens, and small (one line) in the top bar.
+2. **Display serif.** *(Now IBM Plex Serif, section 4.)* Add one serif for display moments only: **Source Serif 4**, weight 500. Use it for the sign-up and waiting screen titles, the empty-state line, and the preview tray's building heading. Everything else stays Inter. This is where the "City of Poetry" voice lives.
 3. **Micro-labels.** Section and field-group labels use 13px uppercase, letter-spacing 0.08em, weight 600, in `text-muted`: "HISTORY", "BUILDING", "OBSERVATIONS". This is our Raycast-meets-lab detail.
 4. **Dashed hairline** (`1px dashed border`) divides sections inside a tray. Solid `border` stays for panels and rows.
 5. **Hatch means unknown.** A fine diagonal hatch in `border` colour is the fill for **"Not yet inspected"** buildings and for any "Not yet verified" value. It is a functional use: it tells colour-blind users "no data", and it echoes the lab's hatch. It appears **nowhere else**. No other textures or patterns.
@@ -39,27 +39,28 @@ How Zahle shows up. Each item is small, and each one has a job:
 
 | Zahle thing | Where it appears in the design |
 |---|---|
-| **Limestone** | The warm cream ground (`ground`) and the soft surfaces. The calm base of everything. |
+| **Limestone** | Was the warm cream ground. **Replaced by the owner, 17 Nov 2026 (section 15):** the ground is now a cool off-white (`ground` `#F6F7F8`). Limestone survives only as the grey of "Not yet inspected". |
 | **Red roof tile (terracotta)** | The strongest status colour (section 3). Warm, not alarming. |
 | **Vineyards** | The "good" green. |
 | **The Berdawni river** | The accent blue: buttons, links, selected states, focus. |
 | **Bekaa sun** | `sun`, for the one celebration moment after a saved report. |
 | **The three-arch window (Lebanese triple arch)** | The shape language. The tray's grab handle is a small arch. Empty states and the brand mark use a single-line arch icon. The three-level status uses three arches of rising fill. One shape, used with restraint. |
-| **Arabic name** | The wordmark shows "Zahle Building Registry" with **زحلة** beside it in IBM Plex Sans Arabic, in the top-left. |
+| **Arabic name** | The logo "Zahle on Record": **زحلة** flows into "on record" along one line (section 15). |
 | **Poetry** | Short, human lines in empty states and the "Waiting for OEA approval" screen. Two or three lines in the whole app, never decoration. |
 
 Rules for the Zahle theme: no stock "Lebanese" clichés (no cedar tree, no flag colours, no ornament patterns, no illustrations of people or buildings). No textures or patterns on surfaces, except the one functional hatch for "not yet inspected" (section 1). If a Zahle idea does not carry meaning, leave it out.
 
 ## 3. Colours
 
-Light and warm. Dark text is a deep slate, never pure black.
+Light and cool (owner, 17 Nov 2026, section 15). Dark text is a deep slate, never pure black.
 
 | Token | Hex | Zahle name | Use |
 |---|---|---|---|
-| `ground` | `#F7F6F2` | Limestone | Page background behind trays |
+| `ground` | `#F6F7F8` | | Page background behind trays. Cool off-white (section 15); text `#5B6472` on it is 5.6:1 |
 | `surface` | `#FFFFFF` | | Trays, cards, inputs |
-| `surface-soft` | `#F1EFEA` | | Hover rows, secondary buttons |
-| `border` | `#E6E3DC` | | Fine 1px borders (Raycast precision) |
+| `surface-soft` | `#EFF1F4` | | Hover rows, writing areas, pressed secondary buttons. `text-muted` on it is 5.3:1 |
+| `border` | `#E2E5E9` | | Fine 1px borders (Raycast precision) |
+| `border-strong` | `#CFD4DA` | | The edge of secondary buttons and top-bar controls |
 | `text` | `#1F2A37` | | Main text |
 | `text-muted` | `#5B6472` | | Secondary text. Must pass 4.5:1 on white |
 | `accent` | `#1E5A8C` | Berdawni dusk | Main buttons, links, selected states, focus ring (7.25:1 with white text; owner, 17 Nov 2026) |
@@ -90,20 +91,30 @@ Status colours differ in lightness as well as hue. They always come with their w
 
 ## 4. Type
 
+Owner, 17 Nov 2026 (section 15): IBM Plex replaces Inter, Inter Tight and Source Serif 4. One family, a sans and a serif cut, engineered and slightly technical, which suits a record kept by engineers.
+
 | Role | Font | Notes |
 |---|---|---|
-| Headings | Inter Tight, 600 | |
-| Display moments | Source Serif 4, 500 | Titles on sign-up and waiting screens, empty-state lines, the building heading in the preview tray. Nowhere else. |
-| Micro-labels | Inter, 600, 13px, uppercase, letter-spacing 0.08em | Section names inside trays |
-| Body and UI | Inter, 400 and 500 | |
-| Numbers | Inter with tabular numbers | Dates, years, counts |
-| Arabic | IBM Plex Sans Arabic | Names, observations, the wordmark |
+| Headings in the app | IBM Plex Sans, 600 | |
+| Display moments | IBM Plex Serif, 500 | Landing headline and section titles, titles on sign-in, sign-up and waiting screens, empty-state lines. Slight negative tracking (−0.01 to −0.015em) only at 24px and above. |
+| Micro-labels | IBM Plex Sans, 600, 13px, uppercase, letter-spacing 0.08em | Section names inside trays |
+| Body, UI and buttons | IBM Plex Sans, 400 and 500 | Buttons and interactive labels at 500 |
+| Numbers | IBM Plex Sans with tabular numbers (`.tabular`) | Dates, years, counts |
+| Arabic | IBM Plex Sans Arabic | Names, observations, every Arabic text a person types |
+| The logo | Outlined letters, not a web font | زحلة in Markazi Text 500 and "on record" in IBM Plex Serif 500, drawn once by `scripts/render-logo.ts`. Markazi is no longer loaded as a font. |
 
-Scale: 13 / 15 / 17 / 20 / 24 / 32 px. At most 3 sizes on one screen. Weights 400, 500, 600 only. `dir="auto"` on text inputs and on any user text. The UI stays in English.
+Scale: 13 / 15 / 17 / 20 / 24 / 32 px (the landing headline 56px). At most 3 sizes on one screen. Weights 400, 500, 600 only. `dir="auto"` on text inputs and on any user text. The UI stays in English.
 
 ## 5. Shape and depth
 
-- Radius: trays 24px, cards 16px, buttons and inputs 12px, chips 999px.
+Owner, 17 Nov 2026 (section 15): crisper corners and buttons.
+
+- Radius: trays 24px, cards and panels 12px, buttons, inputs and segmented controls 8px, rating chips 6px. Trays keep 24px: they are the large, springy surfaces from Family, and an 8px control inside 16 to 20px of tray padding nests correctly in a 24px corner.
+- **Buttons, everywhere** (`src/components/ui/button-styles.ts`): 40px visual height with an invisible hit area that reaches 44px; 8px corners; IBM Plex Sans 500 at 15px; press scales to 0.97 and springs back (`spring-snappy`).
+  - Primary: `accent` fill, a hairline darker edge, a faint inner top highlight and a 1–2px shadow under 0.2 alpha of the accent.
+  - Secondary: white, 1px `border-strong`, a 1px shadow; hover `surface-soft`.
+  - Ghost: no border, muted text; hover `surface-soft`.
+  - Top-bar controls (Locate building, the account menu) use the secondary look.
 - Depth: 1px `border` first, then a soft shadow. Shadow alpha stays **below 0.08** (for example `0 8px 32px rgba(31, 42, 55, 0.07)`), never a hard drop-shadow.
 - A list or table sits in a bordered panel with hairline row dividers. It is never bare text on the ground.
 - 8px spacing rhythm (4px for tight details). Touch targets at least 44px.
@@ -363,3 +374,11 @@ The owner likes the layout, the map and the predominant grey. The beige ground a
 | Ribbon | A **river-blue** (`#1E5A8C`) ribbon that grows out of a letter of the logo at the top left and runs down through the text column (the part without the map), tying the words together and leading the eye from headline to paragraph to sections. Only on the landing page. |
 | Footer | The new logo only; everything else removed. **Easter egg:** the ribbon ends in the footer and ties itself into the logo when the visitor scrolls to the bottom, and the altitude and coordinates ("945 m · 33.85° N, 35.90° E") interact with the ribbon (for example written along it, or revealed as it ties). |
 | Map | Unchanged. |
+
+### 15.1 As built (coder, 17 Nov 2026; for the owner to confirm)
+
+- **Logo construction.** زحلة is set in Markazi Text 500 and "on record" in IBM Plex Serif 500, at 0.42 of the Arabic size (0.54 in the small top-bar cut, so it still reads at about 30px tall). The shared line leaves the lower stroke of the ح where it touches the baseline, at that stroke's thickness, thins as it passes through the tail of ز, shades from ink to river blue, and runs on as the line "on record" sits on. The letters are outlined by `scripts/render-logo.ts` with HarfBuzz (the browsers' own shaping engine), so the Arabic joins correctly and no logo font is loaded. Component: `src/components/ui/Logo.tsx`, cuts `large` and `small`.
+- **Ribbon.** It leaves the logo from the tip of the ز's tail, as a hairline that shades from ink into river blue, and runs down a lane in the margin beside the text, never over it. On laptops it swings into the open column between the hero and "The record", passes behind the product pictures and comes out in the gap between the About columns. On phones it stays in the margin all the way down. It draws with scroll and never undraws. Stroke about 1.75px. `src/components/landing/Ribbon.tsx`.
+- **Footer tie.** The footer logo shows without its line. When the visitor reaches the bottom, the ribbon comes down beside the logo, sweeps under it with "945 m · 33.85° N, 35.90° E" written along that stretch and revealed as the ribbon passes, makes one loop, and lays itself along the logo's baseline, where the logo's own line fades in. Under reduced motion it is shown drawn and tied.
+- **Map credit.** On the hero picture itself, bottom right, 12px muted: "Map data © OpenStreetMap contributors · Terrain: SRTM (USGS) via Mapzen".
+
