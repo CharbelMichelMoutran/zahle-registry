@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Wordmark } from "../ui/Wordmark";
+import { Logo } from "../ui/Logo";
 
 /**
  * Frame for the sign-up, login and waiting screens: the large bilingual wordmark
@@ -9,8 +9,8 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col items-center bg-ground px-4 pt-12 pb-10 sm:pt-20">
       {/* Back to the start: the landing page when signed out; the proxy routes everyone else. */}
-      <Link href="/" aria-label="Zahle Building Registry" className="rounded-control focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">
-        <Wordmark />
+      <Link href="/" aria-label="Zahle on Record" className="rounded-control focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">
+        <Logo className="h-14 sm:h-16" title={null} />
       </Link>
       <main className="mt-10 w-full max-w-[440px]">
         <div className="rounded-card border border-line bg-surface p-5 shadow-tray sm:p-7">{children}</div>

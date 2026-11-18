@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Landing from "@/components/landing/Landing";
 
 export const metadata: Metadata = {
-  title: "Zahle Building Registry",
+  title: "Zahle on Record",
   description: "A lasting record of every building in Zahle, made by civil engineers.",
   alternates: { canonical: "/" },
 };

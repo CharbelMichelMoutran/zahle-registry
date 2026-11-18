@@ -11,7 +11,7 @@ import { WELCOME_KEY } from "./auth/WaitingPanel";
 import { LocateMenu } from "./LocateMenu";
 import MapView, { type MapViewHandle } from "./MapView";
 import { Button, IconButton } from "./ui/Button";
-import { Wordmark } from "./ui/Wordmark";
+import { Logo } from "./ui/Logo";
 
 /** The signed-in app: header with the engineer's name and Log out, and the map. */
 export default function RegistryApp() {
@@ -63,7 +63,7 @@ export default function RegistryApp() {
       <div className="flex h-dvh flex-col overflow-hidden bg-ground">
         <header className="z-[1200] flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface px-4">
           <h1 className="shrink-0">
-            <Wordmark size="small" />
+            <Logo cut="small" className="h-8" />
           </h1>
           {/* Positioned, so the Locate popover can hang from the right edge on phones. */}
           <div className="relative ml-auto flex min-w-0 items-center gap-2">
@@ -77,11 +77,11 @@ export default function RegistryApp() {
             <div className="pointer-events-none absolute inset-x-0 top-3 z-[1050] flex justify-center px-4">
               <p
                 role="status"
-                className="motion-safe-only pointer-events-auto flex min-h-11 animate-[fadeout_5s_ease-in_forwards] items-center gap-3 rounded-full border border-line bg-surface py-1 pr-1 pl-4 text-body text-ink shadow-tray"
+                className="motion-safe-only pointer-events-auto flex min-h-11 animate-[fadeout_5s_ease-in_forwards] items-center gap-3 rounded-card border border-line bg-surface py-1 pr-1 pl-4 text-body text-ink shadow-tray"
               >
                 <span className="h-2 w-2 shrink-0 rounded-full bg-vine" aria-hidden />
                 <bdi dir="auto">{welcome}</bdi>
-                <IconButton label="Dismiss" onClick={() => setWelcome(null)} className="h-9 w-9 rounded-full">
+                <IconButton label="Dismiss" onClick={() => setWelcome(null)} className="h-9 w-9">
                   <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
                     <path d="M5 5l10 10M15 5L5 15" strokeLinecap="round" />
                   </svg>

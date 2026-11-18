@@ -12,12 +12,12 @@ import { LocateMenu } from "./LocateMenu";
 import ResidentTray from "./ResidentTray";
 import { coveredRectOf } from "./tray-rect";
 import { Button } from "./ui/Button";
-import { Wordmark } from "./ui/Wordmark";
+import { Logo } from "./ui/Logo";
 
 // Leaflet needs `window`, so the map renders only in the browser.
 const BuildingMap = dynamic(() => import("./BuildingMap"), {
   ssr: false,
-  loading: () => <div className="h-full w-full bg-slate-100" />,
+  loading: () => <div className="h-full w-full bg-ground" />,
 });
 
 /** The resident's own building and its latest rating (null: not yet inspected). */
@@ -110,7 +110,7 @@ export default function ResidentApp() {
       <div className="flex h-dvh flex-col overflow-hidden bg-ground">
         <header className="z-[1200] flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface px-4">
           <h1 className="shrink-0">
-            <Wordmark size="small" />
+            <Logo cut="small" className="h-8" />
           </h1>
           <div className="relative ml-auto flex min-w-0 items-center gap-2">
             <LocateMenu onLocate={locate} waitForLocation />

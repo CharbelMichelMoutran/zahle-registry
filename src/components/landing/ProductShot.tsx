@@ -2,7 +2,7 @@ import { COLOUR_CONTENT, LANDING_EXAMPLE as X, REPORT_TEXT } from "@/lib/content
 import { COLOURS } from "@/lib/report";
 import { ColourBadge, STATUS_TEXT } from "../report/ColourBadge";
 import { RatingArches } from "../ui/Arch";
-import { Wordmark } from "../ui/Wordmark";
+import { Logo } from "../ui/Logo";
 
 /**
  * Product visuals for the public landing page (stageshow): a still of the
@@ -44,7 +44,7 @@ function MapWindow() {
       className="relative h-[520px] overflow-hidden rounded-card border border-line bg-ground shadow-tray md:absolute md:top-0 md:left-0 md:h-[560px] md:w-[80%]"
     >
       <div className="flex h-12 items-center gap-3 border-b border-line bg-surface px-4">
-        <Wordmark size="small" />
+        <Logo cut="small" className="h-7" title={null} />
         <span className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-control border border-line px-2.5 text-micro font-medium text-ink">
           <svg viewBox="0 0 20 20" className="h-4 w-4 text-muted" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
             <circle cx="10" cy="10" r="5.5" />
