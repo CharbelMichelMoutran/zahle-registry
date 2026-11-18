@@ -4,9 +4,9 @@ Last updated: 17 Nov 2026, night (see "UI pass" below). Read this first, then `p
 
 ## Snapshot
 
-- **Live site:** https://zahle-registry.vercel.app (everything behind login). Last production deploy is commit `6be74a9`, confirmed Ready and aliased.
+- **Live site:** https://zahle-registry.vercel.app (everything behind login). Last production deploy is commit `67a87b6` (UI pass stages 0 to 3), confirmed Ready and aliased on 17 Nov 2026.
 - **Repo:** https://github.com/CharbelMichelMoutran/zahle-registry. **Private. Keep it private until the owner says.**
-- **Git:** `main`, 15 local commits **not pushed** (the UI pass, stages 0 to 3). Live site still shows the old design until the owner says "push and deploy".
+- **Git:** `main`, everything committed and pushed.
 - **Database:** all 8 migrations applied (last: `20261119000000_residents.sql`). Append-only triggers on reports and construction-date changes checked enabled after the 17 Nov migration.
 - **Data now:** 4 engineer accounts, 4 reports, 1 resident, 1 resident building (from the owner's own testing on 17 Nov; the reports are permanent unless the owner approves a cleanup).
 - **Agents running:** none.
@@ -39,7 +39,7 @@ Resident privacy is enforced by our server (scoped to the session's resident) wi
 - **AI direction, open decision (devil's-advocate review given to the owner):** the owner proposed that Claude interviews residents, picks a rating colour shown with a Claude-orange outline, and engineers query Claude for triage. The orchestrator recommended that Claude rates **visit urgency** (Urgent / Soon / Routine, orange ring), **never the condition colour**; intake is photo-first with 4 to 6 questions; engineers get a ranked queue (urgency x residents) with Claude's summary and evidence; learning is measured by a fixed test set, protected list in code, rulebook with engineer approval; ask the OEA contact whether they would use the ranked list. **The owner has not decided.** `plan.md` is unchanged on this.
 - **Teaching Claude engineering, proposed:** context file, fixed output schema, protected list in code, similar past cases, rulebook later, and a 30 to 50 case test set (civil-engineer drafts, OEA contact checks). Not started; waits for the owner.
 
-## UI pass, 17 Nov 2026 night (plan item 23; local commits only, not pushed or deployed)
+## UI pass, 17 Nov 2026 night (plan item 23; pushed and deployed at the owner's request)
 
 Owner decisions: no engineer side panel (Later list), no mockups, review the real app per stage. Picks: accent `#1E5A8C`, OSM toned grey plus a pre-rendered Zahle hillshade, Markazi Text 500 for Arabic display, a small collapsible map key (engineer map only). See `DESIGN.md` sections 13 and 14.
 
