@@ -28,7 +28,7 @@ export function AccountMenu({ name, onLogout }: { name: string | null; onLogout:
         aria-expanded={open}
         whileTap={{ scale: 0.97 }}
         onClick={() => setOpen((o) => !o)}
-        className="flex min-h-11 min-w-0 max-w-[260px] items-center gap-2 rounded-control border border-line bg-surface px-3 text-body text-ink transition-colors hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-accent"
+        className="relative flex h-10 min-w-0 max-w-[260px] items-center gap-2 rounded-control px-3 border border-line-strong bg-surface text-body font-medium text-ink shadow-[0_1px_2px_rgb(31_42_55/0.05)] transition-[background-color,border-color] duration-150 ease-out hover:border-[#bcc3cb] hover:bg-surface-soft after:absolute after:inset-x-0 after:-inset-y-0.5 after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <bdi dir="auto" className="truncate">{name ?? "Account"}</bdi>
         <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-muted" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>

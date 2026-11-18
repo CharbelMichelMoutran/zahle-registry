@@ -91,7 +91,7 @@ export function LocateMenu({
             setOpen(true);
           }
         }}
-        className="flex h-11 min-w-11 items-center justify-center gap-2 rounded-control border border-line bg-surface text-body text-ink transition-colors hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-accent md:px-3"
+        className="relative flex h-10 min-w-10 items-center justify-center gap-2 rounded-control md:px-3 after:-inset-x-0.5 border border-line-strong bg-surface text-body font-medium text-ink shadow-[0_1px_2px_rgb(31_42_55/0.05)] transition-[background-color,border-color] duration-150 ease-out hover:border-[#bcc3cb] hover:bg-surface-soft after:absolute after:-inset-y-0.5 after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <LocateIcon className="h-5 w-5 shrink-0 text-muted" />
         <span aria-hidden className="hidden whitespace-nowrap md:inline">
