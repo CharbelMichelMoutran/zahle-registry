@@ -298,7 +298,7 @@ export default function ReportForm({
                 aria-label="Construction month (optional)"
                 value={draft.constructionMonth}
                 onChange={(e) => set("constructionMonth", e.target.value)}
-                className={`${compactInputClass} w-[4.75rem]`}
+                className={`${compactInputClass} w-[5.5rem]`}
               >
                 <option value="">{REPORT_TEXT.month}</option>
                 {SHORT_MONTHS.map((m, i) => (
