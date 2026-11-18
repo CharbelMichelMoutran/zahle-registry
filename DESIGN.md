@@ -344,3 +344,22 @@ New `accent-soft`: `#E8EFF7` (main text on it 12.5:1; A on it 5.31:1; B on it 6.
 - **Arabic display font:** Markazi Text 500 (14.7). IBM Plex Sans Arabic stays for body.
 - **Map key:** yes, a small collapsible key in a map corner: green, amber, red with their words, the hatch for "Not yet inspected". Claude's orange ring is added to the key only when flags exist. Collapses to one button.
 - Still open: the "Show imminent risk" command (14.9, 10b).
+
+## 15. Second UI pass, 17 Nov 2026 (owner; this section wins over all older sections)
+
+The owner likes the layout, the map and the predominant grey. The beige ground and the fonts read as "cheap and vibecoded". Keep the layout and the map; change the following.
+
+| Topic | Decision |
+|---|---|
+| Name | **Zahle on Record** everywhere (landing, app top bar, sign-in screens, browser tab). The GitHub repo stays `zahle-registry`. |
+| Logo | Arabic **زحلة** flows into the English "on record": one stroke of the Arabic (for example the baseline or the tail of the ة) extends and becomes the line "on record" sits on. Bilingual in one gesture. Replaces the stacked wordmark. |
+| Ground | **Cool off-white**, around `#F6F7F8`, replaces the beige limestone `#F7F6F2` everywhere except the map. No warm tint. |
+| Fonts | **IBM Plex Sans** (UI and body) and **IBM Plex Serif** (display), replacing Inter, Inter Tight and Source Serif 4. IBM Plex Sans Arabic stays for Arabic body text. Markazi Text for زحلة in the logo is kept only if it suits the new logo; the coder decides with the owner. |
+| Buttons | Crisp: 8px corners, tighter height (still 44px touch target), IBM Plex Sans medium, a fine border on secondary buttons. Applies to every button. |
+| Landing headline | "Every building in Zahle, inspected." |
+| Landing problem line | "In Lebanon, building records sit on paper no one can reach. Every inspection starts from scratch. We made records accessible so Zahle could be the first city to adequately meet its citizens' needs." |
+| Landing sign-in | **One** sign-in button only, at the top right, opening the role choice. Remove the buttons under the paragraph and at the bottom of the page. |
+| Landing section title | "No engineer has to start from scratch." (replaces "The next engineer starts from the record, not from scratch."). Other paragraphs unchanged. |
+| Ribbon | A **river-blue** (`#1E5A8C`) ribbon that grows out of a letter of the logo at the top left and runs down through the text column (the part without the map), tying the words together and leading the eye from headline to paragraph to sections. Only on the landing page. |
+| Footer | The new logo only; everything else removed. **Easter egg:** the ribbon ends in the footer and ties itself into the logo when the visitor scrolls to the bottom, and the altitude and coordinates ("945 m · 33.85° N, 35.90° E") interact with the ribbon (for example written along it, or revealed as it ties). |
+| Map | Unchanged. |
