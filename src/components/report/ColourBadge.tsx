@@ -19,24 +19,36 @@ export const DOT_CLASS: Record<Colour, string> = {
   red: "bg-rooftile",
 };
 
+const SIZE = {
+  small: "min-h-7 gap-2 px-2.5 py-0.5 text-micro",
+  // The preview tray leads with the status (DESIGN.md 14.9 item 7): the largest thing in it.
+  large: "min-h-10 gap-2.5 pr-4 pl-3 py-1 text-lead",
+} as const;
+
 /** A rating is never shown alone: arches, colour and the word together (plan rule 1). */
-export function ColourBadge({ colour, long = false }: { colour: Colour; long?: boolean }) {
+export function ColourBadge({
+  colour,
+  long = false,
+  size = "small",
+}: {
+  colour: Colour;
+  long?: boolean;
+  size?: keyof typeof SIZE;
+}) {
   const c = COLOUR_CONTENT[colour];
   return (
-    <span
-      className={`inline-flex min-h-7 items-center gap-2 rounded-full border px-2.5 py-0.5 text-micro font-medium text-ink ${STATUS_BG[colour]}`}
-    >
-      <RatingArches colour={colour} className={STATUS_TEXT[colour]} />
+    <span className={`inline-flex items-center rounded-full border font-medium text-ink ${SIZE[size]} ${STATUS_BG[colour]}`}>
+      <RatingArches colour={colour} large={size === "large"} className={STATUS_TEXT[colour]} />
       {long ? c.label : c.word}
     </span>
   );
 }
 
 /** Neutral, with the "unknown" hatch; never styled as a warning (plan rule 3). */
-export function NotYetInspectedBadge() {
+export function NotYetInspectedBadge({ size = "small" }: { size?: keyof typeof SIZE }) {
   return (
-    <span className="inline-flex min-h-7 items-center gap-2 rounded-full border border-line bg-surface px-2.5 py-0.5 text-micro font-medium text-muted">
-      <span className="hatch h-3.5 w-3.5 rounded-[4px] border border-line" aria-hidden />
+    <span className={`inline-flex items-center rounded-full border border-line bg-surface font-medium text-muted ${SIZE[size]}`}>
+      <span className={`hatch shrink-0 rounded-[4px] border border-line ${size === "large" ? "h-5 w-5" : "h-3.5 w-3.5"}`} aria-hidden />
       {NOT_YET_INSPECTED}
     </span>
   );
