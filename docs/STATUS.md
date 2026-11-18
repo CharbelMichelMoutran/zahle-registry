@@ -50,6 +50,7 @@ Owner decisions: no engineer side panel (Later list), no mockups, review the rea
 | 2 Landing page | Done: public `/` for signed-out visitors (served from `/welcome` by `src/proxy.ts`), static map image from public OSM (`npm run render:landing`), no data or API calls |
 | 3 Fonts and polish | Done: Markazi Text for زحلة, tray order (status, built, date, one line), report and sign-in polish |
 | 4 Final check (`break-ui`, `emil-design-eng`) | Not started |
+| Second pass (DESIGN.md 15) | Done and live: renamed **Zahle on Record**, new logo, `#F6F7F8` ground, IBM Plex Sans/Serif, 8px buttons, landing copy, one Sign in, river ribbon, footer tie with 945 m and coordinates. "Sign in"/"Sign out" everywhere. Tested in Chrome only, not Safari or a real phone; signed-in screens not seen with real data. |
 
 Not seen in a browser by any agent: the real signed-in map, tray and save with real data (no logins were made). Owner to confirm: 56px landing headline; river and roads on the hero map. Later list candidate: a building name or number field.
 
