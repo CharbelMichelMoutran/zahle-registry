@@ -231,7 +231,6 @@ export const LANDING = {
   closing: "Sign in to the registry.",
   footer: {
     line: "A building registry for Zahle, Lebanon.",
-    credit: "Designed and built by Charbel Moutran.",
     attribution: "Map data © OpenStreetMap contributors · Terrain: SRTM (USGS) via Mapzen",
   },
 } as const;

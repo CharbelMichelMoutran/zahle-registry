@@ -147,7 +147,6 @@ function Footer() {
         <div className="space-y-3">
           <Wordmark size="small" />
           <p className="text-body text-muted">{T.footer.line}</p>
-          <p className="text-body text-muted">{T.footer.credit}</p>
         </div>
         <p className="text-micro text-muted md:max-w-[22rem] md:text-right">{T.footer.attribution}</p>
       </div>
