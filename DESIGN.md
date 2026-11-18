@@ -208,3 +208,22 @@ Still out, or changed from the owner's first draft:
 **Decided: the rating colours.** First option A (no red), then reversed on 16 Nov 2026: **the worst rating is red** (section 3). Wording stays by meaning, from the engineering doc. The draft's "Reinforcement recommended" is **not** used for the worst rating, because it is softer than "unsafe / imminent risk" and could mislead. Orange is now Claude's flag colour.
 
 **Added:** the Beirut Urban Lab references (section 1), the serif display type and micro-labels (section 4), and the hatch for "not yet inspected".
+
+## 13. UI pass, 17 Nov 2026 (owner interview; this section wins over older sections where they differ)
+
+New references from the owner: Open Map Lebanon's Beirut Recovery Map, Beirut Urban Lab, Stamen Design and the Stamen map styles (cartography); Morcos Key, TPTQ Arabic and Kristyan Sarkis (Lebanese and Arabic type). Goal: not only pretty, but **easy to navigate, with attention drawn to the important details**.
+
+| Topic | Decision |
+|---|---|
+| Direction | **Evolve.** Keep limestone ground, springy trays, green/amber/red ratings, hatch for unknown. Add stronger cartography and more editorial, bilingual type. |
+| Device | Laptop first. Phone (375px) must still work well. |
+| Map base | **Terrain feel, like Stamen Terrain, from a free source with no account** (for example a tinted hillshade under a pale base, or OpenTopoMap toned down). Sannine and the valley should be felt, but the map stays quiet so the footprints carry the colour. No Stadia account. |
+| Attention on the engineer map | **Red (imminent risk) buildings stand out**: stronger outline, still visible when zoomed out. Everything else calmer. |
+| Engineer side panel | Laptop: a slim left panel with (1) a **status summary**: counts per rating plus "Not yet inspected", tap a count to filter the map; (2) **recent activity**: the latest 5 to 8 reports by **all engineers** (building, rating chip with word, engineer, date), click to fly there; (3) an **always-on legend** (colours, hatch, Claude's orange ring) at the bottom. The building tray opens over the panel. Phone: the panel becomes a bottom sheet. |
+| Landing page (new, public) | Calm and serious, like Beirut Urban Lab. Serif headline (draft: "Every building in Zahle, remembered."), one line on the problem, a map-visual hero (terrain and footprints, no real ratings or building data), product visuals, then "Sign in as engineer" and "Sign in as resident". No photographs. No demo wording. |
+| Arabic type | **Free fonts close in spirit to Lebanese type design.** A calligraphic-rooted Google font (for example Noto Naskh Arabic or Readex Pro; the coder proposes in the mockup) for the wordmark and display. IBM Plex Sans Arabic stays for body text. |
+| Accent | A **deeper, calmer river blue** replaces `#2F7CF6`; it must read well on terrain and pass contrast. Exact hex chosen in the mockup. |
+| Motion | Springy but restrained (section 6). One hero entrance on the landing page. Nothing loops (except Claude's flag pulse, which stops under reduced motion). |
+| Process | Mockups first (2 to 3 options for the landing page and the engineer map), the owner picks, then the coder builds. Coder only; no devil's-advocate browser test for this pass. |
+
+**Skills for this pass** (installed in `.claude/skills/`; this file wins on conflicts): Emil Kowalski's `emil-design-eng`, `apple-design`, `animate`, `choreograph`, `gestures`, `mobile-native`, `break-ui`; Benji Taylor's `stageshow` (product visuals on the landing page); Leon Lin's `design-taste-frontend` (landing page only; ignore its photography and shader rules, we use no photos); plus section 9.
