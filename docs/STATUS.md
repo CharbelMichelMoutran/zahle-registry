@@ -4,7 +4,7 @@ Last updated: 22 Nov 2026. Read this first, then `plan.md` (source of truth) and
 
 ## Where it stands
 
-- **Live:** https://zahle-registry.vercel.app (open to anyone while login is frozen). Production = commit `PRODCOMMIT`.
+- **Live:** https://zahle-registry.vercel.app (open to anyone while login is frozen). Production = commit `b82ca8c` (deployed 22 Nov).
 - **Repo:** https://github.com/CharbelMichelMoutran/zahle-registry. **Private until the owner says.**
 - **Database:** 10 migrations applied (last `20261122000100_demo_accounts.sql`). Resident tables removed. Append-only triggers on.
 - **Data:** 4 engineer accounts plus the 2 stand-ins (Demo Engineer, Demo EMT), and the reports from the owner's testing. Reports are permanent unless the owner approves a cleanup.
