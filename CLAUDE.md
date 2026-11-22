@@ -1,34 +1,59 @@
-# Zahle Building Registry
+# Zahle on Record (Zahle Building Registry)
 
-A building registry for civil engineers in Zahle, Lebanon. A portfolio demo, built in about 30 hours.
+A building registry for civil engineers in Zahle, Lebanon: a map of every building with an add-only history of inspections. A portfolio demo.
 
-**Read `plan.md` before every task.** It is the source of truth for the problem, scope, design rules, and decisions. If a request conflicts with it, stop and ask the project owner.
+## Start of every session
 
-**At the start of a session, also read `docs/STATUS.md`.** It says where the project stands, what the owner is waiting on, and how to resume. Read `DESIGN.md` before any UI work.
+1. Read `docs/STATUS.md` first: where things stand, open tasks, known bugs.
+2. Read `plan.md`: the source of truth for scope, rules and decisions. If a request conflicts with it, stop and ask the owner.
+3. Read `DESIGN.md` before any UI work.
 
-## Your role: orchestrator
+## Rules for replies
 
-In the main session you are the orchestrator. The project owner writes no code; they direct, decide, and review.
+- Always use the caveman skill for replies, unless the owner says "normal mode".
+- Keep this file under 200 lines.
 
-- **See the big picture.** Explain the experience and how features fit together in plain words, without jargon. The project owner is not a programmer.
-- **Keep `plan.md` current.** When the project owner decides something, update the plan and say what changed. Anything outside section 7 "In" goes on the Later list, not into the build.
-- **Break work into small tasks** and send them to the agents:
-  - `civil-engineer`: engineering content (fields, colour wording, codes, sample data). Writes `docs/engineering.md`.
-  - `coder`: all app code and UI.
-  - `devils-advocate`: tries to break each finished feature in a real browser. Reports only.
-- **Loop:** civil-engineer (if the feature has engineering content) → coder → devils-advocate → coder fixes what matters → show the project owner.
-- **Give each agent a full brief.** Agents start with no memory of this conversation. Say what to build, which plan sections apply, and what "done" looks like.
-- **Decisions belong to the project owner.** Bring them choices with a recommendation; do not decide scope, design direction, or engineering content alone.
-- **Report honestly.** If something is broken, unfinished, or skipped, say so.
+## Stack
+
+- Next.js 16 + React 19 (TypeScript, App Router), Tailwind CSS 4. This Next.js version differs from older ones: see `AGENTS.md`.
+- Leaflet with OpenStreetMap tiles. Building outlines are copied from OSM into our database.
+- Supabase (Postgres + PostGIS) for data. Schema is in `supabase/migrations/`.
+- Vercel for hosting. Claude API for the planned AI features.
+
+## Run and check
+
+```bash
+npm install
+npm run dev               # local site at http://localhost:3000
+npm run build             # production build, also type-checks
+npm run lint              # ESLint
+npm run import:buildings  # copy OSM building outlines (safe to re-run)
+```
+
+There are no automated tests. Check changes in a real browser with the Playwright MCP.
+
+Local secrets go in `.env.local` (git-ignored): `SUPABASE_URL`, `SUPABASE_SECRET_KEY`.
+
+## How to work
+
+The owner writes no code. They direct, decide and review.
+
+- Do the work directly. No sub-agents unless the owner asks.
+- Explain in plain words, without jargon.
+- Keep `plan.md` current. When the owner decides something, update the plan and say what changed. Anything outside section 7 "In" goes on the Later list.
+- Keep `docs/STATUS.md` current at the end of each work session.
+- Commit locally in small steps. Push, apply migrations and deploy only when the owner says so.
+- Decisions belong to the owner. Bring choices with a recommendation.
+- Report honestly. If something is broken, unfinished or skipped, say so.
 
 ## Rules for everyone
 
-- Keys and secrets never go into code or git. They live in Vercel and Supabase settings, and in `.env.local` locally (git-ignored).
-- Commits: small, clear messages. The repo must look good on the project owner's GitHub (CharbelMichelMoutran).
-- Never overwrite the record: inspections and documents are added, never edited or deleted (plan section 4).
-- The UI is in English; Arabic text must display and type correctly, right to left.
+- Keys and secrets never go into code or git. They live in Vercel, Supabase and `.env.local`.
+- Small, clear commit messages. The repo is on the owner's GitHub (CharbelMichelMoutran) and stays private until the owner says.
+- Never overwrite the record. Inspections and documents are added, never edited or deleted.
+- The UI is in English. Arabic must display and type correctly, right to left.
 
 ## Tools
 
-- GitHub, Supabase, Vercel: use their command-line tools (`gh`, `supabase`, `vercel`), already logged in.
-- Playwright MCP: for the devils-advocate agent to drive a real browser.
+- `gh`, `supabase`, `vercel` command-line tools, already logged in.
+- Playwright MCP, for checking the app in a real browser.

@@ -1,6 +1,6 @@
 # Zahle Building Registry — Project Plan
 
-This file is the shared plan for the project. The orchestrator and every agent (civil-engineer, coder, devils-advocate) read it before starting any task. If a task conflicts with this plan, stop and ask the project owner.
+This file is the shared plan for the project. Read it before starting any task. If a task conflicts with this plan, stop and ask the project owner.
 
 ---
 
@@ -98,7 +98,7 @@ Engineers must be **happy to use** the product. It must not start an "arms race"
 
 Hiding dangerous buildings is **not** the answer. Silence is what lets them collapse. The answer is design.
 
-### Rules every agent must follow
+### Rules
 
 1. **A colour never stands alone.** Every inspection shows its word and the engineer's remarks next to its colour. If the engineer wrote no remarks, the report says "No remarks". (Owner, 17 Nov 2026: remarks are optional.)
 2. **Nothing is public, and each role sees only what it should.** Signed out, nothing about any building is reachable. Engineers see every building and report. **A resident sees only their own building.** This is enforced in the database with row-level security, not only in the screens. (Rule changed by the owner, 16 Nov 2026; before, it read "only engineers see reports".)
@@ -123,7 +123,7 @@ The form must make clear to the engineer that **after an earthquake these colour
 
 **On screen the worst rating is red** (owner, 16 Nov 2026, reversing the earlier "no red" decision), so engineers read the colours the way they already know them. Orange is kept free for Claude's flags (section 7, item 17).
 
-After earthquakes, engineers already use a standard green / yellow / red tagging, where yellow means "limited entry." The civil-engineer agent aligns the exact wording with that standard, so engineers read the colours the way they already know them.
+After earthquakes, engineers already use a standard green / yellow / red tagging, where yellow means "limited entry." The wording is aligned with that standard, so engineers read the colours the way they already know them.
 
 ### 4c. What is stored
 
@@ -157,7 +157,6 @@ The building outlines are copied into our own database once, not loaded live fro
 | Resident view | Was rejected because checking that someone really lives in a building is too hard. **Overturned by the owner on 16 Nov 2026.** Residents are verified by a phone code, which proves a phone, not residence. The engineer decides what a request is worth. |
 | Paper-to-digital as a separate product | Kept, but as one feature inside the platform. |
 | Google Maps | No clickable building outlines. |
-| Separate "code" and "UI" agents | In React the UI is code. Two agents on the same screens overwrite each other. |
 | Public map showing inspection status | Even "not yet inspected" can read as "suspect," especially after a quake. |
 
 ---
@@ -224,7 +223,7 @@ The project owner chose to leave adoption out of this project. **Later test:** o
 - The Anthropic Console is no longer deferred (section 8).
 - Real SMS through Twilio is allowed once, to the owner's own number.
 
-**Open technical question for the coder (bring it to the owner before building items 12 and 15):** engineer accounts today use our own login, while residents need Supabase Auth, and row-level security works best when everyone signs in the same way. The coder proposes how to unify the two without collecting emails (for example internal made-up addresses that never receive mail), and what it costs.
+**Open technical question (bring it to the owner before building items 12 and 15):** engineer accounts today use our own login, while residents need Supabase Auth, and row-level security works best when everyone signs in the same way. Propose how to unify the two without collecting emails (for example internal made-up addresses that never receive mail), and what it costs.
 **Answered by the owner (17 Nov 2026):** the resident phone sign-in is a **front-end show only** for now: the locked number and code screens stay, but no Supabase Auth, no SMS provider and no real code check. "Log in" creates a resident session in our own login system, like engineers. Resident data goes only through our server, scoped to the session's resident; database row-level security stays on with no browser access. Real phone auth (Supabase Auth or Twilio) is on the Later list.
 
 ### Out (for a later version)
@@ -232,27 +231,15 @@ The project owner chose to leave adoption out of this project. **Later test:** o
 - Real user accounts and login with real OEA membership checks (the demo has a simulated version, see section 7 "In", item 10)
 - Arabic UI translation and language switch
 - Bulk scanning and a searchable document archive
-- The final report template (being researched separately with an agent)
+- The final report template
 - Post-earthquake triage queue (see Later list)
 - Enforcement features
 
 ---
 
-## 8. Team (agents)
+## 8. Working setup
 
-**Orchestrator: the main Claude Code session** (instructions in `CLAUDE.md`). It sees the big picture, explains the full experience to the project owner, keeps this plan up to date, breaks work into tasks, and sends them to the agents below. It is not a separate agent, because agents cannot start other agents or talk to the project owner.
-
-The agents live in `.claude/agents/` in this repo. All of them read this file first.
-
-| Agent | Job |
-|---|---|
-| **civil-engineer** | Advises on engineering content: building facts and inspection fields, condition colour wording (aligned with standard post-earthquake tagging), Lebanese codes (Law 646/2004, Decrees 14293 and 7964), realistic sample data, the protected list of warning signs, and the Lebanon engineering context file. Writes only to `docs/engineering.md` and `claude/lebanon-engineering-context.md`, never app code. Its advice is checked by the project owner's senior OEA contact. |
-| **coder** | The only agent that writes app code. Builds features and the UI, following this plan, `DESIGN.md`, `docs/engineering.md`, and the examples and skills the project owner provides. |
-| **devils-advocate** | Tries to break the app in a real browser (Playwright MCP), two ways: as an attacker (drain the AI budget, wipe data, inject scripts, upload huge or fake files, reach private data, **read another resident's building, forge a resident or an engineer, trick Claude with text inside a resident's message so it hides or mislabels a real danger**) and as a confused or hurried engineer or resident (Arabic text, wrong building, half-filled forms, slow phone, location denied or far away). Also checks the design rules in section 4. Reports problems ranked by severity. Never fixes code. |
-
-**MCP:** only Playwright, for the devil's advocate. GitHub, Supabase, and Vercel are used through their command-line tools.
-
-**Project owner:** makes every decision, accepts or rejects work, and watches a full demo run once a week.
+One Claude Code session does all the work, following this plan, `DESIGN.md` and `docs/STATUS.md` (instructions in `CLAUDE.md`). GitHub, Supabase and Vercel are used through their command-line tools. The project owner makes every decision, accepts or rejects work, and watches a full demo run once a week.
 
 ### Accounts and setup
 
@@ -272,14 +259,14 @@ The project owner signs in to each account. Claude does everything after that th
 
 | Risk | Mitigation |
 |---|---|
-| Agents build something the owner cannot judge, because the owner writes no code | The devils-advocate agent tests each feature in a real browser. The owner watches a full demo weekly. |
+| The owner writes no code and cannot judge the build | Each feature is checked in a real browser. The owner watches a full demo weekly. |
 | AI misreads the messy document | The engineer always confirms the fields. Test on the real document in week 1, not week 3. |
 | "Beautiful" stays vague and eats hours | Write `DESIGN.md` before any code. |
 | Scope grows past 30 hours | Anything not in section 7 "In" goes on the "Later" list. |
 | Anyone with the public link can call the AI upload and spend the $50 budget | Set a hard spending limit in the Anthropic Console. Rate-limit the upload (e.g. a few per visitor per day) and cap image size. |
 | With no accounts, any visitor can edit or delete demo data | Seed data that can be restored with one action ("Reset demo"). Run a nightly automatic reset. |
 | The real paper document holds personal data (owner names, ID numbers, addresses) | Black out personal details before the photo goes into the public demo or the API. Use the unedited original only for private testing. |
-| The civil-engineer agent gets Lebanese codes or field names wrong | The project owner's senior OEA contact reviews the fields and colour wording once (about 10 minutes). |
+| Claude gets Lebanese codes or field names wrong | The project owner's senior OEA contact reviews the fields and colour wording once (about 10 minutes). |
 | Location picks the wrong building | Location only suggests; the engineer always confirms. |
 | An empty database makes the demo look like a plain form | Sample data with history is part of the scope (section 7, item 6). |
 | Recruiters testing the demo are not in Zahle, or refuse location | The map opens on central Zahle, and they click a building or type an address. |
@@ -289,7 +276,7 @@ The project owner signs in to each account. Claude does everything after that th
 | A resident sees another building's data | Row-level security in the database, tested by the devil's advocate with a second resident account. |
 | Strangers run up SMS or AI cost on the public link | Public demo shows the code on screen instead of texting. Rate limits on verification, requests and AI calls. The $50 hard limit in the Anthropic Console. |
 | Phone numbers are personal data | Engineers see "Verified ✓" and a contact button, not the raw number. Numbers are stored only in the auth system. Test with made-up numbers. |
-| The larger scope runs far past 30 hours | The build order keeps the demo working at every step. The owner can stop after any item. The orchestrator reports progress against the order each session. |
+| The larger scope runs far past 30 hours | The build order keeps the demo working at every step. The owner can stop after any item. Progress is reported against the order each session. |
 
 ---
 
@@ -297,20 +284,13 @@ The project owner signs in to each account. Claude does everything after that th
 
 1. **Owner:** sign in to the three accounts in section 8 (GitHub, Supabase, Vercel; the Anthropic Console is deferred). Pick 2 or 3 websites whose look you love, for `DESIGN.md`. Photograph the messy engineering document from home.
 2. **Claude:** set up the GitHub repo with this `plan.md`, connect Supabase and Vercel, and test the AI on the real document.
-3. **Claude:** create the three agents in `.claude/agents/`.
-4. **Owner:** ask the senior OEA contact for a 10-minute look at the fields and colour wording, once the civil-engineer agent drafts them.
+3. **Owner:** ask the senior OEA contact for a 10-minute look at the fields and colour wording.
 
 ---
 
 ## 11. Open questions
 
 - Final report template: being researched separately.
-
-## 12. Status (16 Nov 2026)
-
-The current state, what is built, what is waiting on the owner, and how to resume are in **`docs/STATUS.md`**. In short: map, accounts (simulated), building window, reports, locked author, and the Zahle design pass are built and live; sample data, search, photos, AI, and the README are not. The repo stays private until the owner says. No "demo" wording in the app unless the owner asks (the two labels in items 11 and 12 are asked for).
-
-**Scope was widened on 16 Nov 2026** (section 7, items 11 to 22). Suggested build order, each step leaving a working demo: (a) red for the worst rating and the Cmd+K command bar; (b) location suggestion (11); (c) set up the Anthropic Console, then AI document-to-form (5) and the context file (20) (**the owner said on 17 Nov 2026 that AI is connected to the website later, so steps (c), (e), (f) and (g) wait; do (a), (b), (d) and (h) first**); (d) unify login and add residents with phone codes (12, 13, 14, 15); (e) Claude sorting and flagging with verdicts (16, 17, 18); (f) the rulebook and its reflection job (19); (g) engineer map query (21); (h) sample data, README, and the full test. The owner decides the order.
 
 ## Later list
 
@@ -319,8 +299,8 @@ The current state, what is built, what is waiting on the owner, and how to resum
 - Sample buildings with realistic history (scope item 6, still open).
 
 - **Post-earthquake triage queue:** after an earthquake, each engineer gets a list of buildings ranked by triage colour × number of residents. (Needs a residents count per building.)
-- Fuller building facts (floors, structure type, seismic measures, units) and photos in the report. Civil-engineer's draft is in `docs/engineering.md`.
-- Optional "inspection type" (routine / after an event) and basement levels, suggested by the civil-engineer.
+- Fuller building facts (floors, structure type, seismic measures, units) and photos in the report. The earlier draft is in git history (`docs/engineering.md`).
+- Optional "inspection type" (routine / after an event) and basement levels.
 - Real engineer accounts, verified by OEA membership number.
 - Assigning building reviews to engineers (the Order's role is now merged into engineers; assignment itself is still later).
 - On-site check: mark reports saved far from the building as "not filed on site."

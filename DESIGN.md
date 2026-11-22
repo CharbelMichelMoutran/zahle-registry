@@ -1,6 +1,6 @@
 # DESIGN.md — Zahle Building Registry
 
-Every agent reads this file, together with `plan.md`, before any UI work. If a design choice is not covered here, follow the spirit of this file and ask the project owner. Where this file and `plan.md` disagree, `plan.md` wins, and the orchestrator asks the owner.
+Read this file, together with `plan.md`, before any UI work. If a design choice is not covered here, follow the spirit of this file and ask the project owner. Where this file and `plan.md` disagree, `plan.md` wins, and the owner decides.
 
 Written from the owner's draft (16 Nov 2026). Changes from the draft are listed in section 12.
 
@@ -81,7 +81,7 @@ Share of the screen: about 60% ground and map, 30% trays and surfaces, 10% accen
 | none | Grey with fine hatch | `#A3A8B3` | Limestone grey ("Not yet inspected"). The hatch is described in section 1. |
 | (Claude's flag, not a rating) | Orange | `#F07B2E` | Claude orange. Pulsing ring around a flagged building on the engineer map. |
 
-The red hex is a starting point. The coder checks it against the amber and the orange (they must be easy to tell apart, in lightness as well as hue, and for colour-blind users) and adjusts it if not. Errors in forms keep the dark orange text they have now, never red, so red always means "imminent risk" and nothing else.
+The red hex is a starting point. Check it against the amber and the orange (they must be easy to tell apart, in lightness as well as hue, and for colour-blind users) and adjusts it if not. Errors in forms keep the dark orange text they have now, never red, so red always means "imminent risk" and nothing else.
 
 Status colours differ in lightness as well as hue. They always come with their word (rule 1 of `plan.md` section 4), and with the arch icon: one, two or three filled arches. Text on a status colour is dark slate unless white passes 4.5:1. Wording for each rating comes from `docs/engineering.md` D4, never from this file.
 
@@ -158,7 +158,7 @@ Patterns:
 ### Sign-up, waiting and login
 - Calm, centred card on `ground`, with the wordmark. Visible labels on every field. No icons inside inputs.
 - No "demo" notice anywhere in the app. The owner does not want "This is a demo" text unless they ask for it.
-- **Waiting for OEA approval:** the arch icon, the exact text from `docs/engineering.md` D9.3, and a "Refresh" button. After Refresh, the tray carries the engineer straight into the map with the fading welcome line.
+- **Waiting for OEA approval:** the arch icon, the waiting text in `src/lib/content.ts`, and a "Refresh" button. After Refresh, the tray carries the engineer straight into the map with the fading welcome line.
 
 ### Command bar (from Raycast)
 Ctrl+K or Cmd+K, or a search button, opens a command bar to find a building by street, neighbourhood or landmark (OpenStreetMap has few addresses in Zahle, see `plan.md` section 9). Results are clean rows: name, muted detail line, keyboard navigation, highlighted row. Choosing one flies the map there. In scope now (`plan.md` item 22). For engineers it also takes a plain-language question (item 21), and shows results as a list tray plus highlights on the map, with a one-line reason per building.
@@ -182,7 +182,7 @@ On open, if the person allows location, a tray rises with the closest building h
 - **Errors:** never blame the user, and always offer a way to recover. Example: "We could not save this report. Your answers are still here. Save report again".
 
 ## 8. Words
-- Calm, accurate, kind. Rating wording comes from `docs/engineering.md`.
+- Calm, accurate, kind. Rating wording is in `src/lib/content.ts`.
 - Buttons start with a verb: "Save report", "Create report", "Sign in", "Refresh". Never "OK" or "Submit".
 
 ## 9. Skills to use
@@ -232,10 +232,10 @@ New references from the owner: Open Map Lebanon's Beirut Recovery Map, Beirut Ur
 | Attention on the engineer map | **Red (imminent risk) buildings stand out**: stronger outline, still visible when zoomed out. Everything else calmer. |
 | Engineer side panel | **Removed by the owner, 17 Nov 2026; on the Later list in `plan.md`. Do not build.** Was: Laptop: a slim left panel with (1) a **status summary**: counts per rating plus "Not yet inspected", tap a count to filter the map; (2) **recent activity**: the latest 5 to 8 reports by **all engineers** (building, rating chip with word, engineer, date), click to fly there; (3) an **always-on legend** (colours, hatch, Claude's orange ring) at the bottom. The building tray opens over the panel. Phone: the panel becomes a bottom sheet. |
 | Landing page (new, public) | Calm and serious, like Beirut Urban Lab. Serif headline (draft: "Every building in Zahle, remembered."), one line on the problem, a map-visual hero (terrain and footprints, no real ratings or building data), product visuals, then "Sign in as engineer" and "Sign in as resident". No photographs. No demo wording. |
-| Arabic type | **Free fonts close in spirit to Lebanese type design.** A calligraphic-rooted Google font (for example Noto Naskh Arabic or Readex Pro; the coder proposes in the mockup) for the wordmark and display. IBM Plex Sans Arabic stays for body text. |
+| Arabic type | **Free fonts close in spirit to Lebanese type design.** A calligraphic-rooted Google font (for example Noto Naskh Arabic or Readex Pro; proposed in the mockup) for the wordmark and display. IBM Plex Sans Arabic stays for body text. |
 | Accent | A **deeper, calmer river blue** replaces `#2F7CF6`; it must read well on terrain and pass contrast. Exact hex chosen in the mockup. |
 | Motion | Springy but restrained (section 6). One hero entrance on the landing page. Nothing loops (except Claude's flag pulse, which stops under reduced motion). |
-| Process | **Owner, 17 Nov 2026 (later): no mockups.** Study the references (section 14), then the coder changes the real product in stages; the owner reviews each stage. Coder only; no devil's-advocate browser test for this pass. |
+| Process | **Owner, 17 Nov 2026 (later): no mockups.** Study the references (section 14), then change the real product in stages; the owner reviews each stage. |
 
 **Skills for this pass** (installed in `.claude/skills/`; this file wins on conflicts): Emil Kowalski's `emil-design-eng`, `apple-design`, `animate`, `choreograph`, `gestures`, `mobile-native`, `break-ui`; Benji Taylor's `stageshow` (product visuals on the landing page); Leon Lin's `design-taste-frontend` (landing page only; ignore its photography and shader rules, we use no photos); plus section 9.
 
@@ -337,7 +337,7 @@ The current `#2F7CF6` gives only **3.94:1** with white text, so it fails 4.5:1 t
 
 New `accent-soft`: `#E8EFF7` (main text on it 12.5:1; A on it 5.31:1; B on it 6.26:1).
 
-### 14.9 Top 10 changes for the coder, in priority order
+### 14.9 Top 10 changes, in priority order
 1. **New accent.** Replace `#2F7CF6` with the blue the owner picks (B recommended) in tokens, the selected outline and the focus ring; `accent-soft` becomes `#E8EFF7`.
 2. **Red stands out.** Red footprints: full opacity, a 2px outline in `#8F2A1C` (7.7:1 on `ground`), drawn in their own pane above all other footprints. Below z16, add a centroid dot (8px, red with a white ring) so red buildings stay visible zoomed out. Green and amber fills drop to about 0.7 opacity, with a 1px darker outline of their own hue instead of white.
 3. **Selected building is unmistakable.** A 3px accent outline with a 2px white outer halo, raised to the top. While a tray is open, other footprints dim slightly (about −25% opacity). Red stays at full strength.
@@ -375,7 +375,7 @@ The owner likes the layout, the map and the predominant grey. The beige ground a
 | Footer | The new logo only; everything else removed. **Easter egg:** the ribbon ends in the footer and ties itself into the logo when the visitor scrolls to the bottom, and the altitude and coordinates ("945 m · 33.85° N, 35.90° E") interact with the ribbon (for example written along it, or revealed as it ties). |
 | Map | Unchanged. |
 
-### 15.1 As built (coder, 17 Nov 2026; for the owner to confirm)
+### 15.1 As built (17 Nov 2026; for the owner to confirm)
 
 - **Logo construction.** زحلة is set in Markazi Text 500 and "on record" in IBM Plex Serif 500, at 0.42 of the Arabic size (0.54 in the small top-bar cut, so it still reads at about 30px tall). The shared line leaves the lower stroke of the ح where it touches the baseline, at that stroke's thickness, thins as it passes through the tail of ز, shades from ink to river blue, and runs on as the line "on record" sits on. The letters are outlined by `scripts/render-logo.ts` with HarfBuzz (the browsers' own shaping engine), so the Arabic joins correctly and no logo font is loaded. Component: `src/components/ui/Logo.tsx`, cuts `large` and `small`.
 - **Ribbon.** It leaves the logo from the tip of the ز's tail, as a hairline that shades from ink into river blue, and runs down a lane in the margin beside the text, never over it. On laptops it swings into the open column between the hero and "The record", passes behind the product pictures and comes out in the gap between the About columns. On phones it stays in the margin all the way down. It draws with scroll and never undraws. Stroke about 1.75px. `src/components/landing/Ribbon.tsx`.
