@@ -1,9 +1,9 @@
 import { AREA_LABEL, NO_REMARKS, NOT_INSPECTED, NOT_YET_VERIFIED, REPORT_TEXT } from "@/lib/content";
 import { formatConstructionDate, formatDate, formatSaveTime } from "@/lib/format";
 import { AREAS, reportConstructionDate, type ConstructionDateChange, type Report } from "@/lib/report";
-import { ColourBadge } from "./ColourBadge";
+import { ColourBadge } from "../../report/ColourBadge";
 import { ReportBy } from "./ReportBy";
-import { Row } from "./ui";
+import { Row } from "../../report/ui";
 
 /** A saved report, read-only, in the same calm layout as the form. */
 export default function ReportView({ report, change }: { report: Report; change?: ConstructionDateChange }) {

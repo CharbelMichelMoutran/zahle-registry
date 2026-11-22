@@ -4,17 +4,22 @@ import { MotionConfig } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { Engineer } from "@/lib/account";
 import { approvedMessage, LOGIN_TEXT } from "@/lib/content";
+import { LOGIN_FROZEN, MAP_LABEL } from "@/lib/maps";
 import { apiFetch, LOGGED_OUT_EVENT } from "@/lib/client-fetch";
 import { getCurrentLocation } from "@/lib/location";
-import { AccountMenu } from "./AccountMenu";
-import { WELCOME_KEY } from "./auth/WaitingPanel";
+import { AccountMenu } from "../AccountMenu";
+import { WELCOME_KEY } from "../auth/WaitingPanel";
 import { LocateMenu } from "./LocateMenu";
 import MapView, { type MapViewHandle } from "./MapView";
-import { Button, IconButton } from "./ui/Button";
-import { Logo } from "./ui/Logo";
+import { Button, IconButton } from "../ui/Button";
+import { LinkButton } from "../ui/LinkButton";
+import { Logo } from "../ui/Logo";
 
-/** The signed-in app: header with the engineer's name and Sign out, and the map. */
-export default function RegistryApp() {
+/**
+ * The engineer map at /engineer: top bar and map. While login is frozen the top
+ * bar shows the map's name and "Switch map" instead of the engineer's name and Sign out.
+ */
+export default function EngineerApp() {
   const [engineer, setEngineer] = useState<Engineer | null>(null);
   const [welcome, setWelcome] = useState<string | null>(null);
   const [loggedOut, setLoggedOut] = useState(false);
@@ -68,7 +73,14 @@ export default function RegistryApp() {
           {/* Positioned, so the "Go to building" popover can hang from the right edge on phones. */}
           <div className="relative ml-auto flex min-w-0 items-center gap-2">
             <LocateMenu onLocate={locate} />
-            <AccountMenu name={engineer?.fullName ?? null} onLogout={logout} />
+            {LOGIN_FROZEN ? (
+              <>
+                <span className="hidden text-body font-medium whitespace-nowrap text-ink sm:inline">{MAP_LABEL.engineer}</span>
+                <LinkButton href="/" variant="secondary">Switch map</LinkButton>
+              </>
+            ) : (
+              <AccountMenu name={engineer?.fullName ?? null} onLogout={logout} />
+            )}
           </div>
         </header>
 

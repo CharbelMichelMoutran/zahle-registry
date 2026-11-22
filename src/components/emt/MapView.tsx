@@ -9,7 +9,7 @@ import { sortNewestFirst } from "@/lib/format";
 import { sameConstructionDate, inputConstructionDate, reportConstructionDate, type Colour, type Report, type ReportInput } from "@/lib/report";
 import BuildingPanel, { type BuildingData, type Level, type Tab } from "./BuildingPanel";
 import { newDraft, prefillConstruction } from "./report/ReportForm";
-import { coveredRectOf } from "./tray-rect";
+import { coveredRectOf } from "../tray-rect";
 
 // Leaflet needs `window`, so the map renders only in the browser.
 const BuildingMap = dynamic(() => import("./BuildingMap"), {

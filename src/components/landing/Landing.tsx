@@ -63,9 +63,10 @@ function Hero() {
               <Logo className="h-[72px] sm:h-24" title={null} />
             </span>
           </Link>
-          <LinkButton href="/login" className="relative z-[2]">
-            {T.signIn}
-          </LinkButton>
+          <div className="relative z-[2] flex gap-2">
+            <LinkButton href="/engineer">{T.openMap.engineer}</LinkButton>
+            <LinkButton href="/emt">{T.openMap.emt}</LinkButton>
+          </div>
         </div>
 
         <div data-ribbon="text" className="max-w-[560px] pt-20 pb-12 md:my-auto md:pt-16 md:pb-28">

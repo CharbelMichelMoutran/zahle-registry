@@ -32,7 +32,7 @@ export default function LoginForm() {
       });
       const body = await res.json().catch(() => ({}));
       if (res.ok) {
-        window.location.replace(body.status === "approved" ? "/" : "/waiting");
+        window.location.replace(body.status === "approved" ? "/engineer" : "/waiting");
         return;
       }
       setError(body.error ?? LOGIN_TEXT.failed);

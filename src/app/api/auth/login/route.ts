@@ -1,13 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { PASSWORD_MAX } from "@/lib/account";
 import { LOGIN_TEXT } from "@/lib/content";
-import {
-  clearedResidentSessionCookie,
-  createSession,
-  deleteResidentSession,
-  RESIDENT_SESSION_COOKIE,
-  verifyPassword,
-} from "@/lib/session";
+import { LOGIN_FROZEN, LOGIN_OFF } from "@/lib/maps";
+import { createSession, verifyPassword } from "@/lib/session";
 import { createServerSupabase } from "@/lib/supabase-server";
 
 const json = (body: unknown, status = 200) =>
@@ -18,6 +13,7 @@ const json = (body: unknown, status = 200) =>
  * get the same message and take the same time. No attempt limit (owner decision).
  */
 export async function POST(req: NextRequest) {
+  if (LOGIN_FROZEN) return json({ error: LOGIN_OFF }, 404);
   const raw = await req.text();
   if (raw.length > 2048) return json({ error: LOGIN_TEXT.wrong }, 401);
 
@@ -48,12 +44,6 @@ export async function POST(req: NextRequest) {
 
     const res = json({ status: data.approved_at ? "approved" : "pending" });
     res.cookies.set(await createSession(data.id));
-    // One role at a time: a leftover resident session on this browser ends here.
-    const residentToken = req.cookies.get(RESIDENT_SESSION_COOKIE)?.value;
-    if (residentToken) {
-      await deleteResidentSession(residentToken).catch(() => {});
-      res.cookies.set(clearedResidentSessionCookie());
-    }
     return res;
   } catch (err) {
     console.error("login failed:", err instanceof Error ? err.message : err);

@@ -1,13 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { validateSignup, type SignupInput } from "@/lib/account";
-import {
-  clearedResidentSessionCookie,
-  createSession,
-  deleteResidentSession,
-  hashPassword,
-  RESIDENT_SESSION_COOKIE,
-  visitorHash,
-} from "@/lib/session";
+import { LOGIN_FROZEN, LOGIN_OFF } from "@/lib/maps";
+import { createSession, hashPassword, visitorHash } from "@/lib/session";
 import { createServerSupabase } from "@/lib/supabase-server";
 
 const MAX_BODY_BYTES = 4 * 1024;
@@ -16,6 +10,7 @@ const json = (body: unknown, status = 200) =>
 
 /** Create a demo account. It starts waiting for (simulated) approval. */
 export async function POST(req: NextRequest) {
+  if (LOGIN_FROZEN) return json({ error: LOGIN_OFF }, 404);
   const raw = await req.text();
   if (raw.length > MAX_BODY_BYTES) return json({ error: "This request is too large." }, 413);
 
@@ -59,12 +54,6 @@ export async function POST(req: NextRequest) {
 
     const res = json({ status: "pending" }, 201);
     res.cookies.set(await createSession(id as string));
-    // One role at a time: a leftover resident session on this browser ends here.
-    const residentToken = req.cookies.get(RESIDENT_SESSION_COOKIE)?.value;
-    if (residentToken) {
-      await deleteResidentSession(residentToken).catch(() => {});
-      res.cookies.set(clearedResidentSessionCookie());
-    }
     return res;
   } catch (err) {
     console.error("signup failed:", err instanceof Error ? err.message : err);

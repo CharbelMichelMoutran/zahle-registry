@@ -7,11 +7,11 @@ import { NO_REMARKS, NOT_INSPECTED, NOT_YET_VERIFIED } from "@/lib/content";
 import { firstLine, formatConstructionDate, formatDate } from "@/lib/format";
 import { fadeFast, springSnappy, springTray, staggerDelay } from "@/lib/motion";
 import { reportConstructionDate, type ConstructionDateChange, type Report, type ReportInput } from "@/lib/report";
-import { ColourBadge, NotYetInspectedBadge } from "./report/ColourBadge";
+import { ColourBadge, NotYetInspectedBadge } from "../report/ColourBadge";
 import ReportForm, { INITIAL_SAVE_STATE, type SaveState } from "./report/ReportForm";
 import ReportView from "./report/ReportView";
-import { ArchMark } from "./ui/Arch";
-import { Button, IconButton, Spinner } from "./ui/Button";
+import { ArchMark } from "../ui/Arch";
+import { Button, IconButton, Spinner } from "../ui/Button";
 
 export type Level = "preview" | "full";
 export type Tab = "history" | "create";

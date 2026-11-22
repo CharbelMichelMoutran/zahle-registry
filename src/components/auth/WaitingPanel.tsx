@@ -22,7 +22,7 @@ export default function WaitingPanel() {
       try {
         sessionStorage.setItem(WELCOME_KEY, "1");
       } catch {}
-      window.location.replace("/");
+      window.location.replace("/engineer");
     } catch {
       setError("Something went wrong. Please try again.");
       setBusy(false);

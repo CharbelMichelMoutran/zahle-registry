@@ -1,61 +1,50 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { engineerForToken, RESIDENT_SESSION_COOKIE, residentForToken, SESSION_COOKIE } from "@/lib/session";
+import { LOGIN_FROZEN } from "@/lib/maps";
+import { engineerForToken, SESSION_COOKIE } from "@/lib/session";
+
+const MAP_PAGES = new Set(["/engineer", "/emt"]);
 
 /**
- * Page access, checked on the server before any page renders (plan rule 2):
- * - signed out: the public landing page at / (served from /welcome, a static
- *   page that reads nothing from the registry), /login and /signup
+ * Page access, checked on the server before any page renders.
+ *
+ * While login is frozen (src/lib/maps.ts): the landing page at / and both maps
+ * are open to anyone; every other page sends you to /.
+ *
+ * With login on (plan rule 2):
+ * - signed out: the landing page at /, /login and /signup
  * - engineer waiting for approval: only /waiting
- * - approved engineer: the engineer map at /; every other page sends them to it
- * - resident: only the resident map at /resident; every other page sends them to it
- * Engineers and residents have separate session cookies and tables, so one can
- * never be read as the other. Data routes check the session themselves with
- * src/lib/api-auth.ts: requireEngineer refuses a resident session, and
- * requireResident scopes everything to the session's resident.
+ * - approved engineer: the maps; the sign-in pages send them to the engineer map
+ * Data routes check the session themselves with src/lib/api-auth.ts.
  */
 export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
+  const go = (to: string) => NextResponse.redirect(new URL(to, req.url));
+
+  if (LOGIN_FROZEN) return path === "/" || MAP_PAGES.has(path) ? NextResponse.next() : go("/");
+
   let engineer = null;
   try {
     engineer = await engineerForToken(req.cookies.get(SESSION_COOKIE)?.value);
   } catch (err) {
     console.error(err instanceof Error ? err.message : err);
   }
-
-  const go = (to: string) => NextResponse.redirect(new URL(to, req.url));
   const isAuthPage = path === "/login" || path === "/signup";
-  const isResidentPage = path === "/resident";
-  const isLanding = path === "/welcome";
 
   if (engineer) {
     if (!engineer.approved) return path === "/waiting" ? NextResponse.next() : go("/waiting");
-    if (isAuthPage || isLanding || path === "/waiting" || isResidentPage) return go("/");
+    if (isAuthPage || path === "/waiting" || path === "/resident") return go("/engineer");
     return NextResponse.next();
   }
 
-  const residentToken = req.cookies.get(RESIDENT_SESSION_COOKIE)?.value;
-  if (residentToken) {
-    let residentId = null;
-    try {
-      residentId = await residentForToken(residentToken);
-    } catch (err) {
-      console.error(err instanceof Error ? err.message : err);
-    }
-    if (residentId) return isResidentPage ? NextResponse.next() : go("/resident");
-  }
-
   // Signed out. A cookie that no longer matches a session means the session ended: say so once, then drop it.
-  const staleEngineer = Boolean(req.cookies.get(SESSION_COOKIE)?.value);
-  const stale = staleEngineer || Boolean(residentToken);
+  const stale = Boolean(req.cookies.get(SESSION_COOKIE)?.value);
   let res: NextResponse;
-  if (isAuthPage || isLanding) res = NextResponse.next();
-  else if (path === "/" && !stale) res = NextResponse.rewrite(new URL("/welcome", req.url));
+  if (isAuthPage || (path === "/" && !stale)) res = NextResponse.next();
   else res = go(stale ? "/login?expired=1" : "/login");
-  if (staleEngineer) res.cookies.delete(SESSION_COOKIE);
-  if (residentToken) res.cookies.delete(RESIDENT_SESSION_COOKIE);
+  if (stale) res.cookies.delete(SESSION_COOKIE);
   return res;
 }
 
 export const config = {
-  matcher: ["/", "/welcome", "/login", "/signup", "/waiting", "/resident"],
+  matcher: ["/", "/engineer", "/emt", "/login", "/signup", "/waiting", "/resident", "/welcome"],
 };

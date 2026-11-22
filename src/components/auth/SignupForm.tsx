@@ -154,7 +154,7 @@ export default function SignupForm() {
       </Button>
       <p className="text-center text-body text-muted">
         Already have an account?{" "}
-        <Link href="/login?as=engineer" className="inline-flex min-h-11 items-center px-1 font-medium text-accent underline underline-offset-2">
+        <Link href="/login" className="inline-flex min-h-11 items-center px-1 font-medium text-accent underline underline-offset-2">
           Sign in
         </Link>
       </p>

@@ -5,13 +5,16 @@
 
 import { SIGNUP_ERRORS } from "./content";
 
+/** What an engineer can pick at sign-up. */
 export const DISCIPLINES = ["civil", "structural", "architect"] as const;
-export type Discipline = (typeof DISCIPLINES)[number];
+/** "emt" is only the EMT map's stand-in account (migration 20261122000000_emt_discipline). */
+export type Discipline = (typeof DISCIPLINES)[number] | "emt";
 
 export const DISCIPLINE_LABEL: Record<Discipline, string> = {
   civil: "Civil engineer",
   structural: "Structural engineer",
   architect: "Architect",
+  emt: "EMT",
 };
 
 /**
@@ -23,6 +26,7 @@ export const DISCIPLINE_SHORT: Record<Discipline, string> = {
   civil: "Civil",
   structural: "Structural",
   architect: "Architect",
+  emt: "EMT",
 };
 
 /** Label of the locked engineer box on reports (civil-engineer suggestion; "Engineer" in D2.1). */
@@ -63,7 +67,7 @@ export function validateSignup(input: SignupInput): Partial<Record<keyof SignupI
   if (!name) errors.fullName = e.missing;
   else if (len(name) < 2 || len(name) > 100) errors.fullName = e.fullName;
 
-  if (!DISCIPLINES.includes(input.discipline as Discipline)) errors.discipline = e.discipline;
+  if (!(DISCIPLINES as readonly string[]).includes(input.discipline)) errors.discipline = e.discipline;
 
   if (!contact) errors.contact = e.missing;
   else if (contact.includes("@")) errors.contact = e.contactEmail;

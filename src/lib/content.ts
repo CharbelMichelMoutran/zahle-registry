@@ -153,50 +153,6 @@ export const LOCATE = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// Residents (plan.md item 12, resident first version). Verb-first buttons and
-// no "demo" wording.
-// ---------------------------------------------------------------------------
-
-/** The first screen: who is signing in. */
-export const ROLE_TEXT = {
-  title: "Sign in",
-  lead: "Choose how you use the registry.",
-  resident: { label: "Resident", detail: "See your own building and ask for an inspection." },
-  engineer: { label: "Engineer", detail: "Inspect buildings and write reports." },
-  back: "Choose another role",
-} as const;
-
-export const RESIDENT_SIGN_IN = {
-  title: "Sign in as a resident",
-  name: "Name",
-  phone: "Phone number",
-  /** The one resident sign-in number, as shown. The resident login route uses RESIDENT_PHONE. */
-  phoneShown: "+1 555 010 0000",
-  sendCode: "Send code",
-  codeTitle: "Enter the code",
-  codeSent: "We sent a 6-digit code to ",
-  code: "Code",
-  codeShown: "000000",
-  logIn: "Sign in",
-  loggingIn: "Signing in…",
-  changeName: "Change name",
-  missingName: "Enter your name.",
-  nameTooLong: (max: number) => `Use at most ${max} characters.`,
-  failed: "Something went wrong. Please try again.",
-} as const;
-
-export const RESIDENT_NAME_MAX = 100;
-
-/** The resident's own building tray (plan.md item 12). */
-export const RESIDENT_TRAY = {
-  title: "Your building",
-  requestInspection: "Request inspection",
-} as const;
-
-/** Shown in the "Go to building" menu when the browser will not share location. */
-export const LOCATION_OFF = "Location is off. Turn it on in your browser settings to find your building.";
-
-// ---------------------------------------------------------------------------
 // Public landing page (plan.md item 23, DESIGN.md 13 and 14.9 item 9). Calm and
 // plain; no demo wording, no disclaimer. Problem and about lines follow plan.md
 // section 1; the product visuals use example phrases from docs/engineering.md D3.
@@ -207,8 +163,8 @@ export const LANDING = {
   headline: "Every building in Zahle, inspected.",
   problem:
     "In Lebanon, building records sit on paper no one can reach. Every inspection starts from scratch. We made records accessible so Zahle could be the first city to adequately meet its citizens' needs.",
-  /** The one sign-in control, top right (DESIGN.md 15). Opens the role choice. */
-  signIn: "Sign in",
+  /** The two map buttons, top right, while login is frozen (owner, 22 Nov 2026). */
+  openMap: { engineer: "Engineer", emt: "EMT" },
   showcase: {
     label: "The record",
     title: "No engineer has to start from scratch.",

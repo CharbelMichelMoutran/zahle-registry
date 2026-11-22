@@ -22,10 +22,10 @@ import {
 } from "@/lib/report";
 import type { Engineer } from "@/lib/account";
 import { apiFetch } from "@/lib/client-fetch";
-import { RatingArches } from "../ui/Arch";
-import { STATUS_TEXT } from "./ColourBadge";
+import { RatingArches } from "../../ui/Arch";
+import { STATUS_TEXT } from "../../report/ColourBadge";
 import { ReportBy } from "./ReportBy";
-import { AutoTextarea, compactInputClass, FieldError, Row, Toggle, writeClass } from "./ui";
+import { AutoTextarea, compactInputClass, FieldError, Row, Toggle, writeClass } from "../../report/ui";
 
 export function newDraft(latest: Report | null): ReportInput {
   const [y, m, d] = todayParts();
