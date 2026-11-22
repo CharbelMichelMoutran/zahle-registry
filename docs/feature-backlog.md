@@ -1,5 +1,7 @@
 # Feature backlog — Zahle Building Registry
 
+**Update, 22 Nov 2026: residents are removed from the project (owner; `plan.md` item 24). Features 2 to 5 (resident verification, inspection requests, the building log and the resident map) are deleted below; the notes about them further down are history.**
+
 **Update, 16 Nov 2026: the owner chose all 12 features and told the orchestrator to change whatever they conflict with. They are now in `plan.md` section 7 as items 11 to 22, and the conflicts below were resolved in the owner's favour (see "How each conflict was resolved"). Nothing here is built yet, except parts of item 22.** This file keeps the owner's full original text, and what the orchestrator found when checking it against the plan.
 
 ## How each conflict was resolved (owner's call, 16 Nov 2026)
@@ -47,27 +49,6 @@ Item numbers below are the plan's items (11 to 22), not this list's numbers. The
 - Outside Zahle (> ~20 km): offer "Try the demo as a resident standing on [real Zahle street]", with a visible "Demo location" label.
 - Location denied: go straight to "Pick your building on the map".
 - Dev testing: Chrome DevTools → Sensors → custom location 33.846, 35.902.
-
-## 2. Resident verification (SMS only)
-- Supabase Auth phone OTP.
-- While building: Supabase test phone numbers with a fixed code.
-- Public demo: show "Demo code: ######" on screen instead of texting.
-- Once: send one real SMS via Twilio to my US number, for the demo video.
-- The verified number is attached to every inspection request. Engineers see "Verified ✓" + a contact button, not the raw number.
-
-## 3. Request an inspection
-- Verified residents send a request for their building: description + photos (Supabase Storage).
-- Table `inspection_requests` (id, building_id, resident_id, description, status, created_at).
-- Residents only see "Received — an engineer will review."
-
-## 4. Resident building log
-- Verified residents add observations over time: text, photos, "when did you notice it".
-- Tables `observations` and `observation_photos`.
-
-## 5. Residents see only their own building
-- Resident map: own building(s) in full color; all others barely visible (no fill, not even gray).
-- Engineer map: every building with status + Claude's flags.
-- Enforce with Supabase row-level security, not just the UI.
 
 ## 6. Claude sorts submissions
 - On each new observation or request, a server route calls Claude.

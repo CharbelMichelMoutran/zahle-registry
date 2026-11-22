@@ -87,8 +87,6 @@ Status colours differ in lightness as well as hue. They always come with their w
 
 **Claude's flag is a second, separate signal.** A flagged building gets the orange pulsing ring on top of its rating colour. It never replaces the rating, and it always opens a tray with Claude's reason and evidence. The pulse stops under reduced motion (a steady ring instead).
 
-**Resident map:** the resident's own building is drawn in full status colour. Every other building is barely visible: a faint outline only, no fill, not even grey. A resident never sees another building's status or any Claude flag.
-
 ## 4. Type
 
 Owner, 17 Nov 2026 (section 15): IBM Plex replaces Inter, Inter Tight and Source Serif 4. One family, a sans and a serif cut, engineered and slightly technical, which suits a record kept by engineers.
@@ -144,7 +142,7 @@ Patterns:
 
 ### Layout
 - Full-screen light map. The tray floats at the bottom on phones, and bottom-left on desktop (max width 440px).
-- Top bar: wordmark with **زحلة** on the left. On the right: the signed-in person's name and a menu with "Log out". There is no role switch: the role (engineer or resident) comes from the account, and each role sees its own map and trays (owner decision, 16 Nov 2026).
+- Top bar: wordmark with **زحلة** on the left. On the right: "Go to building", the map's name ("Engineer" or "EMT · Red Cross", plain text, never the red cross emblem) and "Switch map", which goes back to the opening page. With login on, the name and "Switch map" are replaced by the signed-in person's name and a menu with "Log out" (owner, 22 Nov 2026).
 - Map tiles are muted and light. The map stays quiet; the trays carry the personality.
 - Buildings: grey by default. After a report, the building takes its rating colour (section 3), with a thin white outline so shapes stay readable.
 
@@ -164,16 +162,11 @@ Patterns:
 Ctrl+K or Cmd+K, or a search button, opens a command bar to find a building by street, neighbourhood or landmark (OpenStreetMap has few addresses in Zahle, see `plan.md` section 9). Results are clean rows: name, muted detail line, keyboard navigation, highlighted row. Choosing one flies the map there. In scope now (`plan.md` item 22). For engineers it also takes a plain-language question (item 21), and shows results as a list tray plus highlights on the map, with a one-line reason per building.
 
 ### "Is this your building?" tray (plan item 11)
-On open, if the person allows location, a tray rises with the closest building highlighted, two alternatives as clean rows, and "None of these — pick on the map". The map flies to the closest with `spring-gentle`. Location denied: go straight to "Pick your building on the map". More than about 20 km from Zahle: offer a visitor "Try the demo as a resident standing on [a real Zahle street]", with a visible "Demo location" label. That label and the "Demo code" on the phone-verification screen are the only demo wording allowed in the app, because the owner asked for them.
-
-### Resident screens (plan items 12 to 15)
-- **Verify your phone:** a calm card, visible labels, the 6-digit code in separate boxes with big touch targets. The public site shows "Demo code: ######" on screen instead of texting.
-- **Resident tray:** the own building's status chip, then "Request an inspection" and "Add to the building log". After a request, the only message is "Received — an engineer will review."
-- **Building log:** clean rows, newest first, with photos as small thumbnails and "when did you notice it" as a muted detail line.
+On open, if the person allows location, a tray rises with the closest building highlighted, two alternatives as clean rows, and "None of these — pick on the map". The map flies to the closest with `spring-gentle`. Location denied: go straight to "Pick your building on the map". More than about 20 km from Zahle: offer a visitor a real Zahle street, with a visible "Demo location" label. That label is the only demo wording allowed in the app, because the owner asked for it.
 
 ### Engineer screens for Claude (plan items 16 to 19)
 - **Flag tray:** Claude's report with the reason, the evidence, and the rules used, then two clear buttons, "Flag was right" and "Not needed", and an optional note. A small line shows "Flags confirmed: X%".
-- **Labels:** each resident submission shows Claude's label as a chip with its reason. Overriding is one tap. "Unwise" items sit in a held list with the reason, never removed.
+- **Labels:** each submission shows Claude's label as a chip with its reason. Overriding is one tap. "Unwise" items sit in a held list with the reason, never removed.
 - **Rulebook page:** a bordered list with rule text, kind, status, score, and Approve and Reject on candidates that need an engineer.
 
 ### States every screen needs
@@ -207,7 +200,7 @@ No purple-blue gradient washes. No glassmorphism or backdrop blur. No emoji as i
 
 ## 12. Changes from the owner's draft, and open decisions
 
-**Update, 16 Nov 2026 (owner widened the scope, see `plan.md` items 11 to 22):** the Resident view and "Request an inspection" are **back in**, with the role coming from the account and not a switch. The Order is merged into engineers. The **public map** showing "Inspected / Not yet inspected" is **still out**: nothing is public, and a resident sees only their own building. Section 7 now describes these screens.
+**Update, 22 Nov 2026 (owner, `plan.md` item 24):** residents are removed. The opening page offers two maps, Engineer and EMT, with the same screens for now. The Order is merged into engineers. The **public map** showing "Inspected / Not yet inspected" is **still out**.
 
 Still out, or changed from the owner's first draft:
 - The **role switch** pill. Roles come from the account.
