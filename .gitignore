@@ -46,3 +46,4 @@ supabase/.branches/
 
 # Third-party agent skills (reinstall from skills-lock.json)
 .claude/skills/
+.playwright-mcp/

@@ -4,7 +4,7 @@ Last updated: 22 Nov 2026. Read this first, then `plan.md` (source of truth) and
 
 ## Where it stands
 
-- **Live:** https://zahle-registry.vercel.app (open to anyone while login is frozen). Production = the EMT assessment commit (deployed 22 Nov, late).
+- **Live:** https://zahle-registry.vercel.app (open to anyone while login is frozen). Production = commit `8dad7e0` (EMT assessment, deployed 22 Nov, late). `ANTHROPIC_API_KEY` is not set yet, so every Claude step shows "Claude is not connected yet" and falls back to manual entry.
 - **Repo:** https://github.com/CharbelMichelMoutran/zahle-registry. **Private until the owner says.**
 - **Database:** 11 migrations applied (last `20261123000000_emt_assessments.sql`: assessments, debriefs, Claude call log, private `assessment-photos` storage, map colours from reports and assessments). Append-only triggers on.
 - **Data:** 4 engineer accounts plus the 2 stand-ins (Demo Engineer, Demo EMT), and the reports from the owner's testing. Reports are permanent unless the owner approves a cleanup.
@@ -46,6 +46,14 @@ Last updated: 22 Nov 2026. Read this first, then `plan.md` (source of truth) and
 | `src/lib/location.ts` | `getCurrentLocation()`, the stand-in for real location |
 | `supabase/migrations/` | Database schema |
 | `scripts/` | Building import, hillshade, landing map, logo renders |
+
+## Start here next session (owner back from a break)
+
+1. Owner sends the Anthropic API key. Add it with `vercel env add ANTHROPIC_API_KEY production` (and preview), and as `ANTHROPIC_API_KEY=` in `.env.local`. Never in code or git. Restart `npm run dev`, then redeploy (workaround at the bottom).
+2. Quick check: `curl -X POST -H "x-zr-map: emt" -H "Content-Type: application/json" <site>/api/emt/posting -d '{"draft":{"items":{},"photos":[]}}'` should no longer say `"claudeStatus":"off"`.
+3. Owner tests at Stanford as the EMT: EMT map → Go to building → Use current location → Start assessment, with real photos. The first save is the first real assessment record.
+4. Tune Claude's instructions in `src/lib/claude.ts` from what the owner sees (ratings, sketches, posting). Opus switch is `CLAUDE_MODEL` there.
+5. HTML debrief of the 22 Nov build: https://claude.ai/artifact/7ZuPYAo6NEyF3kE7EbekXf
 
 ## Open tasks
 
