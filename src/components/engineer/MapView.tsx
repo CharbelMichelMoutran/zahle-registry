@@ -7,6 +7,7 @@ import type { Engineer } from "@/lib/account";
 import { apiFetch } from "@/lib/client-fetch";
 import { sortNewestFirst } from "@/lib/format";
 import { sameConstructionDate, inputConstructionDate, reportConstructionDate, type Colour, type Report, type ReportInput } from "@/lib/report";
+import { latestColour } from "@/lib/record";
 import BuildingPanel, { type BuildingData, type Level, type Tab } from "./BuildingPanel";
 import { newDraft, prefillConstruction } from "./report/ReportForm";
 import { coveredRectOf } from "../tray-rect";
@@ -127,10 +128,16 @@ export default function MapView({
       const res = await apiFetch(`/api/buildings/${id}/reports`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const body = await res.json();
-      const data: BuildingData = { status: "ready", reports: sortNewestFirst(body.reports), changes: body.changes };
+      const data: BuildingData = {
+        status: "ready",
+        reports: sortNewestFirst(body.reports),
+        changes: body.changes,
+        assessments: body.assessments ?? [],
+        debrief: body.debrief ?? null,
+      };
       setBuildings((b) => ({ ...b, [id]: data }));
       // Keep the map in step with what the panel shows.
-      setColours((c) => withColour(c, id, data.reports[0]?.colour));
+      setColours((c) => withColour(c, id, latestColour(data.reports, data.assessments)));
       const nav = navRef.current;
       if (nav.buildingId === id && nav.level === "full" && nav.tab === "create") ensureDraft(id, data);
       return data;
@@ -216,8 +223,9 @@ export default function MapView({
     const prev = buildingsRef.current[id];
     const ready = prev?.status === "ready" ? prev : null;
     const reports = sortNewestFirst([report, ...(ready?.reports.filter((r) => r.id !== report.id) ?? [])]);
-    setBuildings((b) => ({ ...b, [id]: { status: "ready", reports, changes: ready?.changes ?? [] } }));
-    setColours((c) => withColour(c, id, reports[0].colour));
+    const assessments = ready?.assessments ?? [];
+    setBuildings((b) => ({ ...b, [id]: { status: "ready", reports, changes: ready?.changes ?? [], assessments, debrief: ready?.debrief ?? null } }));
+    setColours((c) => withColour(c, id, latestColour(reports, assessments)));
     loadBuilding(id); // picks up the construction-date change record, if any
     // DESIGN.md 7.5: the tray returns to the preview and celebrates once.
     goTo(1, { ...navRef.current, level: "preview", tab: "history", openReportId: null });

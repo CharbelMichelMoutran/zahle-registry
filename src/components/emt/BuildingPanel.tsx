@@ -7,8 +7,12 @@ import { NO_REMARKS, NOT_INSPECTED, NOT_YET_VERIFIED } from "@/lib/content";
 import { firstLine, formatConstructionDate, formatDate } from "@/lib/format";
 import { fadeFast, springSnappy, springTray, staggerDelay } from "@/lib/motion";
 import { reportConstructionDate, type ConstructionDateChange, type Report, type ReportInput } from "@/lib/report";
+import type { Assessment } from "@/lib/atc20";
+import { mergedRecord, type Debrief, type RecordEntry } from "@/lib/record";
+import { AssessmentView, DebriefCard, EmtLabel, PostingBadge } from "../report/AssessmentParts";
 import { ColourBadge, NotYetInspectedBadge } from "../report/ColourBadge";
-import ReportForm, { INITIAL_SAVE_STATE, type SaveState } from "./report/ReportForm";
+import AssessmentFlow from "./assessment/AssessmentFlow";
+import { INITIAL_SAVE_STATE, type SaveState } from "./report/ReportForm";
 import ReportView from "./report/ReportView";
 import { ArchMark } from "../ui/Arch";
 import { Button, IconButton, Spinner } from "../ui/Button";
@@ -19,7 +23,7 @@ export type Tab = "history" | "create";
 export type BuildingData =
   | { status: "loading" }
   | { status: "error" }
-  | { status: "ready"; reports: Report[]; changes: ConstructionDateChange[] };
+  | { status: "ready"; reports: Report[]; changes: ConstructionDateChange[]; assessments: Assessment[]; debrief: Debrief | null };
 
 type Props = {
   buildingId: string;
@@ -39,6 +43,7 @@ type Props = {
   onRetry: () => void;
   onDraftChange: (update: (d: ReportInput) => ReportInput) => void;
   onSaved: (report: Report) => void;
+  onAssessmentSaved: (assessment: Assessment) => void;
   onStale: () => Promise<void>;
 };
 
@@ -70,7 +75,7 @@ function FinalLine({ report: r, className = "" }: { report: Report; className?: 
 const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(props, ref) {
   const { level, data, onClose, onMinimize, onOpenReport } = props;
   const full = level === "full";
-  const creating = full && props.tab === "create" && data.status === "ready" && !!props.draft;
+  const creating = false; // The EMT assessment has its own buttons.
   const reading = full && props.tab === "history" && props.openReportId !== null;
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollPositions = useRef<Record<string, number>>({});
@@ -102,7 +107,7 @@ const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(prop
     return () => window.removeEventListener("keydown", onKey);
   }, [full, reading, onClose, onMinimize, onOpenReport]);
 
-  const reports = data.status === "ready" ? data.reports : [];
+  const record = data.status === "ready" ? mergedRecord(data.reports, data.assessments) : [];
   const save = creating ? saveState : null;
 
   return (
@@ -145,7 +150,7 @@ const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(prop
                 </IconButton>
               )}
             </div>
-            <Tabs {...props} count={data.status === "ready" ? reports.length : null} />
+            <Tabs {...props} count={data.status === "ready" ? record.length : null} />
             <div className="flex justify-end">
               {save && (
                 // One Save at a time: here on wider screens, in the bottom bar on phones.
@@ -214,7 +219,7 @@ const BuildingPanel = forwardRef<HTMLElement, Props>(function BuildingPanel(prop
               (full ? (
                 <FullView {...props} data={data} formId={formId} onSaveState={onSaveState} />
               ) : (
-                <Preview {...props} reports={reports} />
+                <Preview {...props} record={record} debrief={data.debrief} />
               ))}
           </motion.div>
         </AnimatePresence>
@@ -261,7 +266,7 @@ function Tabs({ tab, onTab, count }: Props & { count: number | null }) {
                 History{count !== null && <span className="tabular text-muted"> {count}</span>}
               </>
             ) : (
-              "Create report"
+              "Assess"
             )}
           </span>
         </button>
@@ -276,12 +281,15 @@ function Tabs({ tab, onTab, count }: Props & { count: number | null }) {
  * the final observation, then who wrote it. Buildings have no name or number
  * in the registry yet, so that line is left out rather than invented.
  */
-function Preview({ reports, onMaximize, celebrateKey }: Props & { reports: Report[] }) {
-  const latest = reports[0];
+function Preview({ record, debrief, onMaximize, celebrateKey }: Props & { record: RecordEntry[]; debrief: Debrief | null }) {
+  const newest = record[0];
+  const latest = newest?.kind === "report" ? newest.report : undefined;
   return (
     <div className="space-y-4">
-      {celebrateKey !== null && latest && <Celebration key={celebrateKey} />}
-      {latest ? (
+      {celebrateKey !== null && newest && <Celebration key={celebrateKey} />}
+      {newest?.kind === "assessment" ? (
+        <AssessmentSummary assessment={newest.assessment} large />
+      ) : latest ? (
         <div className="space-y-3">
           <h2 className="sr-only">Latest report</h2>
           <ColourBadge colour={latest.colour} size="large" />
@@ -312,15 +320,16 @@ function Preview({ reports, onMaximize, celebrateKey }: Props & { reports: Repor
       ) : (
         <div className="space-y-3">
           <NotYetInspectedBadge size="large" />
-          <h2 className="font-serif text-title font-medium text-ink">No reports yet. Create the first one.</h2>
+          <h2 className="font-serif text-title font-medium text-ink">Not assessed yet. Start the first assessment.</h2>
         </div>
       )}
+      {debrief && <DebriefCard text={debrief.text} />}
       <div className="flex gap-2 border-t border-dashed border-line pt-4">
         <Button variant="secondary" className="flex-1" onClick={() => onMaximize("history")}>
           View history
         </Button>
         <Button className="flex-1" onClick={() => onMaximize("create")}>
-          Create report
+          Start assessment
         </Button>
       </div>
     </div>
@@ -349,7 +358,7 @@ function Celebration() {
           </svg>
         </motion.span>
       </span>
-      <p className="text-body text-ink">Report saved. It is now part of this building&apos;s record.</p>
+      <p className="text-body text-ink">Saved. It is now part of this building&apos;s record.</p>
     </div>
   );
 }
@@ -361,22 +370,19 @@ function FullView(
     onSaveState: (s: SaveState) => void;
   },
 ) {
-  const { data, tab, openReportId, onOpenReport, draft } = props;
+  const { data, tab, openReportId, onOpenReport } = props;
   const opened = openReportId ? data.reports.find((r) => r.id === openReportId) : undefined;
+  const openedAssessment = openReportId ? data.assessments.find((a) => a.id === openReportId) : undefined;
+  const record = mergedRecord(data.reports, data.assessments);
 
   if (tab === "create") {
-    if (!draft) return <Loading />;
     return (
-      <ReportForm
-        formId={props.formId}
+      <AssessmentFlow
         buildingId={props.buildingId}
-        engineer={props.engineer}
-        draft={draft}
-        onChange={props.onDraftChange}
-        latest={data.reports[0] ?? null}
-        onSaved={props.onSaved}
-        onStale={props.onStale}
-        onSaveState={props.onSaveState}
+        inspector={props.engineer?.fullName ?? "EMT"}
+        latestReport={data.reports[0] ?? null}
+        latestAssessment={data.assessments[0] ?? null}
+        onSaved={props.onAssessmentSaved}
       />
     );
   }
@@ -384,25 +390,27 @@ function FullView(
   if (opened) {
     return <ReportView report={opened} change={data.changes.find((c) => c.report_id === opened.id)} />;
   }
+  if (openedAssessment) return <AssessmentView assessment={openedAssessment} />;
 
-  if (data.reports.length === 0) {
+  if (record.length === 0) {
     return (
       <div className="flex flex-col items-center py-8 text-center">
         <ArchMark className="h-10 w-9 text-muted" />
-        <p className="mt-3 font-serif text-title font-medium text-ink">No reports yet. Create the first one.</p>
+        <p className="mt-3 font-serif text-title font-medium text-ink">Not assessed yet. Start the first assessment.</p>
         <Button className="mt-5" onClick={() => props.onTab("create")}>
-          Create report
+          Start assessment
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="pb-6">
+    <div className="space-y-4 pb-6">
+      {data.debrief && <DebriefCard text={data.debrief.text} />}
       <ul className="overflow-hidden rounded-card border border-line">
-        {data.reports.map((r, i) => (
+        {record.map((e, i) => (
           <motion.li
-            key={r.id}
+            key={e.id}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...fadeFast, delay: staggerDelay(i) }}
@@ -410,9 +418,25 @@ function FullView(
           >
             <button
               type="button"
-              onClick={() => onOpenReport(r.id)}
+              onClick={() => onOpenReport(e.id)}
               className="block w-full px-4 py-3 text-left transition-colors hover:bg-surface-soft focus-visible:bg-accent-soft focus-visible:outline-none"
             >
+              {e.kind === "assessment" ? (
+                <AssessmentSummary assessment={e.assessment} />
+              ) : (
+              <ReportRow report={e.report} />
+              )}
+            </button>
+          </motion.li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ReportRow({ report: r }: { report: Report }) {
+  return (
+    <>
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-body">
                 <span className="tabular font-medium text-ink">{formatDate(r.report_date)}</span>
                 <span className="min-w-0 truncate text-muted">
@@ -430,10 +454,38 @@ function FullView(
                   <FinalLine report={r} />
                 </p>
               </div>
-            </button>
-          </motion.li>
-        ))}
-      </ul>
+    </>
+  );
+}
+
+/** An EMT assessment in the preview and the history: placard first, then who and when. */
+function AssessmentSummary({ assessment: a, large = false }: { assessment: Assessment; large?: boolean }) {
+  const line = a.stopped_reason ? `Stopped at a danger: ${a.stopped_reason.replace(/^[A-Z]\d+: /, "")}` : a.data.restrictions;
+  return (
+    <div className={large ? "space-y-3" : "space-y-1.5"}>
+      {large && <h2 className="sr-only">Latest assessment</h2>}
+      {!large && (
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-body">
+          <span className="tabular font-medium text-ink">{formatDate(a.created_at.slice(0, 10))}</span>
+          <span className="min-w-0 truncate text-muted">
+            <bdi dir="auto">{a.inspector_name}</bdi>, EMT safety assessment
+          </span>
+        </div>
+      )}
+      <PostingBadge posting={a.posting} size={large ? "large" : "small"} />
+      {line && (
+        <p dir="auto" className="line-clamp-2 text-body text-ink">
+          {line}
+        </p>
+      )}
+      <p className="text-micro text-muted">
+        {large && (
+          <>
+            {formatDate(a.created_at.slice(0, 10))} · <bdi dir="auto">{a.inspector_name}</bdi> ·{" "}
+          </>
+        )}
+        <EmtLabel />
+      </p>
     </div>
   );
 }
