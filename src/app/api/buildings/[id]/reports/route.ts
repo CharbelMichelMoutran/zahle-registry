@@ -1,5 +1,7 @@
-import type { NextRequest } from "next/server";
+import { after, type NextRequest } from "next/server";
 import { requireEngineer } from "@/lib/api-auth";
+import type { Assessment } from "@/lib/atc20";
+import { debriefIsStale, latestDebrief, refreshDebrief } from "@/lib/debrief";
 import { visitorHash } from "@/lib/session";
 import { createServerSupabase } from "@/lib/supabase-server";
 import {
@@ -17,7 +19,13 @@ const MAX_BODY_BYTES = 32 * 1024; // the longest valid report is about 25 KB of 
 const json = (body: unknown, status = 200) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 
-/** All reports for one building (newest first) and its construction-date changes. */
+/**
+ * One building's record: engineer reports (newest first), construction-date
+ * changes, EMT assessments (newest first) and Claude's debrief. A debrief that
+ * no longer covers every record is rewritten after the response (plan.md item 25).
+ */
+export const maxDuration = 60;
+
 export async function GET(req: NextRequest, ctx: RouteContext<"/api/buildings/[id]/reports">) {
   const { denied } = await requireEngineer(req);
   if (denied) return denied;
@@ -25,7 +33,7 @@ export async function GET(req: NextRequest, ctx: RouteContext<"/api/buildings/[i
   if (!UUID.test(id)) return json({ error: "Unknown building." }, 404);
 
   const supabase = createServerSupabase();
-  const [reports, changes] = await Promise.all([
+  const [reports, changes, assessments, debrief] = await Promise.all([
     supabase
       .from("reports")
       .select("*")
@@ -37,13 +45,27 @@ export async function GET(req: NextRequest, ctx: RouteContext<"/api/buildings/[i
       .select("*")
       .eq("building_id", id)
       .order("changed_at", { ascending: false }),
+    supabase
+      .from("assessments")
+      .select("id, building_id, inspector_name, posting, claude_posting, overrode_claude, stopped_reason, data, photos, created_at")
+      .eq("building_id", id)
+      .order("created_at", { ascending: false }),
+    latestDebrief(id).catch((err: Error) => {
+      console.error(err.message);
+      return null;
+    }),
   ]);
 
-  if (reports.error || changes.error) {
-    console.error("load reports failed:", reports.error?.message ?? changes.error?.message);
+  if (reports.error || changes.error || assessments.error) {
+    console.error("load reports failed:", reports.error?.message ?? changes.error?.message ?? assessments.error?.message);
     return json({ error: "Could not load reports." }, 500);
   }
-  return json({ reports: reports.data, changes: changes.data });
+  const reportRows = reports.data as Report[];
+  const assessmentRows = assessments.data as Assessment[];
+  if (debriefIsStale(debrief, reportRows.length + assessmentRows.length)) {
+    after(() => refreshDebrief(id, reportRows, assessmentRows));
+  }
+  return json({ reports: reportRows, changes: changes.data, assessments: assessmentRows, debrief });
 }
 
 const DB_ERRORS: Record<string, [number, string]> = {
