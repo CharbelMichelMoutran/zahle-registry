@@ -4,9 +4,9 @@ Last updated: 22 Nov 2026. Read this first, then `plan.md` (source of truth) and
 
 ## Where it stands
 
-- **Live:** https://zahle-registry.vercel.app (open to anyone while login is frozen). Production = commit `b82ca8c` (deployed 22 Nov).
+- **Live:** https://zahle-registry.vercel.app (open to anyone while login is frozen). Production = the EMT assessment commit (deployed 22 Nov, late).
 - **Repo:** https://github.com/CharbelMichelMoutran/zahle-registry. **Private until the owner says.**
-- **Database:** 10 migrations applied (last `20261122000100_demo_accounts.sql`). Resident tables removed. Append-only triggers on.
+- **Database:** 11 migrations applied (last `20261123000000_emt_assessments.sql`: assessments, debriefs, Claude call log, private `assessment-photos` storage, map colours from reports and assessments). Append-only triggers on.
 - **Data:** 4 engineer accounts plus the 2 stand-ins (Demo Engineer, Demo EMT), and the reports from the owner's testing. Reports are permanent unless the owner approves a cleanup.
 
 ## What's built
@@ -15,7 +15,9 @@ Last updated: 22 Nov 2026. Read this first, then `plan.md` (source of truth) and
 - **Login frozen (22 Nov):** `LOGIN_FROZEN` in `src/lib/maps.ts`. Both maps are open to anyone; reports are signed by the map's stand-in account. Login, sign-up and waiting pages send you to `/`. The code stays.
 - **Map:** Zahle buildings from OpenStreetMap, coloured by condition (worst = red `#D6402B`), toned grey map with hillshade, collapsible key. Trackpad pans, pinch zooms, + and − buttons.
 - **Both maps:** building tray (status, year built, last date), history, full-screen report (rating is the only required field). Reports are add-only.
-- **Go to building:** top-bar button; "Use current location" currently picks a random real Zahle building.
+- **EMT safety assessment (22 Nov, plan item 25):** "Start assessment" on the EMT map. ATC-20 Detailed core plus the Lebanese form's scene safety, location, construction and Actions. Photos to private storage, Claude reads each one, the EMT changes anything, stops on danger with an evacuation order. Saved once at the end; posting colours the building on both maps, labelled "EMT posting, not yet reviewed by an engineer". Files: `src/lib/atc20.ts` (the form), `src/lib/claude.ts` (every Claude call), `src/components/emt/assessment/`, `src/components/report/AssessmentParts.tsx`, `src/app/api/emt/`.
+- **Claude debrief (22 Nov):** 2–4 lines at the top of the tray and history on both maps. Stored in `building_debriefs`, rewritten after a page load when the record has grown (`src/lib/debrief.ts`).
+- **Go to building:** top-bar button; "Use current location" currently picks a random real Zahle building; on the EMT map, the building with an unfinished assessment if there is one.
 - **Landing page:** public start screen with a pre-rendered map of Zahle and the two map buttons. Text unchanged (two lines still mention residents; the owner said not to touch the wording yet).
 - **Look:** renamed **Zahle on Record**; IBM Plex type, Amiri زحلة, accent `#1E5A8C`, off-white `#F6F7F8`, Record logo with river ribbon.
 
@@ -25,7 +27,9 @@ Last updated: 22 Nov 2026. Read this first, then `plan.md` (source of truth) and
 - Records are add-only: reports are never edited or deleted.
 - No demo notices in the app.
 - No engineer side panel (on the Later list).
-- AI direction is **undecided**. The recommendation: Claude rates visit urgency (Urgent / Soon / Routine) and never the condition colour.
+- **Golden rule:** the app must never frustrate the person using it (top of plan.md).
+- AI direction (22 Nov): the EMT assessment and the debrief. Old items 16–19 are on the Later list.
+- Claude model: Sonnet 5.5 (owner's choice for cost); Opus is one line in `src/lib/claude.ts`.
 
 ## File map
 
@@ -45,11 +49,11 @@ Last updated: 22 Nov 2026. Read this first, then `plan.md` (source of truth) and
 
 ## Open tasks
 
-1. **Next:** the owner decides what the EMT map should do differently, and the AI direction (the resident inspection chat is gone).
-2. Then, in the order the owner chooses: Claude flagging, rulebook, map query, Cmd+K, sample data, README, full test. Live updates between the maps without reload are on the Later list.
+1. **Next: the owner gives the Anthropic API key.** It goes in `.env.local` and Vercel as `ANTHROPIC_API_KEY` (never in code). Set a monthly spend limit in the Console. Then test with the owner's Stanford photos and tune Claude's instructions.
+2. Then, in the order the owner chooses: map query, Cmd+K, sample data, README, full test.
 3. UI pass stage 4 (final check) not started.
 4. Owner choices: show "Record" alone in the top bar (the Arabic is too faint at 32px)? Make the footer tie a single sweep (the loop reads like a paperclip)? DESIGN.md 15.1 is out of date. Landing text still mentions residents.
-5. Owner to do: set up the Anthropic Console; connect Vercel to GitHub.
+5. Owner to do: connect Vercel to GitHub.
 6. Commit or ignore the new `.agents/` skills folder and `skills-lock.json` change (installed 22 Nov), and the untracked `Lebanon_Building_Safety_Assessment_Form_Phone.pdf`.
 
 ## Known bugs and gaps
@@ -59,5 +63,8 @@ Last updated: 22 Nov 2026. Read this first, then `plan.md` (source of truth) and
 - Canvas buildings cannot be selected by keyboard.
 - A mouse wheel pans instead of zooming. Ctrl+wheel page zoom is blocked on the map.
 - The EMT report shows "OEA no. DEMO-EMT" and the form's engineer wording; left as is (no feature changes).
+- Not tested with Claude connected: photo reading, sketches, posting proposal, debrief writing. Everything else was checked in the browser on 22 Nov (phone and laptop) with Claude off, and the saved view with a browser-only fake record.
+- Not tested for real: saving an EMT assessment (skipped so no fake assessment lands in the live record; the server's checks were tested).
+- Uploaded photos of an assessment that is never saved stay in storage (harmless, small).
 - Not tested in the browser: saving a report from either map (skipped so no fake report lands in the live record). Reading, the tray, the form and the stand-in signer were checked on 22 Nov.
 - Deploys use a workaround until Vercel is linked to GitHub: `git archive HEAD` into a scratch folder, copy `.vercel/`, then `vercel deploy --prod --yes`.
