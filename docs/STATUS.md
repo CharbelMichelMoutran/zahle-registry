@@ -4,7 +4,7 @@ Last updated: 23 Nov 2026 (evening). Read this first, then `plan.md` (source of 
 
 ## Where it stands
 
-- **Live:** https://zahle-registry.vercel.app (open to anyone while login is frozen). Production = commit `db13354` (professional engineer report, deployed 24 Nov). `ANTHROPIC_API_KEY` is not set yet, so every Claude step shows "Claude is not connected yet" and falls back to manual entry.
+- **Live:** https://zahle-registry.vercel.app (open to anyone while login is frozen). Production = commit `63623a8` (portfolio landing page and Volunteer map, deployed 24 Nov; the engineer report went live just before). `ANTHROPIC_API_KEY` is not set yet, so every Claude step shows "Claude is not connected yet" and falls back to manual entry.
 - **Repo:** https://github.com/CharbelMichelMoutran/zahle-registry. **Private until the owner says.**
 - **Database:** 13 migrations applied (last `20261125000000_engineer_report.sql`, 24 Nov: report details, photos, report numbers; then `20261124000000_map_looks.sql`; before it `20261123000000_emt_assessments.sql`: assessments, debriefs, Claude call log, private `assessment-photos` storage, map colours from reports and assessments). Append-only triggers on.
 - **Data:** 4 engineer accounts plus the 2 stand-ins (Demo Engineer, Demo EMT), and 2 EMT assessments. **No reports:** the 6 old reports were deleted on 24 Nov (owner's one-time exception, plan item 27); backup in `backups/reports-2026-11-24T01-54-03-346Z.json` on the owner's laptop. Append-only guards checked back on.
@@ -58,11 +58,12 @@ Last updated: 23 Nov 2026 (evening). Read this first, then `plan.md` (source of 
 
 ## Open tasks
 
-000. **Portfolio landing page (plan item 28): built locally 23 Nov, not pushed or deployed.** Files: `src/components/landing/` (`Landing.tsx`, `motion.tsx`, `landing.css`), words in `src/lib/landing-content.ts`, author photo `public/landing/author.webp`. Checked headless at 1440 and 390 px: no errors, no sideways scroll. Not yet checked: Safari, a real phone, hover effects. Owner to approve the wording section by section.
+000. **Portfolio landing page (plan item 28): live 24 Nov (owner's go), with the photo-rights issue below still open.** Files: `src/components/landing/` (`Landing.tsx`, `motion.tsx`, `landing.css`), words in `src/lib/landing-content.ts`, author photo `public/landing/author.webp`. Checked headless at 1440 and 390 px: no errors, no sideways scroll. Not yet checked: Safari, a real phone, hover effects. Owner to approve the wording section by section.
     - **Owner, 23 Nov (later):** removed "How it's built", the Result section (numbers, Red Cross as owner) and the sources list; sources now open from the small numbered badges. Next.js dev badge hidden (`next.config.ts`). Owner's photos placed: Zahle from the hill (Task, `public/landing/zahle.webp`) and a damaged building (Claude sketch, `public/landing/damaged-building.webp`).
     - **Photo rights to settle before deploy:** the damaged-building photo is UNDP Lebanon's on Flickr (UNDP209), marked **All rights reserved**: ask UNDP Lebanon for permission or swap for a free-licence photo. The Zahle photo's source is unknown (627 × 650 px, looks like a social-media repost): find its author or replace it with a larger free one.
     - **Placeholders to replace before launch** (grey frames tagged "Placeholder"): (1) Situation photo: damaged building in Tripoli; (2) clip: engineer map; (3) clip: volunteer assessment; (4) **Claude's real sketch** of the damaged-building photo (run it through `drawSketch` once `ANTHROPIC_API_KEY` is set; never hand-drawn); (5) triage screen (the confidence triage is not built yet, Later list).
-    - To check with the owner: LinkedIn URL assumed `linkedin.com/in/charbelmoutran`.
+    - LinkedIn URL confirmed by the owner: `linkedin.com/in/charbelmoutran`.
+    - Old-report cleanup: already done by another session before this one ran it (0 reports, 2 assessments kept); the backup taken here is empty.
     - **EMT map renamed Volunteer map** (labels, page `/volunteer`, `/emt` redirects in `src/proxy.ts`). Internal name and API paths stay `emt`. `MAP_PATH` in `src/lib/maps.ts`.
     - Vercel Web Analytics added in `src/app/layout.tsx` (switch it on in the Vercel dashboard when deploying).
     - The original WhatsApp photo in the repo root is not committed (personal file); delete or keep outside the repo.
