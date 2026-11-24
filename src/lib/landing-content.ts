@@ -47,7 +47,13 @@ export const SITUATION = {
     "The records that would warn us sit on paper in municipal offices, or were never made. Every engineer who inspects a building starts from zero.",
   ],
   bodySource: 4,
-  photo: "Photo: a damaged building in Tripoli (free licence)",
+  photo: {
+    src: "/landing/tripoli.webp",
+    width: 1000,
+    height: 1250,
+    alt: "Bab al-Tabbaneh, Tripoli: a concrete building gutted in the civil war, with laundry hanging from the floors people still live on",
+    credit: "Bab al-Tabbaneh, Tripoli. Photo: FunkMonk, CC BY 3.0, via Wikimedia Commons",
+  },
 } as const;
 
 export const TASK = {
@@ -126,19 +132,29 @@ export const SOLUTION = {
       name: "Engineer map",
       who: "For civil and structural engineers",
       text: "Every building in Zahle, coloured by its last report. Open one, read its whole history, add a professional report. Nothing is ever overwritten.",
-      clip: "Clip: engineer opens a building, reads its history, writes a report",
+      screen: {
+        src: "/landing/engineer-map.webp",
+        width: 1600,
+        height: 1200,
+        alt: "The engineer map: a building posted unsafe by a volunteer, outlined on the map, with Claude's debrief of its record",
+      },
     },
     {
       name: "Volunteer map",
       who: "For Red Cross volunteers, EMTs and rescuers",
       text: "Run an ATC-20 safety check on a phone, step by step. The posting outlines the building on both maps until an engineer reviews it.",
-      clip: "Clip: volunteer assessment on a phone, step by step",
+      screen: {
+        src: "/landing/assessment.webp",
+        width: 780,
+        height: 1688,
+        alt: "The volunteer's safety assessment on a phone: step 1 of 9, with the location Claude filled in from the map",
+      },
     },
   ],
   nearMe: {
     label: "On a mission",
     title: "Near me.",
-    text: "A volunteer team picks how long is too long: a week, a month, six months, a year. The map lists the 20 nearest buildings nobody has visited in that time, or ever, nearest first, and outlines them. A team in the street knows which door is next.",
+    text: "A volunteer team picks how long is too long: a week, a month, six months, a year. The map lists 20 buildings nobody has visited in that time, or ever, and outlines them. Nearest first, but danger pulls a building forward: one last posted unsafe counts as four times closer. A team in the street knows which door is next.",
     shot: {
       src: "/landing/near-me.webp",
       width: 780,
@@ -170,7 +186,7 @@ export const CLAUDE = {
       alt: "A damaged concrete building in Lebanon: broken walls, an exposed floor slab and rubble at its foot",
       credit: "Photo: UNDP Lebanon",
     },
-    output: "Claude's sketch of this photo: real product output, generated once the API key is set",
+    output: "Claude's sketch of this photo, as the app draws it from Claude's answer. Not retouched.",
   },
   triage: {
     title: "It reads every past report, then hands over the list.",
@@ -197,6 +213,7 @@ export const CLAUDE = {
         { title: "It only ranks what's on record.", text: "A building nobody has inspected isn't ranked at all, so a neighbourhood that gets fewer visits shows up less. Asking for “not yet inspected” brings them back." },
         { title: "Uncounted people count for less.", text: "When nobody counted the people inside, the building ranks below one where even a few were counted. A full building nobody counted can sit below a half-empty one." },
         { title: "Claude's confidence is its own guess.", text: "It isn't a measured accuracy. It only orders buildings inside one group, and only where the volunteer agreed with Claude." },
+        { title: "Near me's weights are our choice.", text: "Unsafe counts as four times closer, restricted use twice, never inspected one and a half times. Other numbers would send teams to other doors." },
         { title: "Decisions made alone go up, not down.", text: "A posting made without Claude, or against it, is checked before one Claude agreed with. A single opinion gets a second one first." },
       ],
     },

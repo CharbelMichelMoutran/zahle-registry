@@ -68,6 +68,21 @@ export const PRIORITY_STEPS = [
   "Inside each group: the colour (red, yellow, green), then the damage estimate, then the number of people inside, then Claude’s confidence. For red and yellow, the surer Claude is, the higher; for green, the less sure, the higher. Unknown damage or people rank below known numbers but above zero. Ties: the building waiting longest since its last visit.",
 ] as const;
 
+/**
+ * "Near me" on the volunteer map (owner, 23 Nov 2026): distance and importance
+ * together. Each building's distance is divided by its weight, taken from its
+ * newest record, and the smallest result comes first. Keep NEAR_ME_STEP in step.
+ */
+export const NEAR_ME_WEIGHT = { red: 4, yellow: 2, never: 1.5, green: 1 } as const;
+
+export const NEAR_ME_STEP =
+  "Nearest first, weighted by danger: a building last posted unsafe counts as 4 times closer, restricted use 2 times, never inspected 1.5 times. So an unsafe building 400 m away comes before a safe one 150 m away.";
+
+/** Smaller is sooner. `colour` is the newest record's colour, or null if never inspected. */
+export function nearMeScore(metres: number, colour: Colour | null): number {
+  return metres / NEAR_ME_WEIGHT[colour ?? "never"];
+}
+
 export const PRIORITY_NOTE = "Buildings never inspected are not ranked unless a question asks for them.";
 
 /** The volunteer posting is the newest record: no engineer report since (same order as the map). */

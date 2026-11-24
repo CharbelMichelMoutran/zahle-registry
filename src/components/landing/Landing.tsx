@@ -3,17 +3,21 @@ import Link from "next/link";
 import { MAP_PATH } from "@/lib/maps";
 import { PRIORITY_NOTE, PRIORITY_STEPS } from "@/lib/priority";
 import { ADAPTED, ATC20, AUTHOR, CLAUDE, CLOSE, HERO, SITUATION, SOLUTION, SOURCES, TASK } from "@/lib/landing-content";
+import type { Sketch } from "@/lib/atc20";
+import sketchJson from "@/lib/landing-sketch.json";
+import { SketchView } from "../report/AssessmentParts";
 import { Logo } from "../ui/Logo";
 import { CityFlight, HeroArabic, LightWords, Reveal, SmoothScroll } from "./motion";
 import "./landing.css";
+
+/** Claude's real answer for the damaged-building photo (scripts/landing-sketch.ts). */
+const sketch = sketchJson as Sketch;
 
 /**
  * The portfolio landing page at / (plan.md item 28): a case study in STAR order,
  * after template A (docs/templates/a-editorial.html) with template C's giant
  * زحلة and camera flight. Light only. Words live in src/lib/landing-content.ts.
- *
- * Grey frames marked "Placeholder" stand in for photos, clips and features not
- * built yet; they are listed in docs/STATUS.md and must be replaced before launch.
+
  */
 export default function Landing() {
   return (
@@ -100,16 +104,6 @@ function Chapter({ index, label, side, id, children }: { index: string; label: s
   );
 }
 
-/** A grey frame at the real size of a photo, clip or screen still to come. */
-function Placeholder({ label, ratio = "4 / 3", className = "" }: { label: string; ratio?: string; className?: string }) {
-  return (
-    <div className={`lp-ph ${className}`} style={{ aspectRatio: ratio }} role="img" aria-label={label}>
-      <span className="lp-ph-tag">Placeholder</span>
-      <span className="lp-ph-text">{label}</span>
-    </div>
-  );
-}
-
 /** A real screen from the product on a soft panel, with what it shows under it. */
 function Shot({ src, alt, width, height, credit, phone = false }: { src: string; alt: string; width: number; height: number; credit: string; phone?: boolean }) {
   return (
@@ -168,7 +162,7 @@ function Situation() {
       </div>
       <div className="lp-split">
         <Reveal>
-          <Placeholder label={s.photo} ratio="4 / 5" />
+          <Photo {...s.photo} sizes="(min-width: 900px) 40vw, 100vw" />
         </Reveal>
         <Reveal className="lp-prose" delay={90}>
           {s.body.map((p, i) => (
@@ -299,7 +293,9 @@ function Solution() {
         {s.maps.map((m, i) => (
           <Reveal key={m.name} delay={i * 110}>
             <Link href={i === 0 ? MAP_PATH.engineer : MAP_PATH.emt} className="lp-map-card">
-              <Placeholder label={m.clip} ratio={i === 0 ? "4 / 3" : "4 / 3"} />
+              <div className="lp-screen" data-phone={i === 1 || undefined}>
+                <Image src={m.screen.src} alt={m.screen.alt} width={m.screen.width} height={m.screen.height} sizes={i === 0 ? "(min-width: 860px) 48vw, 100vw" : "260px"} />
+              </div>
               <div className="lp-map-meta">
                 <span className="lp-label">{m.who}</span>
                 <h3>
@@ -349,7 +345,10 @@ function ClaudeSection() {
           <Photo {...c.sketch.photo} sizes="(min-width: 900px) 46vw, 100vw" className="lp-photo-sketch" />
         </Reveal>
         <Reveal delay={120}>
-          <Placeholder label={c.sketch.output} ratio="3 / 2" className="lp-ph-paper" />
+          <figure className="lp-sketch-out">
+            <SketchView sketch={sketch} />
+            <p className="lp-note">{c.sketch.output}</p>
+          </figure>
         </Reveal>
         <Reveal className="lp-sketch-text" delay={200}>
           <h3>{c.sketch.title}</h3>

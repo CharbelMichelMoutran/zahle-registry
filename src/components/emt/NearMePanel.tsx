@@ -7,6 +7,7 @@ import { apiFetch } from "@/lib/client-fetch";
 import { formatDate } from "@/lib/format";
 import { getCurrentPoint, locatableBuildings, metresBetween } from "@/lib/location";
 import { springSnappy } from "@/lib/motion";
+import { NEAR_ME_STEP, nearMeScore } from "@/lib/priority";
 import { NEAR_ME_COUNT, NEAR_ME_WINDOWS, type QueryRow } from "@/lib/query";
 import type { MapRecord } from "@/lib/record";
 import { beirutToday } from "@/lib/record";
@@ -18,6 +19,13 @@ type Found = { rows: QueryRow[]; distance: Map<string, number>; real: boolean };
 
 const COLOUR_POSTING: Record<string, Posting> = { green: "inspected", yellow: "restricted", red: "unsafe" };
 const COLOUR_WORD: Record<string, string> = { green: "good condition", yellow: "needs some work", red: "imminent risk" };
+
+/** The colour of the newest record, volunteer or engineer (the volunteer's wins a tie, as on the map). */
+function newestColour(r: MapRecord) {
+  const { report, emt } = r;
+  if (emt && (!report || emt.day > report.day || (emt.day === report.day && emt.at > report.at))) return emt.colour;
+  return report?.colour ?? emt?.colour ?? null;
+}
 
 /** The day `days` before today, YYYY-MM-DD. */
 function daysAgo(days: number): string {
@@ -72,8 +80,12 @@ export function NearMePanel({
             const last = [r?.report?.day, r?.emt?.day].filter((d): d is string => !!d).sort().at(-1);
             return !last || last < cutoff;
           })
-          .map((b) => ({ b, m: metresBetween(point, b) }))
-          .sort((x, y) => x.m - y.m)
+          .map((b) => {
+            const r = byId.get(b.id);
+            const m = metresBetween(point, b);
+            return { b, m, score: nearMeScore(m, r ? newestColour(r) : null) };
+          })
+          .sort((x, y) => x.score - y.score)
           .slice(0, NEAR_ME_COUNT);
         for (const { b, m } of near) {
           const r = byId.get(b.id);
@@ -166,7 +178,7 @@ export function NearMePanel({
           found && (
             <div className="space-y-2">
               <p className="text-micro text-muted">
-                {found.real ? "From your location, nearest first." : "You are not in Zahle: starting from a Zahle building picked at random."}
+                {found.real ? "From your location." : "You are not in Zahle: starting from a Zahle building picked at random."}
               </p>
               <ResultList
                 rows={found.rows}
@@ -176,6 +188,7 @@ export function NearMePanel({
                   onShow(id);
                 }}
               />
+              <p className="px-1 text-micro text-muted">{NEAR_ME_STEP}</p>
             </div>
           )
         )}
