@@ -125,17 +125,8 @@ p {
 
 /* These panes only draw; taps reach the footprint canvas underneath. */
 .leaflet-red-pane canvas,
-.leaflet-redDot-pane canvas,
 .leaflet-selected-pane canvas {
   pointer-events: none !important;
-}
-
-/* Red dots only when zoomed out, below zoom 16 (BuildingMap.tsx). */
-.leaflet-redDot-pane {
-  opacity: 0;
-}
-.zr-map-far .leaflet-redDot-pane {
-  opacity: 1;
 }
 
 /* While a tray is open, other footprints step back. Red and the selection do not. */
@@ -144,8 +135,7 @@ p {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .leaflet-overlay-pane,
-  .leaflet-redDot-pane {
+  .leaflet-overlay-pane {
     transition: opacity 200ms ease-out;
   }
 }

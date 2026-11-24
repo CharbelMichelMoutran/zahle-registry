@@ -217,6 +217,11 @@ The project owner chose to leave adoption out of this project. **Later test:** o
     - **Both maps** show EMT assessments in the history and tray, colour the building (Inspected green, Restricted yellow, Unsafe red), and label it "EMT posting, not yet reviewed by an engineer". The engineer report form is unchanged.
     - **Claude's debrief:** 2 to 4 lines at the top of a building's tray and history on both maps (state, main damage, what changed, next step), covering engineer reports and EMT assessments. Stored, and rewritten only when the record grows.
     - Without the Anthropic key, every Claude step falls back to manual entry. Cost guard: 150 Claude calls per visitor per hour, plus the Console spend limit.
+26. **Map colours: EMT outline, engineer fill, green fades (owner, 23 Nov 2026).** Overrides "colour the building" in item 25 and "Map colour" in item 4.
+    - An **engineer report** colours the whole building. An **EMT posting** colours only its **outline**; the fill stays as the last engineer report left it (or the "Not yet inspected" hatch). The newest record decides: a newer engineer report takes the whole building again and the EMT outline goes.
+    - An EMT red is a thick red outline drawn on top: no fill, no dot. **No red building has a white dot any more** (engineer red too).
+    - **Green fades to dark grey 6 months** after its day (report date for an engineer report, save day for an EMT posting, Beirut time), for both the fill and the outline, so nobody reads a building as safe forever. Yellow and red never fade. The record itself is unchanged: the tray and history still show the original report.
+    - Map key: Green, Yellow, Red, "Outline: EMT posting", dark grey "Inspected more than 6 months ago", "Not yet inspected".
 
 ### Out (for a later version)
 

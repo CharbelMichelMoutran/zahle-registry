@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { type CSSProperties, useId, useState } from "react";
 import { COLOUR_CONTENT, MAP_KEY, NOT_YET_INSPECTED } from "@/lib/content";
-import { CALM_FILL_OPACITY, RATING_EDGE, RATING_EDGE_WEIGHT, RATING_FILL } from "@/lib/map-style";
+import { CALM_FILL_OPACITY, RATING_EDGE, RATING_EDGE_WEIGHT, RATING_FILL, SHADE_EDGE, SHADE_FILL } from "@/lib/map-style";
 import { springTray } from "@/lib/motion";
 import type { Colour } from "@/lib/report";
 
@@ -17,6 +17,11 @@ function swatch(c: Colour): CSSProperties {
     boxShadow: `inset 0 0 0 ${RATING_EDGE_WEIGHT[c]}px ${RATING_EDGE[c]}`,
   };
 }
+
+const STALE_SWATCH: CSSProperties = {
+  background: `color-mix(in srgb, ${SHADE_FILL.stale} ${CALM_FILL_OPACITY * 100}%, transparent)`,
+  boxShadow: `inset 0 0 0 1px ${SHADE_EDGE.stale}`,
+};
 
 const STORAGE_KEY = "zahle-registry:emt:map-key-open";
 
@@ -36,8 +41,8 @@ function saveOpen(open: boolean) {
 }
 
 /**
- * The map key (DESIGN.md 14.10): the three ratings with their words, and the
- * hatch for "Not yet inspected". Top-left of the map: clear of the zoom buttons
+ * The map key (DESIGN.md 14.10, plan.md item 26): the three ratings with their
+ * words, the EMT outline, faded green, and the hatch for "Not yet inspected". Top-left of the map: clear of the zoom buttons
  * (bottom-right on laptops, top-right on phones), the attribution (bottom-right),
  * the tray (bottom), and the "Go to building" menu (in the top bar). Folds to one button.
  * Claude's orange ring joins the key only once flags exist.
@@ -101,6 +106,14 @@ export function MapKey() {
                 {COLOUR_CONTENT[c].word}
               </li>
             ))}
+            <li className="flex items-center gap-2.5 px-3.5 py-1.5 text-micro text-ink">
+              <span aria-hidden className="h-3.5 w-3.5 shrink-0 rounded-[3px]" style={{ boxShadow: "inset 0 0 0 2px var(--color-ink)" }} />
+              {MAP_KEY.emtOutline}
+            </li>
+            <li className="flex items-center gap-2.5 px-3.5 py-1.5 text-micro text-ink">
+              <span aria-hidden className="h-3.5 w-3.5 shrink-0 rounded-[3px]" style={STALE_SWATCH} />
+              {MAP_KEY.stale}
+            </li>
             <li className="flex items-center gap-2.5 px-3.5 pt-1.5 pb-3 text-micro text-muted">
               <span aria-hidden className="hatch h-3.5 w-3.5 shrink-0 rounded-[3px] border border-line" />
               {NOT_YET_INSPECTED}

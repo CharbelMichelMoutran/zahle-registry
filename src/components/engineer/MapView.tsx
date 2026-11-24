@@ -6,8 +6,8 @@ import { type Ref, useCallback, useEffect, useImperativeHandle, useRef, useState
 import type { Engineer } from "@/lib/account";
 import { apiFetch } from "@/lib/client-fetch";
 import { sortNewestFirst } from "@/lib/format";
-import { sameConstructionDate, inputConstructionDate, reportConstructionDate, type Colour, type Report, type ReportInput } from "@/lib/report";
-import { latestColour } from "@/lib/record";
+import { sameConstructionDate, inputConstructionDate, reportConstructionDate, type Report, type ReportInput } from "@/lib/report";
+import { mapLook, mapRecordOf, sameLook, type MapLook, type MapRecord } from "@/lib/record";
 import BuildingPanel, { type BuildingData, type Level, type Tab } from "./BuildingPanel";
 import { newDraft, prefillConstruction } from "./report/ReportForm";
 import { coveredRectOf } from "../tray-rect";
@@ -100,7 +100,7 @@ export default function MapView({
   const { nav, navRef, push, goTo } = usePanelNavigation();
   const trayRef = useRef<HTMLElement | null>(null);
   const coveredRect = useCallback(() => coveredRectOf(trayRef.current), []);
-  const [colours, setColours] = useState<ReadonlyMap<string, Colour>>(new Map());
+  const [looks, setLooks] = useState<ReadonlyMap<string, MapLook>>(new Map());
   const [buildings, setBuildings] = useState<Record<string, BuildingData>>({});
   const [drafts, setDrafts] = useState<Record<string, ReportInput>>({});
   const [celebrateKey, setCelebrateKey] = useState<number | null>(null);
@@ -111,11 +111,13 @@ export default function MapView({
     buildingsRef.current = buildings;
   }, [buildings]);
 
-  // Map colours: latest report per building.
+  // Map looks: latest engineer report and latest EMT posting per building.
   useEffect(() => {
     apiFetch("/api/buildings/colours")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-      .then((rows: { id: string; colour: Colour }[]) => setColours(new Map(rows.map((r) => [r.id, r.colour]))))
+      .then((rows: ({ id: string } & MapRecord)[]) =>
+        setLooks(new Map(rows.flatMap((r) => { const look = mapLook(r); return look ? [[r.id, look] as const] : []; }))),
+      )
       .catch((err) => console.error("Could not load building colours", err));
   }, []);
 
@@ -137,7 +139,7 @@ export default function MapView({
       };
       setBuildings((b) => ({ ...b, [id]: data }));
       // Keep the map in step with what the panel shows.
-      setColours((c) => withColour(c, id, latestColour(data.reports, data.assessments)));
+      setLooks((m) => withLook(m, id, mapLook(mapRecordOf(data.reports, data.assessments))));
       const nav = navRef.current;
       if (nav.buildingId === id && nav.level === "full" && nav.tab === "create") ensureDraft(id, data);
       return data;
@@ -225,7 +227,7 @@ export default function MapView({
     const reports = sortNewestFirst([report, ...(ready?.reports.filter((r) => r.id !== report.id) ?? [])]);
     const assessments = ready?.assessments ?? [];
     setBuildings((b) => ({ ...b, [id]: { status: "ready", reports, changes: ready?.changes ?? [], assessments, debrief: ready?.debrief ?? null } }));
-    setColours((c) => withColour(c, id, latestColour(reports, assessments)));
+    setLooks((m) => withLook(m, id, mapLook(mapRecordOf(reports, assessments))));
     loadBuilding(id); // picks up the construction-date change record, if any
     // DESIGN.md 7.5: the tray returns to the preview and celebrates once.
     goTo(1, { ...navRef.current, level: "preview", tab: "history", openReportId: null });
@@ -258,7 +260,7 @@ export default function MapView({
   return (
     <div className="relative flex-1 overflow-hidden">
       <BuildingMap
-        colours={colours}
+        looks={looks}
         selectedId={nav.buildingId}
         onSelect={selectBuilding}
         onEmptyClick={onEmptyMapClick}
@@ -297,10 +299,10 @@ export default function MapView({
   );
 }
 
-function withColour(map: ReadonlyMap<string, Colour>, id: string, colour: Colour | undefined) {
-  if (map.get(id) === colour) return map;
+function withLook(map: ReadonlyMap<string, MapLook>, id: string, look: MapLook | undefined) {
+  if (sameLook(map.get(id), look)) return map;
   const next = new Map(map);
-  if (colour) next.set(id, colour);
+  if (look) next.set(id, look);
   else next.delete(id);
   return next;
 }

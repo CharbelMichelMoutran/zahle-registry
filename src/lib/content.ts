@@ -143,6 +143,8 @@ export const approvedMessage = (name: string) => `Account approved. Welcome, ${n
 /** The small map key in the corner of the engineer map (DESIGN.md 14.10). */
 export const MAP_KEY = {
   title: "Map key",
+  emtOutline: "Outline: EMT posting",
+  stale: "Inspected more than 6 months ago",
 };
 
 /** "Go to building" in the top bar (plan.md item 11, engineer version). Text only, no icon (DESIGN.md 15.2). */

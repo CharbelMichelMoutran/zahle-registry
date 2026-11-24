@@ -348,6 +348,7 @@ New `accent-soft`: `#E8EFF7` (main text on it 12.5:1; A on it 5.31:1; B on it 6.
 - **Arabic display font:** Markazi Text 500 (14.7). IBM Plex Sans Arabic stays for body.
 - **Map key:** yes, a small collapsible key in a map corner: green, amber, red with their words, the hatch for "Not yet inspected". Claude's orange ring is added to the key only when flags exist. Collapses to one button.
 - Still open: the "Show imminent risk" command (14.9, 10b).
+- **23 Nov 2026 (plan.md item 26):** an EMT posting colours only the outline (2.5px in the bright hue, red 3px on top); an engineer report fills the building. Green over 6 months old is dark grey `#4A5059` (edge `#2F343B`). The red centroid dot (14.9, item 2) is removed. The key adds "Outline: EMT posting" and "Inspected more than 6 months ago".
 
 ## 15. Second UI pass, 17 Nov 2026 (owner; this section wins over all older sections)
 

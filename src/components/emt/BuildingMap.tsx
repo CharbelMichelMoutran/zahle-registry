@@ -8,9 +8,9 @@ import { animate } from "motion";
 import { motion } from "motion/react";
 import { apiFetch } from "@/lib/client-fetch";
 import { setLocatableBuildings } from "@/lib/location";
-import { CALM_FILL_OPACITY, RATING_EDGE, RATING_EDGE_WEIGHT, RATING_FILL } from "@/lib/map-style";
+import { CALM_FILL_OPACITY, EMT_OUTLINE_WEIGHT, RATING_EDGE, RATING_EDGE_WEIGHT, RATING_FILL, SHADE_EDGE, SHADE_EDGE_WEIGHT, SHADE_FILL } from "@/lib/map-style";
 import { prefersReducedMotion, springGentle, springSnappy } from "@/lib/motion";
-import type { Colour } from "@/lib/report";
+import { sameLook, type MapLook } from "@/lib/record";
 import HILLSHADE from "@/lib/hillshade-bounds.json";
 import { attachMapNavigation, type MapNavigation } from "../map-navigation";
 import { MapKey } from "./MapKey";
@@ -25,9 +25,6 @@ const LOCATE_ZOOM = 17.5;
 /** The imported area plus a margin, so the map cannot be dragged away from Zahle. */
 const ZAHLE_BOUNDS = L.latLngBounds([33.82, 35.86], [33.875, 35.945]);
 
-/** Below this zoom a red building also gets a dot, so it stays visible zoomed out. */
-const RED_DOT_BELOW_ZOOM = 16;
-
 const OUTLINE = { color: "#FFFFFF", weight: 1, opacity: 0.9 };
 const ACCENT = "#1E5A8C";
 
@@ -37,7 +34,7 @@ const ACCENT = "#1E5A8C";
  * pointer events through (globals.css), so a red or selected building is
  * tapped through its base footprint like any other.
  */
-const PANES = { hillshade: 250, red: 410, redDot: 420, selected: 430 } as const;
+const PANES = { hillshade: 250, red: 410, selected: 430 } as const;
 
 /** "Not yet inspected": stone grey with a fine diagonal hatch (the only texture in the app). */
 let hatch: CanvasPattern | string | null = null;
@@ -59,7 +56,8 @@ function hatchFill(): CanvasPattern | string {
 }
 
 type Props = {
-  colours: ReadonlyMap<string, Colour>;
+  /** How each building is drawn: engineer fill, EMT outline, faded green (lib/record.ts). */
+  looks: ReadonlyMap<string, MapLook>;
   selectedId: string | null;
   onSelect: (id: string) => void;
   onEmptyClick: () => void;
@@ -74,7 +72,7 @@ type Props = {
 type Status = "loading" | "ready" | "error";
 
 export default function BuildingMap({
-  colours,
+  looks,
   selectedId,
   onSelect,
   onEmptyClick,
@@ -86,14 +84,14 @@ export default function BuildingMap({
   const mapRef = useRef<L.Map | null>(null);
   const navRef = useRef<MapNavigation | null>(null);
   const layersRef = useRef(new Map<string, L.Polygon>());
-  const renderersRef = useRef<Record<"red" | "redDot" | "selected", L.Canvas> | null>(null);
-  /** Red buildings: the solid footprint and the zoomed-out dot, drawn above the rest. */
-  const redRef = useRef(new Map<string, L.Layer[]>());
+  const renderersRef = useRef<Record<"red" | "selected", L.Canvas> | null>(null);
+  /** Red buildings (engineer fill or EMT outline), drawn above the rest. */
+  const redRef = useRef(new Map<string, L.Layer>());
   const selectedLayerRef = useRef<L.LayerGroup | null>(null);
   const handlersRef = useRef({ onSelect, onEmptyClick, onReady });
   const buildingClickRef = useRef<MouseEvent | null>(null);
   const coveredRef = useRef(coveredRect);
-  const coloursRef = useRef(colours);
+  const looksRef = useRef(looks);
   const selectedRef = useRef(selectedId);
   const focusedKeyRef = useRef<number | null>(null);
   const [status, setStatus] = useState<Status>("loading");
@@ -140,7 +138,6 @@ export default function BuildingMap({
     for (const [name, zIndex] of Object.entries(PANES)) map.createPane(name).style.zIndex = String(zIndex);
     renderersRef.current = {
       red: L.canvas({ pane: "red", padding: 0.25 }),
-      redDot: L.canvas({ pane: "redDot", padding: 0.25 }),
       selected: L.canvas({ pane: "selected", padding: 0.25 }),
     };
 
@@ -185,39 +182,31 @@ export default function BuildingMap({
     };
   }, []);
 
-  /** Draw or remove the standout copy of a red building (DESIGN.md 14.9, item 2). */
+  /** Draw, redraw or remove the standout copy of a red building (DESIGN.md 14.9, item 2): solid for an engineer's red, an outline for an EMT's. */
   const syncRed = (id: string) => {
     const map = mapRef.current;
     const renderers = renderersRef.current;
     const base = layersRef.current.get(id);
     const red = redRef.current;
-    const isRed = coloursRef.current.get(id) === "red";
-    if (!map || !renderers || !base || isRed === red.has(id)) return;
-    if (!isRed) {
-      for (const l of red.get(id)!) l.remove();
-      red.delete(id);
-      return;
-    }
+    if (!map || !renderers || !base) return;
+    red.get(id)?.remove();
+    red.delete(id);
+    const look = looksRef.current.get(id);
+    const redFill = look?.fill === "red";
+    const outline = look?.outline;
+    if (!redFill && outline !== "red") return;
+    // On an engineer's red, a newer EMT outline (any colour) is drawn here too, so the solid red cannot hide it.
     const footprint = L.polygon(base.getLatLngs() as L.LatLng[][], {
       renderer: renderers.red,
       interactive: false,
-      color: RATING_EDGE.red,
-      weight: RATING_EDGE_WEIGHT.red,
+      color: outline ? SHADE_FILL[outline] : RATING_EDGE.red,
+      weight: outline ? EMT_OUTLINE_WEIGHT[outline] : RATING_EDGE_WEIGHT.red,
       opacity: 1,
+      fill: redFill,
       fillColor: RATING_FILL.red,
       fillOpacity: 1,
     });
-    const dot = L.circleMarker(base.getBounds().getCenter(), {
-      renderer: renderers.redDot,
-      interactive: false,
-      radius: 4,
-      color: "#FFFFFF",
-      weight: 2,
-      opacity: 1,
-      fillColor: RATING_FILL.red,
-      fillOpacity: 1,
-    });
-    red.set(id, [footprint.addTo(map), dot.addTo(map)]);
+    red.set(id, footprint.addTo(map));
   };
 
   /** The selected building, drawn on top: its own fill, a 3px accent outline and a 2px white halo. */
@@ -230,8 +219,7 @@ export default function BuildingMap({
     const base = id ? layersRef.current.get(id) : undefined;
     if (!map || !renderers || !id || !base) return;
     const shape = base.getLatLngs() as L.LatLng[][];
-    const style = styleFor(id, coloursRef.current);
-    const fill = coloursRef.current.get(id) === "red" ? { fillColor: RATING_FILL.red, fillOpacity: 1 } : style;
+    const fill = looksRef.current.get(id)?.fill === "red" ? { fillColor: RATING_FILL.red, fillOpacity: 1 } : styleFor(id, looksRef.current);
     selectedLayerRef.current = L.layerGroup([
       // Canvas strokes are centred on the edge: 7px of white under 3px of blue leaves 2px of halo outside.
       L.polygon(shape, { renderer: renderers.selected, interactive: false, fill: false, color: "#FFFFFF", weight: 7, opacity: 1 }),
@@ -270,7 +258,7 @@ export default function BuildingMap({
       })
       .then((data) => {
         layer = L.geoJSON(data, {
-          style: (f) => styleFor(f!.properties.id, coloursRef.current),
+          style: (f) => styleFor(f!.properties.id, looksRef.current),
           onEachFeature: (feature, featureLayer) => {
             const id = feature.properties.id;
             layers.set(id, featureLayer as L.Polygon);
@@ -301,7 +289,7 @@ export default function BuildingMap({
       controller.abort();
       layer?.remove();
       layers.clear();
-      for (const l of [...red.values()].flat()) l.remove();
+      for (const l of red.values()) l.remove();
       red.clear();
       selectedLayerRef.current?.remove();
       selectedLayerRef.current = null;
@@ -309,18 +297,18 @@ export default function BuildingMap({
     };
   }, [attempt]);
 
-  // Recolour only the buildings whose report colour changed.
+  // Recolour only the buildings whose look changed.
   useEffect(() => {
-    const before = coloursRef.current;
-    coloursRef.current = colours;
-    const changed = new Set([...before.keys(), ...colours.keys()]);
+    const before = looksRef.current;
+    looksRef.current = looks;
+    const changed = new Set([...before.keys(), ...looks.keys()]);
     for (const id of changed) {
-      if (before.get(id) === colours.get(id)) continue;
-      layersRef.current.get(id)?.setStyle(styleFor(id, colours));
+      if (sameLook(before.get(id), looks.get(id))) continue;
+      layersRef.current.get(id)?.setStyle(styleFor(id, looks));
       syncRedRef.current(id);
       if (id === selectedRef.current) drawSelectedRef.current();
     }
-  }, [colours]);
+  }, [looks]);
 
   // Outline the selected building; pan only if it would sit behind the panel.
   // A "Go to building" request flies to it instead, wherever it is.
@@ -348,10 +336,9 @@ export default function BuildingMap({
 
   // While a tray is open, the other footprints step back (globals.css).
   const dimmed = selectedId !== null;
-  const far = zoom < RED_DOT_BELOW_ZOOM;
 
   return (
-    <div className={`relative h-full w-full ${dimmed ? "zr-map-dimmed" : ""} ${far ? "zr-map-far" : ""}`}>
+    <div className={`relative h-full w-full ${dimmed ? "zr-map-dimmed" : ""}`}>
       <div ref={containerRef} className="h-full w-full" aria-label="Map of Zahle buildings" />
       <MapKey />
       <ZoomButtons
@@ -446,20 +433,24 @@ function ZoomButton({
 }
 
 /**
- * The base footprint, on the overlay canvas that handles every tap. A red
- * building's base is invisible but still tappable: its solid copy is drawn in
- * the red pane above (syncRed).
+ * The base footprint, on the overlay canvas that handles every tap. Its fill is
+ * the engineer's colour (or the hatch); its edge is the EMT's outline when an
+ * EMT posting is newer. A red fill or a red outline is drawn in the red pane
+ * above (syncRed): the base then leaves that part out but stays tappable.
  */
-function styleFor(id: string, colours: ReadonlyMap<string, Colour>): L.PathOptions {
-  const rating = colours.get(id);
+function styleFor(id: string, looks: ReadonlyMap<string, MapLook>): L.PathOptions {
+  const { fill = null, outline = null } = looks.get(id) ?? {};
   // `fill`, `stroke` and `interactive` are always set, in case the building was drawn differently before.
-  if (rating === "red") return { fill: false, stroke: false, interactive: true };
-  const shown = { fill: true, stroke: true, interactive: true };
-  if (rating) {
-    return { ...shown, color: RATING_EDGE[rating], weight: RATING_EDGE_WEIGHT[rating], opacity: 1, fillColor: RATING_FILL[rating], fillOpacity: CALM_FILL_OPACITY };
-  }
-  // Leaflet's canvas renderer passes fillColor straight to ctx.fillStyle, so a pattern works.
-  return { ...shown, ...OUTLINE, fillColor: hatchFill() as unknown as string, fillOpacity: 1 };
+  if (fill === "red") return { fill: false, stroke: false, interactive: true };
+  const inside: L.PathOptions = fill
+    ? { fill: true, fillColor: SHADE_FILL[fill], fillOpacity: CALM_FILL_OPACITY }
+    : // Leaflet's canvas renderer passes fillColor straight to ctx.fillStyle, so a pattern works.
+      { fill: true, fillColor: hatchFill() as unknown as string, fillOpacity: 1 };
+  const shown = { ...inside, interactive: true };
+  if (outline === "red") return { ...shown, stroke: false };
+  if (outline) return { ...shown, stroke: true, color: SHADE_FILL[outline], weight: EMT_OUTLINE_WEIGHT[outline], opacity: 1 };
+  if (fill) return { ...shown, stroke: true, color: SHADE_EDGE[fill], weight: SHADE_EDGE_WEIGHT[fill], opacity: 1 };
+  return { ...shown, stroke: true, ...OUTLINE };
 }
 
 const MARGIN = 24;
