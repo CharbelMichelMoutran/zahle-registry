@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "import:buildings": "node --env-file=.env.local scripts/import-osm-buildings.ts",
+    "backup:reports": "node --env-file=.env.local scripts/backup-reports.ts",
     "render:hillshade": "node scripts/render-hillshade.ts",
     "render:landing": "node scripts/render-landing-map.ts",
     "render:logo": "node scripts/render-logo.ts"
