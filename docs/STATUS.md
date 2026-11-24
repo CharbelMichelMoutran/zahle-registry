@@ -1,6 +1,6 @@
 # Status — Zahle on Record
 
-Last updated: 22 Nov 2026. Read this first, then `plan.md` (source of truth) and `DESIGN.md` (before UI work). Older detail is in git history.
+Last updated: 23 Nov 2026. Read this first, then `plan.md` (source of truth) and `DESIGN.md` (before UI work). Older detail is in git history.
 
 ## Where it stands
 
@@ -16,6 +16,7 @@ Last updated: 22 Nov 2026. Read this first, then `plan.md` (source of truth) and
 - **Map:** Zahle buildings from OpenStreetMap, coloured by condition (worst = red `#D6402B`), toned grey map with hillshade, collapsible key. Trackpad pans, pinch zooms, + and − buttons.
 - **Both maps:** building tray (status, year built, last date), history, full-screen report (rating is the only required field). Reports are add-only.
 - **EMT safety assessment (22 Nov, plan item 25):** "Start assessment" on the EMT map. ATC-20 Detailed core plus the Lebanese form's scene safety, location, construction and Actions. Photos to private storage, Claude reads each one, the EMT changes anything, stops on danger with an evacuation order. Saved once at the end; posting colours the building on both maps, labelled "EMT posting, not yet reviewed by an engineer". Files: `src/lib/atc20.ts` (the form), `src/lib/claude.ts` (every Claude call), `src/components/emt/assessment/`, `src/components/report/AssessmentParts.tsx`, `src/app/api/emt/`.
+- **Map colours (23 Nov, plan item 26, local only, not deployed):** an engineer report fills the building; an EMT posting colours only the outline (red: thick, on top); green fades to dark grey after 6 months; no red dots. New key rows. Logic in `src/lib/record.ts` (`mapLook`), drawing in both `BuildingMap.tsx`. Needs migration `20261124000000_map_looks.sql` (function `building_map_records()`) on the live database: **not applied yet** (owner runs `supabase db push --remote`). Until then the local map shows no colours; production is unaffected.
 - **Claude debrief (22 Nov):** 2–4 lines at the top of the tray and history on both maps. Stored in `building_debriefs`, rewritten after a page load when the record has grown (`src/lib/debrief.ts`).
 - **Go to building:** top-bar button; "Use current location" currently picks a random real Zahle building; on the EMT map, the building with an unfinished assessment if there is one.
 - **Landing page:** public start screen with a pre-rendered map of Zahle and the two map buttons. Text unchanged (two lines still mention residents; the owner said not to touch the wording yet).
@@ -57,6 +58,7 @@ Last updated: 22 Nov 2026. Read this first, then `plan.md` (source of truth) and
 
 ## Open tasks
 
+0. **Map colours (item 26):** apply the migration, check the colours in the browser, then deploy when the owner says.
 1. **Next: the owner gives the Anthropic API key.** It goes in `.env.local` and Vercel as `ANTHROPIC_API_KEY` (never in code). Set a monthly spend limit in the Console. Then test with the owner's Stanford photos and tune Claude's instructions.
 2. Then, in the order the owner chooses: map query, Cmd+K, sample data, README, full test.
 3. UI pass stage 4 (final check) not started.
