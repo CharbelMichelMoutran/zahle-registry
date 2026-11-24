@@ -58,6 +58,12 @@ Last updated: 23 Nov 2026. Read this first, then `plan.md` (source of truth) and
 
 ## Open tasks
 
+00. **Professional engineer report (item 27): built locally, commits `901e84d` to `56fad5c`, not pushed or deployed.** Checked in a browser (laptop and phone) without saving: the form, Claude links hidden with no key, the saved view and the printed copy, using a browser-only fake report. Waiting on the owner's go, in this order:
+    1. Apply `supabase/migrations/20261125000000_engineer_report.sql` (adds details, photos, report number; replaces `create_report`). **Deploying the new form before this would save reports without their details.**
+    2. `npm run backup:reports` (private file in `backups/`, git-ignored), then run `supabase/cleanup/20261125_delete_old_reports.sql` once by hand (deletes all reports, construction-date changes and debriefs; assessments kept).
+    3. Save one real report in the browser to confirm, then deploy.
+    - Not tested: a real save, photo upload, Claude's "Read photo" and "Draft remarks" (need the key), printing in Safari.
+    - Owner choice: the tray, history and map key still say "Good condition / Needs some work / Imminent risk"; the report says "Satisfactory / Repair required / Unsafe". Align them (both maps share the words)?
 0. **Map colours (item 26):** owner to look at it live. Not yet seen in the browser: an EMT red outline, an EMT outline over an engineer colour, a faded green (no such records exist yet).
 1. **Next: the owner gives the Anthropic API key.** It goes in `.env.local` and Vercel as `ANTHROPIC_API_KEY` (never in code). Set a monthly spend limit in the Console. Then test with the owner's Stanford photos and tune Claude's instructions.
 2. Then, in the order the owner chooses: map query, Cmd+K, sample data, README, full test.
