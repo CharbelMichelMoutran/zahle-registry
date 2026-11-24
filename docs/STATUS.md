@@ -6,8 +6,8 @@ Last updated: 23 Nov 2026. Read this first, then `plan.md` (source of truth) and
 
 - **Live:** https://zahle-registry.vercel.app (open to anyone while login is frozen). Production = commit `f182dfb` (map colours, deployed 23 Nov). `ANTHROPIC_API_KEY` is not set yet, so every Claude step shows "Claude is not connected yet" and falls back to manual entry.
 - **Repo:** https://github.com/CharbelMichelMoutran/zahle-registry. **Private until the owner says.**
-- **Database:** 12 migrations applied (last `20261124000000_map_looks.sql`; before it `20261123000000_emt_assessments.sql`: assessments, debriefs, Claude call log, private `assessment-photos` storage, map colours from reports and assessments). Append-only triggers on.
-- **Data:** 4 engineer accounts plus the 2 stand-ins (Demo Engineer, Demo EMT), and the reports from the owner's testing. Reports are permanent unless the owner approves a cleanup.
+- **Database:** 13 migrations applied (last `20261125000000_engineer_report.sql`, 24 Nov: report details, photos, report numbers; then `20261124000000_map_looks.sql`; before it `20261123000000_emt_assessments.sql`: assessments, debriefs, Claude call log, private `assessment-photos` storage, map colours from reports and assessments). Append-only triggers on.
+- **Data:** 4 engineer accounts plus the 2 stand-ins (Demo Engineer, Demo EMT), and 2 EMT assessments. **No reports:** the 6 old reports were deleted on 24 Nov (owner's one-time exception, plan item 27); backup in `backups/reports-2026-11-24T01-54-03-346Z.json` on the owner's laptop. Append-only guards checked back on.
 
 ## What's built
 
@@ -59,9 +59,8 @@ Last updated: 23 Nov 2026. Read this first, then `plan.md` (source of truth) and
 ## Open tasks
 
 00. **Professional engineer report (item 27): built locally, commits `901e84d` to `56fad5c`, not pushed or deployed.** Checked in a browser (laptop and phone) without saving: the form, Claude links hidden with no key, the saved view and the printed copy, using a browser-only fake report. Waiting on the owner's go, in this order:
-    1. Apply `supabase/migrations/20261125000000_engineer_report.sql` (adds details, photos, report number; replaces `create_report`). **Deploying the new form before this would save reports without their details.**
-    2. `npm run backup:reports` (private file in `backups/`, git-ignored), then run `supabase/cleanup/20261125_delete_old_reports.sql` once by hand (deletes all reports, construction-date changes and debriefs; assessments kept).
-    3. Save one real report in the browser to confirm, then deploy.
+    1. ~~Apply the migration~~ done 24 Nov. ~~Backup and cleanup~~ done 24 Nov.
+    2. Save one real report in the browser to confirm (owner to approve: it stays in the record), then deploy.
     - Not tested: a real save, photo upload, Claude's "Read photo" and "Draft remarks" (need the key), printing in Safari.
     - Owner choice: the tray, history and map key still say "Good condition / Needs some work / Imminent risk"; the report says "Satisfactory / Repair required / Unsafe". Align them (both maps share the words)?
 0. **Map colours (item 26):** owner to look at it live. Not yet seen in the browser: an EMT red outline, an EMT outline over an engineer colour, a faded green (no such records exist yet).
