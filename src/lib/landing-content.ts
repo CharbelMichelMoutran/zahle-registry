@@ -166,6 +166,11 @@ export const CLAUDE = {
     text: "Claude gives a confidence for each reading. Postings it is unsure about go to engineers first, and every correction an engineer makes is kept, so Claude gets more accurate over time.",
     placeholder: "Screen: the triage list, sorted by Claude's confidence",
   },
+  /** The steps themselves come from src/lib/priority.ts, the formula the app runs (plan.md item 29). */
+  ranking: {
+    title: "How buildings are ranked.",
+    lead: "One written formula orders every list in the app, from the priority list to an engineer's question. Nothing is hidden. These are its steps, in order.",
+  },
 } as const;
 
 export const AUTHOR = {

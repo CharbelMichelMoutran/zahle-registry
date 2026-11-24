@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MAP_PATH } from "@/lib/maps";
+import { PRIORITY_NOTE, PRIORITY_STEPS } from "@/lib/priority";
 import { ADAPTED, ATC20, AUTHOR, CLAUDE, CLOSE, HERO, SITUATION, SOLUTION, SOURCES, TASK } from "@/lib/landing-content";
 import { Logo } from "../ui/Logo";
 import { CityFlight, HeroArabic, LightWords, Reveal, SmoothScroll } from "./motion";
@@ -352,6 +353,21 @@ function ClaudeSection() {
         </Reveal>
         <Reveal delay={110}>
           <Placeholder label={c.triage.placeholder} ratio="16 / 10" />
+        </Reveal>
+      </div>
+
+      <div className="lp-ranking" id="ranking">
+        <Reveal className="lp-triage-text">
+          <h3>{c.ranking.title}</h3>
+          <p>{c.ranking.lead}</p>
+        </Reveal>
+        <Reveal delay={110}>
+          <ol className="lp-ranking-steps">
+            {PRIORITY_STEPS.map((s) => (
+              <li key={s}>{s}</li>
+            ))}
+          </ol>
+          <p className="lp-ranking-note">{PRIORITY_NOTE}</p>
         </Reveal>
       </div>
     </Chapter>

@@ -269,6 +269,12 @@
 }
 .lp-triage { display: grid; gap: clamp(24px, 4vw, 64px); margin-top: clamp(64px, 11vh, 130px); align-items: center; }
 @media (min-width: 900px) { .lp-triage { grid-template-columns: 5fr 7fr; } }
+.lp-ranking { display: grid; gap: clamp(24px, 4vw, 64px); margin-top: clamp(64px, 11vh, 130px); align-items: start; }
+@media (min-width: 900px) { .lp-ranking { grid-template-columns: 5fr 7fr; } }
+.lp-ranking-steps { counter-reset: step; display: grid; border-top: 1px solid var(--lp-line); }
+.lp-ranking-steps li { counter-increment: step; display: grid; grid-template-columns: 2.5rem 1fr; padding: 16px 0; border-bottom: 1px solid var(--lp-line); }
+.lp-ranking-steps li::before { content: "0" counter(step); color: var(--lp-muted); font-size: 13px; font-weight: 600; padding-top: 4px; }
+.lp-ranking-note { margin-top: 14px; color: var(--lp-muted); font-size: 15px; }
 .lp-tag { display: inline-block; margin-bottom: 14px; padding: 4px 12px; border-radius: 999px; background: var(--lp-river-soft); color: var(--lp-river); font-size: 13px; font-weight: 600; }
 
 /* Author */
