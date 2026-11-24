@@ -1,7 +1,7 @@
 "use client";
 
 import { MotionConfig } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Engineer } from "@/lib/account";
 import { approvedMessage, LOGIN_TEXT } from "@/lib/content";
 import { LOGIN_FROZEN, MAP_LABEL } from "@/lib/maps";
@@ -11,7 +11,9 @@ import { AccountMenu } from "../AccountMenu";
 import { WELCOME_KEY } from "../auth/WaitingPanel";
 import { LocateMenu } from "./LocateMenu";
 import MapView, { type MapViewHandle } from "./MapView";
+import { NearMePanel } from "./NearMePanel";
 import { Button, IconButton } from "../ui/Button";
+import { buttonClass } from "../ui/button-styles";
 import { LinkButton } from "../ui/LinkButton";
 import { Logo } from "../ui/Logo";
 
@@ -25,6 +27,13 @@ export default function EmtApp() {
   const [loggedOut, setLoggedOut] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
   const mapRef = useRef<MapViewHandle>(null);
+  const [nearOpen, setNearOpen] = useState(false);
+  const [highlighted, setHighlighted] = useState<string[]>([]);
+  // Closing "Near me" clears its highlight, so the map never keeps marks nobody can explain.
+  const closeNear = useCallback(() => {
+    setNearOpen(false);
+    setHighlighted([]);
+  }, []);
 
   useEffect(() => {
     apiFetch("/api/auth/me")
@@ -67,11 +76,20 @@ export default function EmtApp() {
     <MotionConfig reducedMotion="user">
       <div className="flex h-dvh flex-col overflow-hidden bg-ground">
         <header className="z-[1200] flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface px-4">
-          <h1 className="shrink-0">
+          {/* Below 420px the buttons need the room: the logo is kept for screen readers only. */}
+          <h1 className="shrink-0 max-[419px]:sr-only">
             <Logo cut="small" className="h-8" />
           </h1>
           {/* Positioned, so the "Go to building" popover can hang from the right edge on phones. */}
           <div className="relative ml-auto flex min-w-0 items-center gap-2">
+            <button
+              type="button"
+              aria-expanded={nearOpen}
+              onClick={() => (nearOpen ? closeNear() : setNearOpen(true))}
+              className={buttonClass("secondary", "shrink-0")}
+            >
+              Near me
+            </button>
             <LocateMenu onLocate={locate} />
             {LOGIN_FROZEN ? (
               <>
@@ -101,7 +119,10 @@ export default function EmtApp() {
               </p>
             </div>
           )}
-          <MapView ref={mapRef} engineer={engineer} onDraftsChange={(n) => setHasDraft(n > 0)} />
+          <MapView ref={mapRef} engineer={engineer} highlighted={highlighted} onDraftsChange={(n) => setHasDraft(n > 0)} />
+          {nearOpen && (
+            <NearMePanel onClose={closeNear} onResult={setHighlighted} onShow={(id) => mapRef.current?.showBuilding(id)} />
+          )}
         </main>
 
         {loggedOut && (

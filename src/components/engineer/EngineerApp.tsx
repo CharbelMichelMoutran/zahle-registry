@@ -76,7 +76,8 @@ export default function EngineerApp() {
     <MotionConfig reducedMotion="user">
       <div className="flex h-dvh flex-col overflow-hidden bg-ground">
         <header className="z-[1200] flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface px-4">
-          <h1 className="shrink-0">
+          {/* Below 420px the buttons need the room: the logo is kept for screen readers only. */}
+          <h1 className="shrink-0 max-[419px]:sr-only">
             <Logo cut="small" className="h-8" />
           </h1>
           {/* Positioned, so the "Go to building" popover can hang from the right edge on phones. */}
