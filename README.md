@@ -2,7 +2,7 @@
 
 A lasting record of every building in Zahle, Lebanon, made by and for civil engineers, so the next inspection never starts from scratch.
 
-**Live demo:** https://zahle-registry.vercel.app
+**Live demo:** https://zahleonrecord.org
 
 > Work in progress. A portfolio demo; a full README with screenshots comes later.
 
