@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MAP_PATH } from "@/lib/maps";
-import { ADAPTED, ATC20, AUTHOR, BUILT, CLAUDE, CLOSE, HERO, RESULT, SITUATION, SOLUTION, SOURCES, TASK } from "@/lib/landing-content";
+import { ADAPTED, ATC20, AUTHOR, CLAUDE, CLOSE, HERO, SITUATION, SOLUTION, SOURCES, TASK } from "@/lib/landing-content";
 import { Logo } from "../ui/Logo";
-import { CityFlight, CountUp, HeroArabic, LightWords, Reveal, SmoothScroll } from "./motion";
+import { CityFlight, HeroArabic, LightWords, Reveal, SmoothScroll } from "./motion";
 import "./landing.css";
 
 /**
@@ -27,8 +27,6 @@ export default function Landing() {
       <Adapted />
       <Solution />
       <ClaudeSection />
-      <Result />
-      <Built />
       <Author />
       <Close />
     </div>
@@ -111,11 +109,26 @@ function Placeholder({ label, ratio = "4 / 3", className = "" }: { label: string
   );
 }
 
+/** A small numbered badge that opens the source of the fact beside it. */
 function Src({ n }: { n: number }) {
+  const s = SOURCES.find((x) => x.id === n);
+  if (!s) return null;
   return (
-    <a href={`#source-${n}`} className="lp-src" aria-label={`Source ${n}`}>
+    <a href={s.url} className="lp-src" target="_blank" rel="noreferrer" aria-label={`Source: ${s.label}`} title={s.label}>
       {n}
     </a>
+  );
+}
+
+/** A photo in a rounded frame that settles in as it comes into view, with its credit under it. */
+function Photo({ src, alt, width, height, credit, sizes, className = "" }: { src: string; alt: string; width: number; height: number; credit?: string; sizes: string; className?: string }) {
+  return (
+    <figure className={`lp-photo ${className}`}>
+      <div className="lp-photo-frame">
+        <Image src={src} alt={alt} width={width} height={height} sizes={sizes} />
+      </div>
+      {credit && <figcaption>{credit}</figcaption>}
+    </figure>
   );
 }
 
@@ -170,13 +183,13 @@ function Task() {
         <h2 className="lp-h2">{t.title}</h2>
       </Reveal>
       <div className="lp-split lp-split-rev">
-        <Reveal className="lp-prose">
+        <Reveal>
+          <Photo {...t.photo} sizes="(min-width: 900px) 50vw, 100vw" />
+        </Reveal>
+        <Reveal className="lp-prose" delay={90}>
           {t.body.map((p) => (
             <p key={p}>{p}</p>
           ))}
-        </Reveal>
-        <Reveal delay={90}>
-          <Placeholder label={t.photo} ratio="3 / 2" />
         </Reveal>
       </div>
       <div className="lp-heard">
@@ -308,10 +321,10 @@ function ClaudeSection() {
 
       <div className="lp-sketch">
         <Reveal>
-          <Placeholder label={c.sketch.photo} ratio="4 / 5" />
+          <Photo {...c.sketch.photo} sizes="(min-width: 900px) 46vw, 100vw" className="lp-photo-sketch" />
         </Reveal>
         <Reveal delay={120}>
-          <Placeholder label={c.sketch.output} ratio="4 / 5" className="lp-ph-paper" />
+          <Placeholder label={c.sketch.output} ratio="3 / 2" className="lp-ph-paper" />
         </Reveal>
         <Reveal className="lp-sketch-text" delay={200}>
           <h3>{c.sketch.title}</h3>
@@ -340,92 +353,6 @@ function ClaudeSection() {
         </Reveal>
       </div>
     </Chapter>
-  );
-}
-
-function Result() {
-  const r = RESULT;
-  return (
-    <Chapter index={r.index} label={r.label} side={r.side}>
-      <Reveal>
-        <h2 className="lp-h2">{r.title}</h2>
-      </Reveal>
-      <Reveal>
-        <Placeholder label={r.clip} ratio="16 / 9" />
-      </Reveal>
-      <div className="lp-numbers">
-        {r.numbers.map((n) => (
-          <div key={n.text}>
-            <b>
-              <CountUp to={n.value} />
-            </b>
-            <span className="lp-label">{n.text}</span>
-          </div>
-        ))}
-      </div>
-      <p className="lp-note">{r.numbersNote}</p>
-      <Reveal className="lp-callout">
-        <p className="lp-label">{r.owner.label}</p>
-        <p>{r.owner.text}</p>
-      </Reveal>
-    </Chapter>
-  );
-}
-
-function Built() {
-  const b = BUILT;
-  return (
-    <Chapter index={b.index} label={b.label} side={b.side}>
-      <Reveal>
-        <h2 className="lp-h2">{b.title}</h2>
-      </Reveal>
-      <Reveal>
-        <Diagram />
-      </Reveal>
-      <div className="lp-stack">
-        {b.stack.map((s, i) => (
-          <Reveal key={s.name} delay={i * 70} className="lp-stack-item">
-            <h3>{s.name}</h3>
-            <p>{s.text}</p>
-          </Reveal>
-        ))}
-      </div>
-    </Chapter>
-  );
-}
-
-/** How a request moves: phone to Vercel, then to the database and to Claude. */
-function Diagram() {
-  return (
-    <div className="lp-diagram" role="img" aria-label="A phone or laptop talks to the Next.js app on Vercel. The app reads and writes Postgres with PostGIS, and sends photos to Claude, which returns typed ratings and a sketch.">
-      <div className="lp-node">
-        <span className="lp-label">Client</span>
-        <b>Phone or laptop</b>
-        <small>Leaflet map, assessment steps</small>
-      </div>
-      <span className="lp-edge" aria-hidden="true" />
-      <div className="lp-node lp-node-main">
-        <span className="lp-label">Vercel</span>
-        <b>Next.js app</b>
-        <small>Pages and server routes</small>
-      </div>
-      <div className="lp-branch" aria-hidden="true">
-        <span className="lp-edge" />
-        <span className="lp-edge" />
-      </div>
-      <div className="lp-node-pair">
-        <div className="lp-node">
-          <span className="lp-label">Supabase</span>
-          <b>Postgres + PostGIS</b>
-          <small>Outlines, reports, add-only triggers, private photos</small>
-        </div>
-        <div className="lp-node">
-          <span className="lp-label">Anthropic</span>
-          <b>Claude</b>
-          <small>Photo → typed ratings + sketch</small>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -472,18 +399,6 @@ function Close() {
           {CLOSE.engineer}
         </Pill>
         <Pill href={MAP_PATH.emt}>{CLOSE.volunteer}</Pill>
-      </div>
-      <div className="lp-sources">
-        <p className="lp-label">{CLOSE.sources}</p>
-        <ol>
-          {SOURCES.map((s) => (
-            <li key={s.id} id={`source-${s.id}`}>
-              <a href={s.url} target="_blank" rel="noreferrer">
-                {s.label}
-              </a>
-            </li>
-          ))}
-        </ol>
       </div>
       <div className="lp-close-row">
         <span>Zahle on Record</span>

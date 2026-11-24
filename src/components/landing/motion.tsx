@@ -192,39 +192,3 @@ export function Reveal({ children, className = "", delay = 0 }: { children: Reac
     </div>
   );
 }
-
-/** A number that counts up once, when it comes into view. */
-export function CountUp({ to }: { to: number }) {
-  const el = useRef<HTMLSpanElement>(null);
-  const [v, setV] = useState(to);
-  useEffect(() => {
-    const e = el.current;
-    if (!e || reduced() || to === 0) return;
-    setV(0);
-    let raf = 0;
-    const io = new IntersectionObserver(
-      ([en]) => {
-        if (!en.isIntersecting) return;
-        io.disconnect();
-        const t0 = performance.now();
-        const tick = (t: number) => {
-          const k = clamp((t - t0) / 1400);
-          setV(Math.round(to * (1 - Math.pow(1 - k, 4))));
-          if (k < 1) raf = requestAnimationFrame(tick);
-        };
-        raf = requestAnimationFrame(tick);
-      },
-      { threshold: 0.6 },
-    );
-    io.observe(e);
-    return () => {
-      io.disconnect();
-      cancelAnimationFrame(raf);
-    };
-  }, [to]);
-  return (
-    <span ref={el} className="tabular">
-      {v.toLocaleString("en")}
-    </span>
-  );
-}

@@ -59,7 +59,12 @@ export const TASK = {
     "Zahle is where I was born and raised, in Rassieh. I know its streets, its stone houses and the people who would have to use this.",
     "I've worked with the Zahle municipality and the Red Cross Zahle Center, so this can actually reach the people who'd use it.",
   ],
-  photo: "Photo: Zahle from the hill, red roofs and the Berdawni valley",
+  photo: {
+    src: "/landing/zahle.webp",
+    width: 627,
+    height: 650,
+    alt: "Zahle from the hill: red-tiled roofs filling the Berdawni valley, with snow on Mount Sannine behind",
+  },
   heard: {
     label: "What engineers told us",
     intro: "We talked to engineers in Lebanon before writing a line of code. They said the same three things.",
@@ -145,7 +150,13 @@ export const CLAUDE = {
   sketch: {
     title: "It draws what it sees.",
     text: "For each photo, Claude draws a line sketch of the facade, the way an engineer would in a field report, and marks every damage with its check number. It draws only what is visible: no invented floors, no hidden sides.",
-    photo: "Photo: a partly collapsed building in Lebanon (free licence)",
+    photo: {
+      src: "/landing/damaged-building.webp",
+      width: 1600,
+      height: 1067,
+      alt: "A damaged concrete building in Lebanon: broken walls, an exposed floor slab and rubble at its foot",
+      credit: "Photo: UNDP Lebanon",
+    },
     output: "Claude's sketch of this photo: real product output, generated once the API key is set",
   },
   triage: {
@@ -154,37 +165,6 @@ export const CLAUDE = {
     text: "Claude gives a confidence for each reading. Postings it is unsure about go to engineers first, and every correction an engineer makes is kept, so Claude gets more accurate over time.",
     placeholder: "Screen: the triage list, sorted by Claude's confidence",
   },
-} as const;
-
-export const RESULT = {
-  index: "07",
-  label: "Result",
-  side: "What exists today",
-  title: "It works today, on a phone, in Zahle.",
-  numbers: [
-    { value: 4595, text: "Buildings on the map" },
-    { value: 22, text: "ATC-20 checks, adapted" },
-    { value: 0, text: "Records ever overwritten" },
-  ],
-  numbersNote: "Add-only is enforced by the database itself, not just the app.",
-  clip: "Clip: the map, zooming from the valley to one building's record",
-  owner: {
-    label: "Who could run it",
-    text: "The Lebanese Red Cross is trusted in every town in Lebanon and already runs on volunteers. It could own this, train its volunteers on it, and take it from Zahle to the rest of the country.",
-  },
-} as const;
-
-export const BUILT = {
-  index: "08",
-  label: "How it's built",
-  side: "For the engineers reading",
-  title: "Small stack, strict rules.",
-  stack: [
-    { name: "Next.js on Vercel", text: "The site, both maps and the server routes that talk to Claude." },
-    { name: "Postgres + PostGIS", text: "4,595 building outlines copied from OpenStreetMap. Triggers refuse every edit and delete." },
-    { name: "Claude", text: "Reads photos and returns typed answers checked against a schema, so a bad reply can't break a form." },
-    { name: "Leaflet", text: "The map: building outlines on toned OpenStreetMap tiles and a hillshade of the valley." },
-  ],
 } as const;
 
 export const AUTHOR = {
@@ -205,5 +185,4 @@ export const CLOSE = {
   engineer: "Open the engineer map",
   volunteer: "Open the volunteer map",
   credit: "Map data © OpenStreetMap contributors · Terrain: SRTM (USGS) via Mapzen",
-  sources: "Sources",
 } as const;
