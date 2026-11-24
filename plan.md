@@ -298,6 +298,8 @@ The project owner signs in to each account. Claude does everything after that th
 - A priority list for engineers, ranking EMT postings to review.
 - Switch the assessment to Claude Opus 5.5 if Sonnet's readings are not good enough (one line in `src/lib/claude.ts`).
 - Engineer review of an EMT posting (confirm or change it).
+- **Claude's confidence level** (owner, 23 Nov 2026): Claude says how sure it is of each reading, sketch and proposed posting, so the person knows where to look twice.
+- **Triage formula** (owner, 23 Nov 2026): a written, visible formula that ranks buildings for reinspection (rating, residents, age of the last report, and more). It feeds the post-earthquake triage queue below.
 
 - **Post-earthquake triage queue:** after an earthquake, each engineer gets a list of buildings ranked by triage colour × number of residents (the report's residents count).
 - Fuller building facts (floors, structure type, seismic measures, units) and photos in the report. The earlier draft is in git history (`docs/engineering.md`).
