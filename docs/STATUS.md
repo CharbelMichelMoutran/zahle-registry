@@ -39,6 +39,7 @@ Last updated: 24 Nov 2026 (night). Read this first, then `plan.md` (source of tr
 | `plan.md` | Problem, scope, rules, build order |
 | `DESIGN.md` | Visual rules (sections 13 to 15 are the latest pass) |
 | `docs/feature-backlog.md` | The 12 widened-scope features |
+| `docs/demo-notes.md` | One paragraph: what to show in a demo |
 | `src/app/` | Pages: landing (`/`), engineer, emt, login, signup, waiting (frozen), API |
 | `src/components/engineer/`, `emt/` | Each map's own screens: app and top bar, map, tray, report form and view, key, Go to building |
 | `src/components/` | Shared: landing, auth (frozen), ui, report badges and fields, map navigation |
