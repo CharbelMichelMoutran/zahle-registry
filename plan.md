@@ -313,7 +313,7 @@ The project owner signs in to each account. Claude does everything after that th
 
 (Add ideas here instead of building them now.)
 
-- **Added 23 Nov 2026 (item 28):** build Claude's confidence triage (unsure postings go first to engineers; human corrections are saved to tune Claude); real photos and product clips for the landing page; polish the map screens in the landing page's style and fonts; buy a domain; make the repo public when everything is done.
+- **Added 23 Nov 2026 (item 28):** build Claude's confidence triage (unsure postings go first to engineers; human corrections are saved to tune Claude); real photos and product clips for the landing page; polish the map screens in the landing page's style and fonts. (Domain bought and repo made public on 24 Nov, owner.)
 
 - Sample buildings with realistic history (scope item 6, still open).
 - Live updates between the Engineer and EMT maps, without a reload.

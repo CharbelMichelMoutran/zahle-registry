@@ -1,11 +1,11 @@
 # Status — Zahle on Record
 
-Last updated: 24 Nov 2026 (late night). Read this first, then `plan.md` (source of truth) and `DESIGN.md` (before UI work). Older detail is in git history.
+Last updated: 24 Nov 2026 (domain day). Read this first, then `plan.md` (source of truth) and `DESIGN.md` (before UI work). Older detail is in git history.
 
 ## Where it stands
 
-- **Live:** https://zahle-registry.vercel.app (open to anyone while login is frozen). Production = commit `534a5af` (product in the landing look, Claude's line in ranked lists, landing Near me and biases; deployed 24 Nov). `ANTHROPIC_API_KEY` is set (24 Nov) in `.env.local` and Vercel Production (not Preview). The owner chose to keep the key that was shown in chat.
-- **Repo:** https://github.com/CharbelMichelMoutran/zahle-registry. **Private until the owner says.**
+- **Live:** https://zahleonrecord.org (bought 24 Nov on Vercel, \$9.99, renews \$10.99 a year; www works too). The old https://zahle-registry.vercel.app still works. Open to anyone while login is frozen. Production = commit `b7c2a4e` (tab and home-screen icon drawn from the logo, `src/app/icon.tsx` and `apple-icon.tsx` via `src/lib/icon.tsx`; deployed 24 Nov). `ANTHROPIC_API_KEY` is set (24 Nov) in `.env.local` and Vercel Production (not Preview). The owner chose to keep the key that was shown in chat.
+- **Repo:** https://github.com/CharbelMichelMoutran/zahle-registry. **Public since 24 Nov (owner).** Git history was scanned for keys first: none.
 - **Database:** 13 migrations applied (last `20261125000000_engineer_report.sql`, 24 Nov: report details, photos, report numbers; then `20261124000000_map_looks.sql`; before it `20261123000000_emt_assessments.sql`: assessments, debriefs, Claude call log, private `assessment-photos` storage, map colours from reports and assessments). Append-only triggers on.
 - **Data:** 4 engineer accounts plus the 2 stand-ins (Demo Engineer, Demo EMT), and 2 EMT assessments. **No reports:** the 6 old reports were deleted on 24 Nov (owner's one-time exception, plan item 27); backup in `backups/reports-2026-11-24T01-54-03-346Z.json` on the owner's laptop. Append-only guards checked back on.
 
@@ -84,7 +84,7 @@ Last updated: 24 Nov 2026 (late night). Read this first, then `plan.md` (source 
 2. Then, in the order the owner chooses: map query, Cmd+K, sample data, README, full test.
 3. UI pass stage 4 (final check) not started.
 4. Owner choices: show "Record" alone in the top bar (the Arabic is too faint at 32px)? Make the footer tie a single sweep (the loop reads like a paperclip)? DESIGN.md 15.1 is out of date. Landing text still mentions residents.
-5. Owner to do: connect Vercel to GitHub.
+5. Owner to do: connect Vercel to GitHub. `vercel git connect` failed on 24 Nov (the Vercel GitHub app is likely not installed): in the Vercel dashboard, project zahle-registry, Settings, Git, connect the repo. Then pushes deploy themselves.
 6. Commit or ignore the new `.agents/` skills folder and `skills-lock.json` change (installed 22 Nov), and the untracked `Lebanon_Building_Safety_Assessment_Form_Phone.pdf`.
 
 ## Known bugs and gaps
