@@ -79,6 +79,106 @@ export const FilterSchema = z.object({
 
 export type Filter = z.infer<typeof FilterSchema>;
 
+/**
+ * What Claude fills in: the same fields, flat, as plain strings and numbers.
+ * The strict schema above compiles to a grammar too large for Claude's API, so
+ * the allowed values are listed in words here and every value is checked
+ * against the strict lists in fromClaude() before use.
+ */
+const list = (what: string) => z.array(z.string()).describe(`${what}. Empty = any`);
+const str = (what: string) => z.string().describe(what);
+export const ClaudeFilterSchema = z.object({
+  mapColour: list(`The building's colour on the map today, any of: ${MAP_SHADES.join(", ")} (stale = green older than 6 months; not_inspected = no record at all)`),
+  needsEngineerReport: z.boolean().describe("true only if the question is about engineer reports"),
+  engineerColour: list("Latest engineer report rating, any of: green, yellow, red"),
+  engineerFrom: str("Engineer report date on or after, YYYY-MM-DD, or empty"),
+  engineerTo: str("Engineer report date on or before, YYYY-MM-DD, or empty"),
+  builtFrom: nullableNumber("Construction year at least"),
+  builtTo: nullableNumber("Construction year at most"),
+  mentions: list("Words that must all appear in the engineer reports' written observations"),
+  needsVolunteer: z.boolean().describe("true if the question is about volunteer (EMT) assessments"),
+  posting: list("Latest volunteer posting, any of: inspected (green), restricted (yellow), unsafe (red)"),
+  volunteerFrom: str("Assessment date on or after, YYYY-MM-DD, or empty"),
+  volunteerTo: str("Assessment date on or before, YYYY-MM-DD, or empty"),
+  claude: str("One of: any, agreed, disagreed, downgraded (volunteer chose lower than Claude), not_used"),
+  confidenceMin: nullableNumber("Claude's confidence (0-100) in its own posting, at least"),
+  confidenceMax: nullableNumber("Claude's confidence (0-100) in its own posting, at most"),
+  evacuation: z.boolean().nullable().describe("true = stopped with an evacuation order; null = any"),
+  reinspection: z.boolean().nullable().describe("null = any"),
+  damageAtLeast: str(`Damage estimate at least, one of: ${DAMAGE_ESTIMATES.join(", ")}; or empty`),
+  floorsMin: nullableNumber("Floors above ground at least"),
+  floorsMax: nullableNumber("Floors above ground at most"),
+  construction: list(`Construction, any of: ${CONSTRUCTION.map((c) => `${c.id} (${c.label})`).join(", ")}`),
+  occupancy: list(`Use, any of: ${OCCUPANCY.join(", ")}`),
+  itemRatings: list(`Item ratings as "id=rating", e.g. "S3=severe". Ratings: ${RATINGS.join(", ")}`),
+  reviewedByEngineer: str("One of: any, yes (an engineer reported since the latest volunteer posting), no"),
+  peopleMin: nullableNumber("People inside at least"),
+  peopleMax: nullableNumber("People inside at most"),
+  recordsMin: nullableNumber("Number of records at least"),
+  sort: str("One of: priority (most dangerous first, the default), newest, oldest, most_people"),
+  limit: nullableNumber("How many buildings at most, e.g. 10 for 'top 10'"),
+  understood: z.boolean().describe("false if the question is not about the buildings in this registry or cannot be expressed with these fields"),
+});
+
+export type ClaudeFilter = z.infer<typeof ClaudeFilterSchema>;
+
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+const pick = <T extends string>(allowed: readonly T[], values: string[]) =>
+  [...new Set(values.map((v) => v.trim().toLowerCase()))].flatMap((v) => allowed.filter((a) => a.toLowerCase() === v));
+const one = <T extends string>(allowed: readonly T[], v: string, fallback: T): T => pick(allowed, [v])[0] ?? fallback;
+const dayOrNull = (v: string) => (DAY.test(v.trim()) ? v.trim() : null);
+const num = (v: number | null) => (typeof v === "number" && Number.isFinite(v) ? v : null);
+
+/** Claude's answer, checked value by value against the strict lists; anything not allowed is dropped. */
+export function fromClaude(c: ClaudeFilter): Filter | null {
+  const items = c.itemRatings.flatMap((x) => {
+    const [id, rating] = x.split("=").map((t) => t.trim());
+    const r = pick(RATINGS, [rating ?? ""])[0];
+    return ITEM_BY_ID[id?.toUpperCase()] && r ? [{ id: id.toUpperCase(), ratings: [r] }] : [];
+  });
+  const filter: Filter = {
+    mapColour: pick(MAP_SHADES, c.mapColour),
+    engineer: c.needsEngineerReport
+      ? {
+          colour: pick(["green", "yellow", "red"] as const, c.engineerColour),
+          from: dayOrNull(c.engineerFrom),
+          to: dayOrNull(c.engineerTo),
+          builtFrom: num(c.builtFrom),
+          builtTo: num(c.builtTo),
+          mentions: c.mentions.map((w) => w.trim()).filter(Boolean).slice(0, 10),
+        }
+      : null,
+    volunteer: c.needsVolunteer
+      ? {
+          posting: pick(POSTINGS, c.posting),
+          from: dayOrNull(c.volunteerFrom),
+          to: dayOrNull(c.volunteerTo),
+          claude: one(["any", "agreed", "disagreed", "downgraded", "not_used"] as const, c.claude, "any"),
+          confidenceMin: num(c.confidenceMin),
+          confidenceMax: num(c.confidenceMax),
+          evacuation: c.evacuation,
+          reinspection: c.reinspection,
+          damageAtLeast: pick(DAMAGE_ESTIMATES, [c.damageAtLeast])[0] ?? null,
+          floorsMin: num(c.floorsMin),
+          floorsMax: num(c.floorsMax),
+          construction: pick(CONSTRUCTION.map((x) => x.id), c.construction),
+          occupancy: pick(OCCUPANCY, c.occupancy),
+          items,
+        }
+      : null,
+    reviewedByEngineer: one(["any", "yes", "no"] as const, c.reviewedByEngineer, "any"),
+    peopleMin: num(c.peopleMin),
+    peopleMax: num(c.peopleMax),
+    recordsMin: num(c.recordsMin),
+    sort: one(["priority", "newest", "oldest", "most_people"] as const, c.sort, "priority"),
+    limit: num(c.limit),
+    understood: c.understood,
+  };
+  // The strict schema has the last word.
+  const parsed = FilterSchema.safeParse(filter);
+  return parsed.success ? parsed.data : null;
+}
+
 /** For Claude: the item ids it may use. */
 export const ITEM_IDS = ITEMS.map((i) => `${i.id} ${i.label}`).join("; ");
 

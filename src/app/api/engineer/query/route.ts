@@ -4,7 +4,7 @@ import { loadBuildingFacts } from "@/lib/building-facts";
 import { claude, claudeAllowed, readQuery } from "@/lib/claude";
 import type { BuildingFacts } from "@/lib/priority";
 import { isQueryPreset, type QueryResult } from "@/lib/query";
-import { describeFilter, FilterSchema, PRESET_FILTERS, runFilter, type Filter } from "@/lib/query-filter";
+import { describeFilter, fromClaude, PRESET_FILTERS, runFilter, type Filter } from "@/lib/query-filter";
 import { beirutToday } from "@/lib/record";
 import { visitorHash } from "@/lib/session";
 import { createServerSupabase } from "@/lib/supabase-server";
@@ -53,11 +53,11 @@ export async function POST(req: NextRequest) {
     try {
       if (!(await claudeAllowed(visitorHash(req.headers), "query"))) return json({ claudeStatus: "busy" });
       const read = await readQuery(question, beirutToday());
-      // Checked again here: Claude's answer is input like any other.
-      const parsed = read ? FilterSchema.safeParse(read) : null;
-      if (!parsed?.success) return json({ claudeStatus: "failed" });
-      if (!parsed.data.understood) return json({ claudeStatus: "not-understood" });
-      filter = parsed.data;
+      // Checked value by value: Claude's answer is input like any other.
+      const checked = read && fromClaude(read);
+      if (!checked) return json({ claudeStatus: "failed" });
+      if (!checked.understood) return json({ claudeStatus: "not-understood" });
+      filter = checked;
     } catch (err) {
       console.error("readQuery failed:", err instanceof Error ? err.message : err);
       return json({ claudeStatus: "failed" });
