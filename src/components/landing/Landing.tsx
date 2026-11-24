@@ -180,7 +180,9 @@ function Task() {
   return (
     <Chapter index={t.index} label={t.label} side={t.side}>
       <Reveal>
-        <h2 className="lp-h2">{t.title}</h2>
+        <h2 className="lp-h2 lp-h2-wide">
+          {t.title} <em className="lp-serif">{t.titleAccent}</em>
+        </h2>
       </Reveal>
       <div className="lp-split lp-split-rev">
         <Reveal>

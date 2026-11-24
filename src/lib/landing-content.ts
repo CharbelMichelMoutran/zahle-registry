@@ -54,7 +54,8 @@ export const TASK = {
   index: "02",
   label: "Task",
   side: "Why Zahle",
-  title: "I built this because I was tired of watching my people die under buildings.",
+  title: "I watched too many people be buried under rubble, and decided to rally my brightest classmates to stop this.",
+  titleAccent: "This is only the beginning.",
   body: [
     "Zahle is where I was born and raised, in Rassieh. I know its streets, its stone houses and the people who would have to use this.",
     "I've worked with the Zahle municipality and the Red Cross Zahle Center, so this can actually reach the people who'd use it.",
