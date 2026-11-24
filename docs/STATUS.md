@@ -4,7 +4,7 @@ Last updated: 23 Nov 2026. Read this first, then `plan.md` (source of truth) and
 
 ## Where it stands
 
-- **Live:** https://zahle-registry.vercel.app (open to anyone while login is frozen). Production = commit `f182dfb` (map colours, deployed 23 Nov). `ANTHROPIC_API_KEY` is not set yet, so every Claude step shows "Claude is not connected yet" and falls back to manual entry.
+- **Live:** https://zahle-registry.vercel.app (open to anyone while login is frozen). Production = commit `db13354` (professional engineer report, deployed 24 Nov). `ANTHROPIC_API_KEY` is not set yet, so every Claude step shows "Claude is not connected yet" and falls back to manual entry.
 - **Repo:** https://github.com/CharbelMichelMoutran/zahle-registry. **Private until the owner says.**
 - **Database:** 13 migrations applied (last `20261125000000_engineer_report.sql`, 24 Nov: report details, photos, report numbers; then `20261124000000_map_looks.sql`; before it `20261123000000_emt_assessments.sql`: assessments, debriefs, Claude call log, private `assessment-photos` storage, map colours from reports and assessments). Append-only triggers on.
 - **Data:** 4 engineer accounts plus the 2 stand-ins (Demo Engineer, Demo EMT), and 2 EMT assessments. **No reports:** the 6 old reports were deleted on 24 Nov (owner's one-time exception, plan item 27); backup in `backups/reports-2026-11-24T01-54-03-346Z.json` on the owner's laptop. Append-only guards checked back on.
@@ -58,9 +58,9 @@ Last updated: 23 Nov 2026. Read this first, then `plan.md` (source of truth) and
 
 ## Open tasks
 
-00. **Professional engineer report (item 27): built locally, commits `901e84d` to `56fad5c`, not pushed or deployed.** Checked in a browser (laptop and phone) without saving: the form, Claude links hidden with no key, the saved view and the printed copy, using a browser-only fake report. Waiting on the owner's go, in this order:
+00. **Professional engineer report (item 27): live since 24 Nov (not pushed to GitHub).** Checked in a browser (laptop and phone) without saving: the form, Claude links hidden with no key, the saved view and the printed copy, using a browser-only fake report. Waiting on the owner's go, in this order:
     1. ~~Apply the migration~~ done 24 Nov. ~~Backup and cleanup~~ done 24 Nov.
-    2. Save one real report in the browser to confirm (owner to approve: it stays in the record), then deploy.
+    2. ~~Deploy~~ done 24 Nov; the live form was opened and filled without saving. **No real save yet:** the owner's first report will be `ZR-2026-0001`.
     - Not tested: a real save, photo upload, Claude's "Read photo" and "Draft remarks" (need the key), printing in Safari.
     - Owner choice: the tray, history and map key still say "Good condition / Needs some work / Imminent risk"; the report says "Satisfactory / Repair required / Unsafe". Align them (both maps share the words)?
 0. **Map colours (item 26):** owner to look at it live. Not yet seen in the browser: an EMT red outline, an EMT outline over an engineer colour, a faded green (no such records exist yet).
