@@ -244,8 +244,8 @@ function Choice<T extends string>({
           role={multi ? "checkbox" : "radio"}
           aria-checked={on(o)}
           onClick={() => onChange(o)}
-          className={`min-h-11 rounded-control border px-3 text-body transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
-            on(o) ? "border-accent bg-accent-soft font-medium text-ink" : "border-line bg-surface text-ink hover:bg-surface-soft"
+          className={`min-h-11 rounded-full border px-4 text-body transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
+            on(o) ? "border-ink bg-ink font-medium text-surface" : "border-line-strong bg-surface text-ink hover:border-ink"
           }`}
         >
           {labels?.[o] ?? o}
@@ -689,7 +689,7 @@ function Items({ items, draft, update }: { items: Item[]; draft: Draft; update: 
                             items: { ...d.items, [i.id]: { ...(d.items[i.id] ?? emptyAnswer()), rating: r, by: "emt" } },
                           }))
                         }
-                        className={`min-h-11 rounded-control border px-1 text-micro leading-tight font-medium text-ink transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
+                        className={`min-h-11 rounded-full border px-1 text-micro leading-tight font-medium text-ink transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
                           a.rating === r ? RATING_ON[r] : "border-line bg-surface hover:bg-surface-soft"
                         }`}
                       >

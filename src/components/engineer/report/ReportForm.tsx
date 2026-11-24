@@ -721,8 +721,8 @@ function Segmented<T extends string>({
               aria-checked={selected}
               onClick={() => onChange(selected ? null : o.value)}
               className={[
-                "rounded-control border font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent",
-                compact ? "min-h-9 px-2.5 text-micro" : "min-h-11 px-3 text-body",
+                "rounded-full border font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent",
+                compact ? "min-h-9 px-3 text-micro" : "min-h-11 px-4 text-body",
                 selected ? "border-ink bg-ink text-surface" : "border-line bg-surface text-ink hover:border-line-strong",
               ].join(" ")}
             >
@@ -762,7 +762,7 @@ function Picks({
               aria-pressed={on}
               onClick={() => onChange(on ? value.filter((v) => v !== o) : [...value, o])}
               className={[
-                "inline-flex min-h-9 items-center gap-1.5 rounded-control border px-2.5 text-micro font-medium transition-colors",
+                "inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-micro font-medium transition-colors",
                 "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent",
                 on ? "border-accent bg-accent-soft text-ink" : "border-line bg-surface text-muted hover:text-ink",
               ].join(" ")}
