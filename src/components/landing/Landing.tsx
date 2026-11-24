@@ -1,148 +1,493 @@
 import Image from "next/image";
 import Link from "next/link";
-import { LANDING as T } from "@/lib/content";
-import mapSize from "@/lib/landing-map.json";
-import { LinkButton } from "../ui/LinkButton";
+import { MAP_PATH } from "@/lib/maps";
+import { ADAPTED, ATC20, AUTHOR, BUILT, CLAUDE, CLOSE, HERO, RESULT, SITUATION, SOLUTION, SOURCES, TASK } from "@/lib/landing-content";
 import { Logo } from "../ui/Logo";
-import { ProductShot } from "./ProductShot";
-import { Ribbon } from "./Ribbon";
+import { CityFlight, CountUp, HeroArabic, LightWords, Reveal, SmoothScroll } from "./motion";
+import "./landing.css";
 
 /**
- * The public landing page (plan.md item 23, DESIGN.md 13 to 15).
- * Shown at / to signed-out visitors (src/proxy.ts). A static page: it makes no
- * database or API call, and its map is a flat picture drawn from open
- * OpenStreetMap outlines by scripts/render-landing-map.ts, every footprint grey.
+ * The portfolio landing page at / (plan.md item 28): a case study in STAR order,
+ * after template A (docs/templates/a-editorial.html) with template C's giant
+ * زحلة and camera flight. Light only. Words live in src/lib/landing-content.ts.
  *
- * The river-blue ribbon (Ribbon.tsx) grows out of the ز tail in the logo, runs
- * down the text column and ties back into the ز of the footer logo. It finds its way by the
- * data-ribbon marks below: it runs beside text, never over it, and passes
- * behind the product pictures.
+ * Grey frames marked "Placeholder" stand in for photos, clips and features not
+ * built yet; they are listed in docs/STATUS.md and must be replaced before launch.
  */
 export default function Landing() {
   return (
-    <div data-ribbon="root" className="relative isolate overflow-x-clip bg-ground text-ink">
-      <Ribbon />
+    <div className="lp">
+      <SmoothScroll />
+      <Nav />
       <Hero />
-      <Showcase />
-      <About />
-      <Footer />
+      <CityFlight />
+      <Situation />
+      <Task />
+      <Atc20 />
+      <Adapted />
+      <Solution />
+      <ClaudeSection />
+      <Result />
+      <Built />
+      <Author />
+      <Close />
     </div>
+  );
+}
+
+function Nav() {
+  return (
+    <nav className="lp-nav" aria-label="Main">
+      <Link href="/" aria-label="Zahle on Record" className="lp-nav-logo">
+        <Logo cut="small" className="h-9" title={null} />
+      </Link>
+      <div className="lp-nav-links">
+        <Pill href={MAP_PATH.engineer}>Engineer</Pill>
+        <Pill href={MAP_PATH.emt}>Volunteer</Pill>
+      </div>
+    </nav>
+  );
+}
+
+function Pill({ href, children, solid = false }: { href: string; children: React.ReactNode; solid?: boolean }) {
+  return (
+    <Link href={href} className="lp-pill" data-solid={solid || undefined}>
+      <span>{children}</span>
+    </Link>
   );
 }
 
 function Hero() {
   return (
-    <header className="relative flex flex-col md:block md:min-h-[min(100svh,820px)]">
-      {/* The map: on laptops it fills the right of the hero and fades into the ground under the text. */}
-      <div className="landing-map pointer-events-none relative order-last h-[340px] md:absolute md:inset-y-0 md:right-0 md:left-[30%] md:h-auto">
-        <div className="h-full w-full [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_80%,transparent)] md:[mask-image:linear-gradient(to_right,transparent,black_30%),linear-gradient(to_bottom,black_75%,transparent)] md:[mask-composite:intersect]">
-          <Image
-            src="/landing/zahle-map-2400.webp"
-            alt=""
-            width={mapSize.width}
-            height={mapSize.height}
-            priority
-            sizes="(min-width: 768px) 70vw, 100vw"
-            className="h-full w-full object-cover object-[52%_52%]"
-          />
-        </div>
-        {/* Required credit for the picture's map data and terrain, kept on the picture itself. */}
-        <p className="pointer-events-auto absolute right-4 bottom-3 text-[12px] leading-4 text-muted sm:right-8 md:bottom-[22%]">
-          {T.mapCredit}
-        </p>
-      </div>
-
-      <div className="relative mx-auto flex max-w-[1200px] flex-col px-4 pt-5 sm:px-8 md:min-h-[inherit] md:pt-8">
-        <div className="flex items-center justify-between gap-4">
-          <Link
-            href="/"
-            aria-label="Zahle on Record"
-            className="-m-1 rounded-control p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          >
-            <span data-ribbon="logo" className="block">
-              <Logo className="h-[72px] sm:h-24" title={null} />
-            </span>
-          </Link>
-          <div className="relative z-[2] flex gap-2">
-            <LinkButton href="/engineer">{T.openMap.engineer}</LinkButton>
-            <LinkButton href="/emt">{T.openMap.emt}</LinkButton>
-          </div>
-        </div>
-
-        <div data-ribbon="text" className="max-w-[560px] pt-20 pb-12 md:my-auto md:pt-16 md:pb-28">
-          <p className="landing-fade micro-label">{T.place}</p>
-          <h1
-            className="landing-rise mt-4 font-serif text-[40px]/[44px] font-medium tracking-[-0.015em] text-balance text-ink sm:text-hero"
-            style={{ animationDelay: "40ms" }}
-          >
-            {T.headline}
-          </h1>
-          <p className="landing-rise mt-6 max-w-[31rem] text-lead text-muted" style={{ animationDelay: "140ms" }}>
-            {T.problem}
-          </p>
+    <header className="lp-hero">
+      <HeroArabic />
+      <p className="lp-label lp-fade">{HERO.kicker}</p>
+      <h1 className="lp-hero-title">
+        {HERO.lines.map((l, i) => (
+          <span key={l} className="lp-line">
+            <span style={{ animationDelay: `${i * 80}ms` }}>{l}</span>
+          </span>
+        ))}
+        <span className="lp-line">
+          <span style={{ animationDelay: "160ms" }}>
+            <em className="lp-serif">{HERO.accent}</em>
+          </span>
+        </span>
+      </h1>
+      <div className="lp-hero-foot lp-fade">
+        <p className="lp-lead">{HERO.lead}</p>
+        <div className="lp-hero-actions">
+          <Pill href={MAP_PATH.engineer} solid>
+            Engineer map
+          </Pill>
+          <Pill href={MAP_PATH.emt}>Volunteer map</Pill>
         </div>
       </div>
     </header>
   );
 }
 
-function Showcase() {
+function Chapter({ index, label, side, id, children }: { index: string; label: string; side: string; id?: string; children: React.ReactNode }) {
   return (
-    <section aria-labelledby="showcase-title" className="mx-auto max-w-[1200px] px-4 pt-16 pb-20 sm:px-8 md:pt-24">
-      <div data-ribbon="text" className="max-w-[640px]">
-        <p className="micro-label">{T.showcase.label}</p>
-        <h2 id="showcase-title" className="mt-3 font-serif text-heading font-medium tracking-[-0.01em] text-ink sm:text-display">
-          {T.showcase.title}
-        </h2>
+    <section className="lp-chapter" id={id} aria-label={`${label}: ${side}`}>
+      <div className="lp-chapter-head">
+        <span className="lp-label">
+          {index} — {label}
+        </span>
+        <span className="lp-label">{side}</span>
       </div>
-      {/* The pictures sit above the ribbon: it passes behind them. */}
-      <div data-ribbon="cards" className="relative z-[2]">
-        <div className="mt-10 md:mt-14">
-          <ProductShot />
-        </div>
-        <ul className="mt-12 grid gap-px overflow-hidden rounded-card border border-line bg-line md:mt-16 md:grid-cols-3">
-          {T.showcase.points.map((p) => (
-            <li key={p.label} className="bg-surface px-5 py-5">
-              <p className="micro-label">{p.label}</p>
-              <p className="mt-2 text-body text-ink">{p.text}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {children}
     </section>
   );
 }
 
-function About() {
+/** A grey frame at the real size of a photo, clip or screen still to come. */
+function Placeholder({ label, ratio = "4 / 3", className = "" }: { label: string; ratio?: string; className?: string }) {
   return (
-    <section aria-labelledby="about-title" className="border-t border-line">
-      <div className="mx-auto grid max-w-[1200px] gap-8 px-4 py-16 sm:px-8 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-24 md:py-24">
-        <div data-ribbon="about-title">
-          <p className="micro-label">{T.about.label}</p>
-          <h2 id="about-title" className="mt-3 font-serif text-heading font-medium tracking-[-0.01em] text-ink sm:text-display">
-            {T.about.title}
-          </h2>
-        </div>
-        <div data-ribbon="about-body" className="max-w-[36rem] space-y-4">
-          {T.about.body.map((p) => (
-            <p key={p} className="text-lead text-muted first:text-ink">
+    <div className={`lp-ph ${className}`} style={{ aspectRatio: ratio }} role="img" aria-label={label}>
+      <span className="lp-ph-tag">Placeholder</span>
+      <span className="lp-ph-text">{label}</span>
+    </div>
+  );
+}
+
+function Src({ n }: { n: number }) {
+  return (
+    <a href={`#source-${n}`} className="lp-src" aria-label={`Source ${n}`}>
+      {n}
+    </a>
+  );
+}
+
+function Situation() {
+  const s = SITUATION;
+  return (
+    <Chapter index={s.index} label={s.label} side={s.side}>
+      <LightWords text={s.statement} className="lp-statement" />
+      <p className="lp-note">
+        Lebanon Health Ministry <Src n={s.statementSource} />
+      </p>
+      <div className="lp-facts">
+        {s.facts.map((f, i) => (
+          <Reveal key={f.text} delay={i * 90} className="lp-fact">
+            <b>
+              {f.value}
+              {f.unit && <small>{f.unit}</small>}
+            </b>
+            <p>
+              {f.text} <Src n={f.source} />
+            </p>
+          </Reveal>
+        ))}
+      </div>
+      <div className="lp-split">
+        <Reveal>
+          <Placeholder label={s.photo} ratio="4 / 5" />
+        </Reveal>
+        <Reveal className="lp-prose" delay={90}>
+          {s.body.map((p, i) => (
+            <p key={p}>
               {p}
+              {i === 0 && (
+                <>
+                  {" "}
+                  <Src n={s.bodySource} />
+                </>
+              )}
             </p>
           ))}
+        </Reveal>
+      </div>
+    </Chapter>
+  );
+}
+
+function Task() {
+  const t = TASK;
+  return (
+    <Chapter index={t.index} label={t.label} side={t.side}>
+      <Reveal>
+        <h2 className="lp-h2">{t.title}</h2>
+      </Reveal>
+      <div className="lp-split lp-split-rev">
+        <Reveal className="lp-prose">
+          {t.body.map((p) => (
+            <p key={p}>{p}</p>
+          ))}
+        </Reveal>
+        <Reveal delay={90}>
+          <Placeholder label={t.photo} ratio="3 / 2" />
+        </Reveal>
+      </div>
+      <div className="lp-heard">
+        <Reveal>
+          <p className="lp-label">{t.heard.label}</p>
+          <p className="lp-heard-intro">{t.heard.intro}</p>
+        </Reveal>
+        <ol className="lp-rows">
+          {t.heard.points.map((p, i) => (
+            <Reveal key={p.title} delay={i * 80}>
+              <li className="lp-row">
+                <span className="lp-label">0{i + 1}</span>
+                <h3>{p.title}</h3>
+                <p>{p.text}</p>
+              </li>
+            </Reveal>
+          ))}
+        </ol>
+      </div>
+    </Chapter>
+  );
+}
+
+function Atc20() {
+  const a = ATC20;
+  return (
+    <Chapter index={a.index} label={a.label} side={a.side}>
+      <Reveal>
+        <h2 className="lp-h2 lp-h2-wide">{a.title}</h2>
+      </Reveal>
+      <Reveal className="lp-prose lp-prose-wide">
+        {a.body.map((p, i) => (
+          <p key={p}>
+            {p} <Src n={a.bodySources[i]} />
+          </p>
+        ))}
+      </Reveal>
+      <div className="lp-placards">
+        {a.placards.map((p, i) => (
+          <Reveal key={p.word} delay={i * 110}>
+            <div className="lp-placard" data-tone={p.tone}>
+              <span className="lp-placard-bar" />
+              <span className="lp-label">Posting</span>
+              <b>{p.word}</b>
+              <p>{p.text}</p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+      <Reveal className="lp-why">
+        <p className="lp-label">{a.why.title}</p>
+        <p className="lp-why-text">{a.why.text}</p>
+      </Reveal>
+    </Chapter>
+  );
+}
+
+function Adapted() {
+  const a = ADAPTED;
+  return (
+    <Chapter index={a.index} label={a.label} side={a.side}>
+      <Reveal>
+        <h2 className="lp-h2">{a.title}</h2>
+      </Reveal>
+      <ol className="lp-rows">
+        {a.steps.map((s, i) => (
+          <Reveal key={s.title} delay={i * 60}>
+            <li className="lp-row">
+              <span className="lp-label">0{i + 1}</span>
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
+            </li>
+          </Reveal>
+        ))}
+      </ol>
+      <Reveal className="lp-callout">
+        <p className="lp-label">{a.oea.label}</p>
+        <p>{a.oea.text}</p>
+      </Reveal>
+    </Chapter>
+  );
+}
+
+function Solution() {
+  const s = SOLUTION;
+  return (
+    <Chapter index={s.index} label={s.label} side={s.side}>
+      <Reveal>
+        <h2 className="lp-h2">{s.title}</h2>
+      </Reveal>
+      <div className="lp-maps">
+        {s.maps.map((m, i) => (
+          <Reveal key={m.name} delay={i * 110}>
+            <Link href={i === 0 ? MAP_PATH.engineer : MAP_PATH.emt} className="lp-map-card">
+              <Placeholder label={m.clip} ratio={i === 0 ? "4 / 3" : "4 / 3"} />
+              <div className="lp-map-meta">
+                <span className="lp-label">{m.who}</span>
+                <h3>
+                  {m.name} <span className="lp-arrow">→</span>
+                </h3>
+                <p>{m.text}</p>
+              </div>
+            </Link>
+          </Reveal>
+        ))}
+      </div>
+      <Reveal className="lp-key">
+        <span>
+          <i className="lp-key-fill" /> Engineer report fills the building
+        </span>
+        <span>
+          <i className="lp-key-line" /> Volunteer posting outlines it
+        </span>
+      </Reveal>
+    </Chapter>
+  );
+}
+
+function ClaudeSection() {
+  const c = CLAUDE;
+  return (
+    <Chapter index={c.index} label={c.label} side={c.side} id="claude">
+      <Reveal>
+        <h2 className="lp-h2 lp-h2-wide">{c.title}</h2>
+      </Reveal>
+      <Reveal className="lp-prose lp-prose-wide">
+        <p>{c.lead}</p>
+      </Reveal>
+
+      <div className="lp-sketch">
+        <Reveal>
+          <Placeholder label={c.sketch.photo} ratio="4 / 5" />
+        </Reveal>
+        <Reveal delay={120}>
+          <Placeholder label={c.sketch.output} ratio="4 / 5" className="lp-ph-paper" />
+        </Reveal>
+        <Reveal className="lp-sketch-text" delay={200}>
+          <h3>{c.sketch.title}</h3>
+          <p>{c.sketch.text}</p>
+        </Reveal>
+      </div>
+
+      <div className="lp-features">
+        {c.features.map((f, i) => (
+          <Reveal key={f.title} delay={i * 90} className="lp-feature">
+            <span className="lp-label">0{i + 1}</span>
+            <h3>{f.title}</h3>
+            <p>{f.text}</p>
+          </Reveal>
+        ))}
+      </div>
+
+      <div className="lp-triage">
+        <Reveal className="lp-triage-text">
+          <span className="lp-tag">{c.triage.tag}</span>
+          <h3>{c.triage.title}</h3>
+          <p>{c.triage.text}</p>
+        </Reveal>
+        <Reveal delay={110}>
+          <Placeholder label={c.triage.placeholder} ratio="16 / 10" />
+        </Reveal>
+      </div>
+    </Chapter>
+  );
+}
+
+function Result() {
+  const r = RESULT;
+  return (
+    <Chapter index={r.index} label={r.label} side={r.side}>
+      <Reveal>
+        <h2 className="lp-h2">{r.title}</h2>
+      </Reveal>
+      <Reveal>
+        <Placeholder label={r.clip} ratio="16 / 9" />
+      </Reveal>
+      <div className="lp-numbers">
+        {r.numbers.map((n) => (
+          <div key={n.text}>
+            <b>
+              <CountUp to={n.value} />
+            </b>
+            <span className="lp-label">{n.text}</span>
+          </div>
+        ))}
+      </div>
+      <p className="lp-note">{r.numbersNote}</p>
+      <Reveal className="lp-callout">
+        <p className="lp-label">{r.owner.label}</p>
+        <p>{r.owner.text}</p>
+      </Reveal>
+    </Chapter>
+  );
+}
+
+function Built() {
+  const b = BUILT;
+  return (
+    <Chapter index={b.index} label={b.label} side={b.side}>
+      <Reveal>
+        <h2 className="lp-h2">{b.title}</h2>
+      </Reveal>
+      <Reveal>
+        <Diagram />
+      </Reveal>
+      <div className="lp-stack">
+        {b.stack.map((s, i) => (
+          <Reveal key={s.name} delay={i * 70} className="lp-stack-item">
+            <h3>{s.name}</h3>
+            <p>{s.text}</p>
+          </Reveal>
+        ))}
+      </div>
+    </Chapter>
+  );
+}
+
+/** How a request moves: phone to Vercel, then to the database and to Claude. */
+function Diagram() {
+  return (
+    <div className="lp-diagram" role="img" aria-label="A phone or laptop talks to the Next.js app on Vercel. The app reads and writes Postgres with PostGIS, and sends photos to Claude, which returns typed ratings and a sketch.">
+      <div className="lp-node">
+        <span className="lp-label">Client</span>
+        <b>Phone or laptop</b>
+        <small>Leaflet map, assessment steps</small>
+      </div>
+      <span className="lp-edge" aria-hidden="true" />
+      <div className="lp-node lp-node-main">
+        <span className="lp-label">Vercel</span>
+        <b>Next.js app</b>
+        <small>Pages and server routes</small>
+      </div>
+      <div className="lp-branch" aria-hidden="true">
+        <span className="lp-edge" />
+        <span className="lp-edge" />
+      </div>
+      <div className="lp-node-pair">
+        <div className="lp-node">
+          <span className="lp-label">Supabase</span>
+          <b>Postgres + PostGIS</b>
+          <small>Outlines, reports, add-only triggers, private photos</small>
+        </div>
+        <div className="lp-node">
+          <span className="lp-label">Anthropic</span>
+          <b>Claude</b>
+          <small>Photo → typed ratings + sketch</small>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Author() {
+  const a = AUTHOR;
+  return (
+    <section className="lp-chapter lp-author" aria-label="About the author">
+      <Reveal className="lp-author-photo">
+        <Image src="/landing/author.webp" alt={a.photoAlt} width={1000} height={1333} sizes="(min-width: 900px) 34vw, 100vw" />
+      </Reveal>
+      <Reveal className="lp-author-text" delay={100}>
+        <p className="lp-label">{a.label}</p>
+        <h2 className="lp-h2">{a.name}</h2>
+        <p className="lp-author-role">{a.role}</p>
+        <p className="lp-lead">{a.line}</p>
+        <div className="lp-author-links">
+          {a.links.map((l) => (
+            <a key={l.label} href={l.href} className="lp-pill" target="_blank" rel="noreferrer">
+              <span>{l.label} ↗</span>
+            </a>
+          ))}
+        </div>
+        <p className="lp-note">{a.email}</p>
+      </Reveal>
     </section>
   );
 }
 
-/** The logo only. Its Arabic waits fainter until the ribbon ties back into the ز (Ribbon.tsx). */
-function Footer() {
+function Close() {
   return (
-    <footer className="mx-auto max-w-[1200px] px-4 pt-10 pb-[max(4rem,env(safe-area-inset-bottom))] sm:px-8 md:grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-24 md:pt-12 md:pb-20">
-      <div className="md:col-start-2">
-        <span data-ribbon="footer-logo" className="inline-block">
-          <Logo cut="footer" className="h-[72px] sm:h-24" arabicClassName="ribbon-footer-arabic" />
+    <footer className="lp-close">
+      <div className="lp-close-big">
+        <h2>
+          {CLOSE.title[0]}
+          <br />
+          {CLOSE.title[1]}
+        </h2>
+        <span className="lp-close-ar" aria-hidden="true">
+          زحلة
         </span>
+      </div>
+      <div className="lp-close-actions">
+        <Pill href={MAP_PATH.engineer} solid>
+          {CLOSE.engineer}
+        </Pill>
+        <Pill href={MAP_PATH.emt}>{CLOSE.volunteer}</Pill>
+      </div>
+      <div className="lp-sources">
+        <p className="lp-label">{CLOSE.sources}</p>
+        <ol>
+          {SOURCES.map((s) => (
+            <li key={s.id} id={`source-${s.id}`}>
+              <a href={s.url} target="_blank" rel="noreferrer">
+                {s.label}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div className="lp-close-row">
+        <span>Zahle on Record</span>
+        <span>{CLOSE.credit}</span>
       </div>
     </footer>
   );

@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { LOGIN_FROZEN } from "@/lib/maps";
 import { engineerForToken, SESSION_COOKIE } from "@/lib/session";
 
-const MAP_PAGES = new Set(["/engineer", "/emt"]);
+const MAP_PAGES = new Set(["/engineer", "/volunteer"]);
 
 /**
  * Page access, checked on the server before any page renders.
@@ -19,6 +19,9 @@ const MAP_PAGES = new Set(["/engineer", "/emt"]);
 export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const go = (to: string) => NextResponse.redirect(new URL(to, req.url));
+
+  // The EMT map was renamed the Volunteer map (owner, 23 Nov 2026); old links still work.
+  if (path === "/emt") return go("/volunteer");
 
   if (LOGIN_FROZEN) return path === "/" || MAP_PAGES.has(path) ? NextResponse.next() : go("/");
 
@@ -46,5 +49,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/engineer", "/emt", "/login", "/signup", "/waiting", "/resident", "/welcome"],
+  matcher: ["/", "/engineer", "/emt", "/volunteer", "/login", "/signup", "/waiting", "/resident", "/welcome"],
 };

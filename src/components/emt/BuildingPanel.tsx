@@ -379,7 +379,7 @@ function FullView(
     return (
       <AssessmentFlow
         buildingId={props.buildingId}
-        inspector={props.engineer?.fullName ?? "EMT"}
+        inspector={props.engineer?.fullName ?? "Volunteer"}
         latestReport={data.reports[0] ?? null}
         latestAssessment={data.assessments[0] ?? null}
         onSaved={props.onAssessmentSaved}

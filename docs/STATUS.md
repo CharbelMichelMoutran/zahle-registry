@@ -1,6 +1,6 @@
 # Status — Zahle on Record
 
-Last updated: 23 Nov 2026. Read this first, then `plan.md` (source of truth) and `DESIGN.md` (before UI work). Older detail is in git history.
+Last updated: 23 Nov 2026 (evening). Read this first, then `plan.md` (source of truth) and `DESIGN.md` (before UI work). Older detail is in git history.
 
 ## Where it stands
 
@@ -57,6 +57,13 @@ Last updated: 23 Nov 2026. Read this first, then `plan.md` (source of truth) and
 5. HTML debrief of the 22 Nov build: https://claude.ai/artifact/7ZuPYAo6NEyF3kE7EbekXf
 
 ## Open tasks
+
+000. **Portfolio landing page (plan item 28): built locally 23 Nov, not pushed or deployed.** Files: `src/components/landing/` (`Landing.tsx`, `motion.tsx`, `landing.css`), words in `src/lib/landing-content.ts`, author photo `public/landing/author.webp`. Checked headless at 1440 and 390 px: no errors, no sideways scroll. Not yet checked: Safari, a real phone, hover effects. Owner to approve the wording section by section.
+    - **Placeholders to replace before launch** (grey frames tagged "Placeholder"): (1) Situation photo: damaged building in Tripoli; (2) Task photo: Zahle from the hill; (3) clip: engineer map; (4) clip: volunteer assessment; (5) Claude sketch pair: photo of a partly collapsed Lebanese building + **Claude's real sketch output** (run it through `drawSketch` once `ANTHROPIC_API_KEY` is set; never hand-drawn); (6) triage screen (the confidence triage is not built yet, Later list); (7) Result clip: map from valley to one building. Photos free-licence only, credited.
+    - To check with the owner: LinkedIn URL assumed `linkedin.com/in/charbelmoutran`.
+    - **EMT map renamed Volunteer map** (labels, page `/volunteer`, `/emt` redirects in `src/proxy.ts`). Internal name and API paths stay `emt`. `MAP_PATH` in `src/lib/maps.ts`.
+    - Vercel Web Analytics added in `src/app/layout.tsx` (switch it on in the Vercel dashboard when deploying).
+    - The original WhatsApp photo in the repo root is not committed (personal file); delete or keep outside the repo.
 
 00. **Professional engineer report (item 27): live since 24 Nov (not pushed to GitHub).** Checked in a browser (laptop and phone) without saving: the form, Claude links hidden with no key, the saved view and the printed copy, using a browser-only fake report. Waiting on the owner's go, in this order:
     1. ~~Apply the migration~~ done 24 Nov. ~~Backup and cleanup~~ done 24 Nov.

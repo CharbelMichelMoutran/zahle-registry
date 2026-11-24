@@ -229,6 +229,14 @@ The project owner chose to leave adoption out of this project. **Later test:** o
     - **Saved report:** the same sections read-only, and "Print / Save as PDF" (browser print) for a clean paper copy with the cover photo, the parts table, photos and a blank stamp and signature space.
     - **Old reports are deleted, once (owner's exception to rule 5, 23 Nov 2026):** every simple report on both maps, the construction-date change history and the Claude debriefs (they rewrite themselves). EMT assessments are kept. A private backup file is saved on the owner's laptop first (never in git). Runs only on the owner's "go", when the new report is ready.
 
+28. **Portfolio landing page (owner, 23 Nov 2026).** Replaces the landing page at `/`. A case study in STAR order for recruiters: hero; Situation (Lebanon's buildings at risk, the 2026 Tripoli collapses, sourced numbers only); Task (why Zahle: the owner's hometown, one line on work with the Zahle municipality and the Red Cross Zahle Center; what engineers told us, quoted only as "engineers we talked to"); Action (ATC-20 explained simply and why it saves lives; how we adapted it; the OEA once looked at Red Cross volunteers doing first safety checks and found the technology not ready; the two maps; Claude given the most space: photo reading, the sketch, confidence triage); Result (real product clips, numbers, the Lebanese Red Cross as a possible owner); How it's built; Author (photo with his mother, no caption; name; Stanford CS; born and raised in Rassieh, Zahle; "passionate about using CS for world impact"; LinkedIn charbelmoutran, GitHub, `cmoutran[at]stanford[dot]edu`); Try it.
+    - **Look:** template A (`docs/templates/a-editorial.html`) with C's faint giant زحلة and the camera flight into the city. **Light only**: white, greys, river blue. No beige; red and green only for map ratings. Inter Tight and Instrument Serif on the landing page; the "Record" logo stays. Photos allowed on this page (exception to `DESIGN.md`).
+    - **Writing:** first person, plain, short, precise, no clichés. The owner approves each section.
+    - **Placeholders until later**, each a labelled grey frame listed in `docs/STATUS.md`: photos (free-licence only), product clips, the confidence triage, the Claude sketch (real product output once the API key is set; never drawn by hand and passed off as Claude's).
+    - **EMT map renamed the Volunteer map** (Red Cross volunteers, EMTs, rescuers), page `/volunteer`; `/emt` redirects. Internal name stays `emt`.
+    - Vercel Web Analytics (no cookies).
+    - Then: backup and cleanup of old reports (owner confirms right before), no new sample reports.
+
 ### Out (for a later version)
 
 - Real user accounts and login with real OEA membership checks (the demo has a simulated version, see section 7 "In", item 10)
@@ -295,6 +303,8 @@ The project owner signs in to each account. Claude does everything after that th
 ## Later list
 
 (Add ideas here instead of building them now.)
+
+- **Added 23 Nov 2026 (item 28):** build Claude's confidence triage (unsure postings go first to engineers; human corrections are saved to tune Claude); real photos and product clips for the landing page; polish the map screens in the landing page's style and fonts; buy a domain; make the repo public when everything is done.
 
 - Sample buildings with realistic history (scope item 6, still open).
 - Live updates between the Engineer and EMT maps, without a reload.

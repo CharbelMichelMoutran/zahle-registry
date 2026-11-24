@@ -143,7 +143,7 @@ export const approvedMessage = (name: string) => `Account approved. Welcome, ${n
 /** The small map key in the corner of the engineer map (DESIGN.md 14.10). */
 export const MAP_KEY = {
   title: "Map key",
-  emtOutline: "Outline: EMT posting",
+  emtOutline: "Outline: volunteer posting",
   stale: "Inspected more than 6 months ago",
 };
 
@@ -152,52 +152,4 @@ export const LOCATE = {
   button: "Go to building",
   typeAddress: "Type address",
   currentLocation: "Use current location",
-} as const;
-
-// ---------------------------------------------------------------------------
-// Public landing page (plan.md item 23, DESIGN.md 13 and 14.9 item 9). Calm and
-// plain; no demo wording, no disclaimer. Problem and about lines follow plan.md
-// section 1; the product visuals use example phrases from docs/engineering.md D3.
-// ---------------------------------------------------------------------------
-
-export const LANDING = {
-  place: "Zahle · Bekaa · Lebanon",
-  headline: "Every building in Zahle, inspected.",
-  problem:
-    "In Lebanon, building records sit on paper no one can reach. Every inspection starts from scratch. We made records accessible so Zahle could be the first city to adequately meet its citizens' needs.",
-  /** The two map buttons, top right, while login is frozen (owner, 22 Nov 2026). */
-  openMap: { engineer: "Engineer", emt: "EMT" },
-  showcase: {
-    label: "The record",
-    title: "No engineer has to start from scratch.",
-    points: [
-      { label: "One history", text: "Every inspection is added to the building's history. Nothing is overwritten." },
-      { label: "Colour with words", text: "A rating always comes with its word and the engineer's remarks." },
-      { label: "Each role its own view", text: "Engineers see every building. A resident sees only their own." },
-    ],
-  },
-  about: {
-    label: "About the registry",
-    title: "A lasting record, made by engineers.",
-    body: [
-      "Inspections happen in Lebanon, but their results rarely build into a record anyone can find. The Order of Engineers and Architects and the municipalities end up inspecting buildings from scratch.",
-      "The registry keeps every inspection of every building in Zahle, written by engineers, with residents adding what they see. It matters most after a disaster, such as the 2023 earthquakes, when unstable buildings must be found and checked again quickly.",
-      "The registry records facts. Decisions on use, repair or evacuation stay with the authorities.",
-    ],
-  },
-  /** Written along the ribbon when it ties into the footer logo. */
-  coordinates: "945 m · 33.85° N, 35.90° E",
-  /** Credit for the hero picture, on the picture itself. Required by the OSM licence. */
-  mapCredit: "Map data © OpenStreetMap contributors · Terrain: SRTM (USGS) via Mapzen",
-} as const;
-
-/** Invented example content for the landing page's product visuals. Not a real building or engineer. */
-export const LANDING_EXAMPLE = {
-  built: "1968",
-  inspected: "12/03/2026",
-  final: "Needs repair of roof waterproofing and two columns within the year.",
-  roof: "Damp stains on top-floor ceiling, north-east corner. Waterproofing worn. Needs repair before winter.",
-  columns: "Rusted rebar exposed on two ground-floor columns, concrete spalling. Needs repair.",
-  engineer: "Dana Haddad",
-  residents: "14",
 } as const;

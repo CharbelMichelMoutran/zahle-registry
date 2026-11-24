@@ -14,7 +14,7 @@ export const DISCIPLINE_LABEL: Record<Discipline, string> = {
   civil: "Civil engineer",
   structural: "Structural engineer",
   architect: "Architect",
-  emt: "EMT",
+  emt: "Volunteer",
 };
 
 /**
@@ -26,7 +26,7 @@ export const DISCIPLINE_SHORT: Record<Discipline, string> = {
   civil: "Civil",
   structural: "Structural",
   architect: "Architect",
-  emt: "EMT",
+  emt: "Volunteer",
 };
 
 /** Label of the locked engineer box on reports (civil-engineer suggestion; "Engineer" in D2.1). */

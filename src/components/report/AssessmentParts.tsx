@@ -43,7 +43,7 @@ export function PostingBadge({ posting, size = "small" }: { posting: Posting; si
 
 /** Says plainly that an EMT, not an engineer, made this posting. */
 export function EmtLabel() {
-  return <span className="text-micro text-muted">EMT posting, not yet reviewed by an engineer</span>;
+  return <span className="text-micro text-muted">Volunteer posting, not yet reviewed by an engineer</span>;
 }
 
 /** Claude's short debrief of the whole record, above the history. */
@@ -148,8 +148,8 @@ export function AssessmentView({ assessment: a }: { assessment: Assessment }) {
           {formatDate(a.created_at.slice(0, 10))} · {a.inspector_name}
           {d.organization && ` · ${d.organization}`}
           {a.claude_posting && ` · Claude suggested ${POSTING_LABEL[a.claude_posting]}`}
-          {a.overrode_claude && " · EMT overrode Claude"}
-          {changedByEmt > 0 && ` · EMT changed ${changedByEmt} of Claude's answers`}
+          {a.overrode_claude && " · Volunteer overrode Claude"}
+          {changedByEmt > 0 && ` · Volunteer changed ${changedByEmt} of Claude's answers`}
         </p>
       </div>
 

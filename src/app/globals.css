@@ -163,47 +163,6 @@ p {
   }
 }
 
-/*
- * The landing page's one entrance (DESIGN.md 13): the map settles in while the
- * place, headline, line and buttons rise in one short sequence. Plays once;
- * nothing loops. With reduced motion everything is simply there.
- */
-@media (prefers-reduced-motion: no-preference) {
-  .landing-fade {
-    animation: landing-fade 480ms cubic-bezier(0.23, 1, 0.32, 1) both;
-  }
-  /* The footer logo's Arabic waits in a fainter tone for the ribbon (Ribbon.tsx raises it as the ribbon ties). */
-  .ribbon-footer-arabic {
-    opacity: 0.45;
-  }
-  .landing-rise {
-    animation: landing-rise 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-  .landing-map {
-    animation: landing-map 1200ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-}
-
-@keyframes landing-rise {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-}
-
-@keyframes landing-map {
-  from {
-    opacity: 0;
-    transform: scale(1.03);
-  }
-}
-
-@keyframes landing-fade {
-  from {
-    opacity: 0;
-  }
-}
-
 /* Printing a saved engineer report (plan.md item 27): only its paper copy is printed. */
 @media print {
   @page {

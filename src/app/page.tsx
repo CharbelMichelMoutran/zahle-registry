@@ -3,13 +3,13 @@ import Landing from "@/components/landing/Landing";
 
 export const metadata: Metadata = {
   title: "Zahle on Record",
-  description: "A lasting record of every building in Zahle, made by civil engineers.",
+  description: "A shared record of every building in Zahle, Lebanon, and an earthquake safety check that Red Cross volunteers can run with Claude.",
   alternates: { canonical: "/" },
 };
 
 /**
- * The public landing page, where you choose the Engineer or EMT map. It is
- * static and reads nothing from the registry.
+ * The public landing page (plan.md item 28): the case study, with links to the
+ * Engineer and Volunteer maps. It is static and reads nothing from the registry.
  */
 export default function LandingPage() {
   return <Landing />;
