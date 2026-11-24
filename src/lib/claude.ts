@@ -22,6 +22,7 @@ import {
   type Sketch,
   type Walk,
 } from "./atc20";
+import { FilterSchema, ITEM_IDS, type Filter } from "./query-filter";
 import { createServerSupabase } from "./supabase-server";
 
 /**
@@ -374,4 +375,29 @@ ${report}`,
   const out = response.parsed_output;
   if (!out) return null;
   return { remarks: out.remarks.slice(0, 2000), actions: out.actions.filter((a) => allowedActions.includes(a)) };
+}
+
+// ---------------------------------------------------------------------------
+// The engineer's "Ask" (plan.md items 21 and 29): a question becomes a filter
+// ---------------------------------------------------------------------------
+
+/**
+ * Claude only fills the filter's fields; the server applies them
+ * (lib/query-filter.ts). It never writes database code and never sees the record.
+ */
+export async function readQuery(question: string, today: string): Promise<Filter | null> {
+  const c = claude();
+  if (!c) return null;
+  const response = await c.messages.parse({
+    model: CLAUDE_MODEL,
+    max_tokens: 3000,
+    output_config: { effort: "low", format: zodOutputFormat(FilterSchema) },
+    system: `You turn an engineer's question about the buildings of a building registry for Zahle, Lebanon, into a search filter. Fill only the fields the question asks about; leave every other field empty, null or "any". Never invent a condition.
+
+The record holds engineer reports (rating green = good condition, yellow = needs some work, red = imminent risk) and volunteer (EMT, Red Cross) safety assessments with an ATC-20 posting (inspected = green, restricted = yellow, unsafe = red). Claude proposes a posting with a confidence from 0 to 100; the volunteer decides. "Dangerous" or "greatly dangerous" means red / unsafe unless the question says otherwise. "Your confidence" or "Claude's confidence" is confidenceMin / confidenceMax. "According to the EMT" or "volunteer" means the volunteer fields. Sort is "priority" unless the question asks for another order.
+Today is ${today}. ATC-20 item ids: ${ITEM_IDS}.`,
+    messages: [{ role: "user", content: question }],
+  });
+  if (response.stop_reason === "refusal") return null;
+  return response.parsed_output ?? null;
 }

@@ -46,8 +46,11 @@ export type MapLook = { fill: Shade | null; outline: Shade | null };
 
 const STALE_AFTER_MONTHS = 6;
 
+/** Today's date in Beirut, YYYY-MM-DD. */
+export const beirutToday = () => beirutDay(new Date().toISOString());
+
 /** Green fades to dark grey 6 months after its day, so nothing reads as safe forever. Yellow and red never fade. */
-function shadeOf(e: MapEntry, today: string): Shade {
+export function shadeOf(e: Pick<MapEntry, "colour" | "day">, today = beirutToday()): Shade {
   if (e.colour !== "green") return e.colour;
   const fades = new Date(`${e.day}T00:00:00Z`);
   fades.setUTCMonth(fades.getUTCMonth() + STALE_AFTER_MONTHS);
@@ -57,7 +60,7 @@ function shadeOf(e: MapEntry, today: string): Shade {
 /** Same order as mergedRecord(): the later day wins, then the later save. Checked against today in Beirut. */
 export function mapLook({ report, emt }: MapRecord): MapLook | undefined {
   if (!report && !emt) return undefined;
-  const today = beirutDay(new Date().toISOString());
+  const today = beirutToday();
   const emtNewer = !!emt && (!report || emt.day > report.day || (emt.day === report.day && emt.at > report.at));
   return { fill: report && shadeOf(report, today), outline: emtNewer ? shadeOf(emt, today) : null };
 }
