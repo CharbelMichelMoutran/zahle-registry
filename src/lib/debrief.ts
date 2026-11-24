@@ -1,6 +1,7 @@
 import "server-only";
 import { ITEMS, POSTING_LABEL, RATING_LABEL, type Assessment } from "./atc20";
 import { CLAUDE_MODEL, claude, writeDebrief } from "./claude";
+import { CLASSIFICATION, detailsSummary } from "./engineer-report";
 import type { Report } from "./report";
 import { createServerSupabase } from "./supabase-server";
 
@@ -21,7 +22,12 @@ function recordText(reports: Report[], assessments: Assessment[]): string {
     ].filter(Boolean);
     rows.push({
       at: `${r.report_date}T${r.created_at.slice(11)}`,
-      text: `${r.report_date}, engineer report by ${r.engineer_name}: ${RATING_WORD[r.colour]}. ${notes.join(" ")}`,
+      text: r.details
+        ? `${r.report_date}, engineer report ${r.report_number ?? ""} by ${r.engineer_name}:\n${detailsSummary(r.details, {
+            classification: CLASSIFICATION[r.colour],
+            remarks: r.final_observation,
+          })}`
+        : `${r.report_date}, engineer report by ${r.engineer_name}: ${RATING_WORD[r.colour]}. ${notes.join(" ")}`,
     });
   }
   for (const a of assessments) {

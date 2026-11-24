@@ -14,7 +14,9 @@ import {
 } from "@/lib/report";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const MAX_BODY_BYTES = 32 * 1024; // the longest valid report is about 25 KB of text
+/** A photo path the photo route wrote: `<building id>/<uuid>.jpg`. */
+const PHOTO_PATH = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\.jpg$/i;
+const MAX_BODY_BYTES = 128 * 1024; // the longest valid engineer report, in Arabic, is about 90 KB of text
 
 const json = (body: unknown, status = 200) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
@@ -131,6 +133,10 @@ export async function POST(req: NextRequest, ctx: RouteContext<"/api/buildings/[
   }
   if (!payload) {
     return json({ error: "Some fields need attention.", fields: result.errors }, 422);
+  }
+  // Photos are stored under the building they were taken for.
+  if (payload.photos.some((p) => !PHOTO_PATH.test(p) || !p.startsWith(`${id}/`))) {
+    return json({ error: "Invalid request." }, 400);
   }
   const { data, error } = await supabase.rpc("create_report", {
     p: payload,

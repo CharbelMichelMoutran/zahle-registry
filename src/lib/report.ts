@@ -4,6 +4,7 @@
  */
 import type { Discipline } from "./account";
 import { REPORT_ERRORS as E } from "./content";
+import { detailErrors, detailPhotos, sanitizeDetails, type Details } from "./engineer-report";
 
 // ---------------------------------------------------------------------------
 // Owner decision (plan section 7): easy to flip.
@@ -69,6 +70,11 @@ export type Report = {
   final_not_inspected_reason: string | null;
   colour: Colour;
   created_at: string;
+  /** The professional engineer report (plan.md item 27). Null on EMT simple reports. */
+  details: Details | null;
+  photos: string[];
+  /** ZR-<year>-<0001>, only on reports with details. */
+  report_number: string | null;
 };
 
 export type ConstructionDateChange = {
@@ -125,6 +131,8 @@ export type ReportInput = {
   constructionChangeReason: string;
   observations: Record<Area, ObservationInput>;
   colour: Colour | null;
+  /** Engineer map only (plan.md item 27). Absent on the EMT simple report. */
+  details?: Details | null;
 };
 
 /** The row the server sends to the database. */
@@ -142,6 +150,8 @@ export type ReportPayload = {
   construction_change_reason: string | null;
 } & Record<`${Area}_observation` | `${Area}_not_inspected_reason`, string | null> & {
     colour: Colour;
+    details: Details | null;
+    photos: string[];
   };
 
 export type FieldErrors = Partial<Record<string, string>>;
@@ -253,6 +263,8 @@ export function validateReport(
     }
   }
 
+  if (input.details) Object.assign(errors, detailErrors(sanitizeDetails(input.details)));
+
   if (!input.colour || !COLOURS.includes(input.colour)) {
     errors.colour = E.rating;
   }
@@ -298,5 +310,7 @@ export function toPayload(
     construction_change_reason: constructionChanged ? clean(input.constructionChangeReason) || null : null,
     ...obs,
     colour: input.colour!,
+    details: input.details ? sanitizeDetails(input.details) : null,
+    photos: input.details ? detailPhotos(sanitizeDetails(input.details)) : [],
   };
 }

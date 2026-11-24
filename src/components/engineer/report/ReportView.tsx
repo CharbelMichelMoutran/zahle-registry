@@ -2,11 +2,14 @@ import { AREA_LABEL, NO_REMARKS, NOT_INSPECTED, NOT_YET_VERIFIED, REPORT_TEXT } 
 import { formatConstructionDate, formatDate, formatSaveTime } from "@/lib/format";
 import { AREAS, reportConstructionDate, type ConstructionDateChange, type Report } from "@/lib/report";
 import { ColourBadge } from "../../report/ColourBadge";
+import ReportDocument from "./ReportDocument";
 import { ReportBy } from "./ReportBy";
 import { Row } from "../../report/ui";
 
 /** A saved report, read-only, in the same calm layout as the form. */
 export default function ReportView({ report, change }: { report: Report; change?: ConstructionDateChange }) {
+  // The professional engineer report (plan.md item 27); EMT simple reports keep this layout.
+  if (report.details) return <ReportDocument report={report} details={report.details} change={change} />;
   const r = report;
   return (
     <article className="space-y-7 pb-6">

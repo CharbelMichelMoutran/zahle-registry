@@ -442,6 +442,7 @@ function ReportRow({ report: r }: { report: Report }) {
     <>
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-body">
                 <span className="tabular font-medium text-ink">{formatDate(r.report_date)}</span>
+                {r.report_number && <span className="tabular text-micro text-muted">{r.report_number}</span>}
                 <span className="min-w-0 truncate text-muted">
                   <bdi dir="auto">{r.engineer_name}</bdi>
                   {SHOW_DISCIPLINE_IN_HISTORY && r.engineer_discipline && (

@@ -211,7 +211,7 @@ export default function MapView({
   useEffect(() => {
     ensureDraftRef.current = (id, d) => {
       if (d?.status !== "ready") return;
-      setDrafts((all) => (all[id] ? all : { ...all, [id]: newDraft(d.reports[0] ?? null) }));
+      setDrafts((all) => (all[id] ? all : { ...all, [id]: newDraft(d.reports[0] ?? null, d.reports.find((r) => r.details)?.details) }));
     };
   }, []);
 

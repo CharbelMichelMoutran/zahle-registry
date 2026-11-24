@@ -283,3 +283,82 @@ export async function writeDebrief(record: string): Promise<string | null> {
   const text = response.parsed_output?.text.trim();
   return text ? text.slice(0, 1500) : null;
 }
+
+// ---------------------------------------------------------------------------
+// The engineer report (plan.md item 27): help only when the engineer asks
+// ---------------------------------------------------------------------------
+
+const ENGINEER_ROLE = `You assist a licensed civil or structural engineer in Zahle, Lebanon, who is writing a building condition report for a lasting building registry (in the spirit of ASCE 11 and Eurocode 8 Part 3). The engineer asked for your help; they decide everything, and your text is only a suggestion they may use, change or ignore.
+
+Write as one engineer to another: precise, technical, concise, no filler, no markdown. Judge only what is shown or written. Never invent dimensions, causes or parts that are not visible. Common Lebanese construction: reinforced concrete frames with hollow concrete block infill, open ground floors with shops or parking, traditional stone, and floors added on roofs.`;
+
+const PartPhotoSchema = z.object({
+  condition: z.enum(["none", "moderate", "severe"]).nullable().describe("Null if the photo does not show this part clearly"),
+  note: z.string().describe("One to three technical sentences on what the photo shows of this part"),
+});
+
+export type PartPhotoResult = z.infer<typeof PartPhotoSchema>;
+
+/** Read one photo for one building part: a suggested condition and a short note. */
+export async function readPartPhoto(input: {
+  image: string;
+  part: string;
+  note: string;
+}): Promise<PartPhotoResult | null> {
+  const c = claude();
+  if (!c) return null;
+  const response = await c.messages.parse({
+    model: CLAUDE_MODEL,
+    max_tokens: 3000,
+    output_config: { effort: "medium", format: zodOutputFormat(PartPhotoSchema) },
+    system: ENGINEER_ROLE,
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "image", source: { type: "base64", media_type: "image/jpeg", data: input.image } },
+          {
+            type: "text",
+            text: `Building part: ${input.part}.
+Suggest its condition on the ATC-20 scale (Minor/none: no or hairline damage. Moderate: clear damage that needs repair but no loss of capacity. Severe: damage that reduces capacity or is a hazard) and write a short technical note.
+The engineer's note so far: ${input.note || "none"}`,
+          },
+        ],
+      },
+    ],
+  });
+  if (response.stop_reason === "refusal") return null;
+  return response.parsed_output ?? null;
+}
+
+const RemarksSchema = z.object({
+  remarks: z.string().describe("The observations and remarks section: 3 to 8 sentences, under 1500 characters"),
+  actions: z.array(z.string()).describe("Recommended actions, only from the allowed list"),
+});
+
+export type RemarksResult = z.infer<typeof RemarksSchema>;
+
+/** Draft the remarks and suggest recommended actions from what the engineer filled in. */
+export async function draftRemarks(report: string, allowedActions: readonly string[]): Promise<RemarksResult | null> {
+  const c = claude();
+  if (!c) return null;
+  const response = await c.messages.parse({
+    model: CLAUDE_MODEL,
+    max_tokens: 4000,
+    output_config: { effort: "medium", format: zodOutputFormat(RemarksSchema) },
+    system: ENGINEER_ROLE,
+    messages: [
+      {
+        role: "user",
+        content: `Draft the "Observations and remarks" section of this report: a summary of the findings, the parts of concern, and what could not be inspected. Then suggest recommended actions, choosing only from: ${allowedActions.join(", ")}.
+
+The report so far:
+${report}`,
+      },
+    ],
+  });
+  if (response.stop_reason === "refusal") return null;
+  const out = response.parsed_output;
+  if (!out) return null;
+  return { remarks: out.remarks.slice(0, 2000), actions: out.actions.filter((a) => allowedActions.includes(a)) };
+}

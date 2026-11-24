@@ -203,3 +203,22 @@ p {
     opacity: 0;
   }
 }
+
+/* Printing a saved engineer report (plan.md item 27): only its paper copy is printed. */
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm 14mm;
+  }
+  body:has(> .print-sheet) {
+    background: #fff;
+  }
+  body:has(> .print-sheet) > :not(.print-sheet) {
+    display: none !important;
+  }
+  .print-sheet {
+    color: #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
