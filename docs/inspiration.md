@@ -1,57 +1,49 @@
 # Inspiration list — Zahle on Record
 
-A running list of websites the owner likes, for the portfolio UI pass. Each entry says what to take and what to leave, the way `DESIGN.md` section 1 does. When we make templates, they come from this list. `DESIGN.md` still wins on any rule.
+The owner's chosen websites for the portfolio UI pass (23 Nov 2026). Templates come from this list. `DESIGN.md` still wins on any rule until the owner changes it.
 
-"Read" means the page code was read (fonts, colours, tech). "Seen" means it was looked at in a real browser. Nothing here is "seen" yet.
+**Direction:** award-level studio sites. Huge type, images that reveal and move, smooth page changes, playful motion. Not plain, archive-style or quiet sites.
 
-## Owner's picks
-
-| Site | What it is | What we take | What we leave | Checked |
-|---|---|---|---|---|
-| [Kristyan Sarkis](https://kristyan-sarkis.com/) | Lebanese type designer and lettering artist (TPTQ Arabic). | Arabic lettering as the artwork itself: a drawn **زحلة** with room around it. Black and white chrome, so the work carries the colour. Very little navigation. | The single column of images (we are a tool, not a gallery). The stock WordPress template. | Read, 23 Nov |
-| [Lama Lama](https://lamalama.com/) | Creative digital agency, Amsterdam. | One sharp grotesk (Suisse BP Intl) in four weights, with a mono (Sometype Mono) for small labels. Near-white `#FBFBFB` ground, black text, a single red. Agency-level confidence in big type. | The single pure red `#FF0000` (red means "unsafe" for us). | Read, 23 Nov |
-| [Sasha Denisova](https://sasha.works/) | Independent visual and digital designer, Prague. | To be filled after a browser look. | — | Read (title only), 23 Nov |
-| [MakeReign](https://www.makereign.com/) | "A digital interface company", Cape Town, Ireland, Amsterdam. | Aeonik in three weights. Soft greys (`#D9DEDC`, `#EEF1EF`) with near-black `#202023` and one pale yellow highlight `#FBFDA4`. Smooth scrolling (Lenis). | — | Read, 23 Nov. No "Academy" page found: owner to send the link. |
-| [TB.D](https://tbd.studio/) | Multidisciplinary studio: interiors, furniture, identity, print, digital. | Akzidenz-Grotesk only, regular and italic. A tiny, quiet site. Owner to confirm this is the right "TBD". | — | Read, 23 Nov |
-
-## Owner's verdicts
-
-- **Liked (23 Nov):** [basement.studio](https://basement.studio/) and [Locomotive](https://locomotive.ca/en): bold, playful, motion-heavy studio sites with big type. This is the direction for the landing page.
-- **Liked from batch 2 (23 Nov):** [Exo Ape](https://exoape.com) (**the favourite**), [Lusion](https://lusion.co), [Unseen Studio](https://unseen.co), [14islands](https://14islands.com). Not picked: Active Theory, Igloo Inc, darkroom.engineering, Obys, Cuberto, Dogstudio.
-- **Rejected (23 Nov), "ugly":** Beirut Urban Lab, Public Works Studio, Arab Center for Architecture, Forensic Architecture, Hashim Sarkis Studios, Lina Ghotmeh, Felt, Rauno. Plain, archive-style and quiet looks are out for the portfolio landing page. (Beirut Urban Lab is still in `DESIGN.md` section 1; owner to decide whether to drop it there too.)
-
-## Batch 2, in the basement / Locomotive vein (opened 23 Nov)
+## The favourites
 
 | Site | What it is |
 |---|---|
+| [Exo Ape](https://exoape.com) | **The favourite.** Amsterdam studio: big type, image transitions. |
+| [Lando Norris](https://www.landonorris.com) | "INCREDIBLE." The F1 driver's site: bold type and motion. |
+| [Aristide Benoist](https://aristidebenoist.com) | "Gorgeous." Developer portfolio with silky image transitions. |
+| [Shed](https://shed.design) | "Perfect." Spatial storytelling and fluid motion. |
+| [Dennis Snellenberg](https://dennissnellenberg.com) | "Super beautiful." Amsterdam designer: big type, magnetic buttons. |
+
+## Also liked
+
+| Site | What it is |
+|---|---|
+| [Cappen](https://www.cappen.com) | The "human thinkers" site (owner to confirm). Studio: huge type, image reveals. |
+| [Immersive Garden](https://immersive-g.com) | Paris studio: cinematic 3D. |
 | [Lusion](https://lusion.co) | 3D and WebGL studio, Bristol. |
-| [Active Theory](https://activetheory.net) | Immersive web studio, Los Angeles. |
-| [Igloo Inc](https://igloo.inc) | Full 3D scrolling site, widely awarded. |
-| [darkroom.engineering](https://darkroom.engineering) | Formerly Studio Freight, makers of Lenis smooth scroll. |
-| [Obys](https://obys.agency) | Ukrainian agency: editorial type and bold motion. |
-| [Cuberto](https://cuberto.com) | Agency known for cursor and hover effects. |
-| [Dogstudio](https://dogstudio.co) | Studio with a 3D dog hero. |
 | [Unseen Studio](https://unseen.co) | Brand and digital studio, Bristol. |
 | [14islands](https://14islands.com) | Stockholm studio: playful, smooth. |
-| [Exo Ape](https://exoape.com) | Amsterdam studio: big type, image transitions. |
-
-## Batch 3, final round, in the Exo Ape vein (opened 23 Nov, waiting on verdicts)
-
-| Site | What it is |
-|---|---|
-| [Dennis Snellenberg](https://dennissnellenberg.com) | Amsterdam designer's portfolio: big type, magnetic buttons, smooth page changes. |
-| [Lando Norris](https://www.landonorris.com) | F1 driver's site, a recent award winner: bold type and motion. |
-| [Cappen](https://www.cappen.com) | Studio site: huge type, image reveals. |
-| [Aristide Benoist](https://aristidebenoist.com) | Developer portfolio known for silky WebGL image transitions. |
-| [Shed](https://shed.design) | Awwwards Site of the Day: spatial storytelling and fluid motion. |
-| [Immersive Garden](https://immersive-g.com) | Paris studio: cinematic 3D. |
-| [Oddcommon](https://www.oddcommon.com) | Studio site: playful, editorial. |
-| [Aino](https://aino.agency) | Studio site: clean, big-type, motion-led. |
+| [basement.studio](https://basement.studio/) | Bold, playful, technical. |
+| [Locomotive](https://locomotive.ca/en) | Montreal agency: smooth scrolling, editorial layout. |
 | [Studio Size](https://studio-size.com) | Studio site. |
 | [Joffrey Spitzer](https://www.joffreyspitzer.com) | Designer portfolio: editorial layout, smooth transitions. |
 
+## The owner's first picks (code read, not yet seen in a browser)
+
+| Site | What to take |
+|---|---|
+| [Kristyan Sarkis](https://kristyan-sarkis.com/) | Arabic lettering as the artwork: a drawn **زحلة** with room around it. |
+| [Lama Lama](https://lamalama.com/) | One sharp grotesk (Suisse BP Intl) plus a mono for labels. Near-white ground, black text. |
+| [MakeReign](https://www.makereign.com/) | Aeonik, soft greys, near-black, one pale yellow highlight, smooth scrolling. No "Academy" page found: owner to send the link. |
+| [Sasha Denisova](https://sasha.works/) | Prague designer. Not yet looked at. |
+| [TB.D](https://tbd.studio/) | Akzidenz-Grotesk only. Owner to confirm this is the right "TBD". |
+
+## Not picked (23 Nov)
+
+- "Ugly": Beirut Urban Lab, Public Works Studio, Arab Center for Architecture, Forensic Architecture, Hashim Sarkis Studios, Lina Ghotmeh, Felt, Rauno. Beirut Urban Lab is still the main reference in `DESIGN.md` section 1: owner to decide whether to drop it.
+- Not chosen: Active Theory, Igloo Inc, darkroom.engineering, Obys, Cuberto, Dogstudio, Oddcommon, Aino.
+
 ## Next
 
-- Owner adds sites here (just send the name or link).
-- Look at each one in a real browser and fill the empty rows.
-- Then draw two or three landing-page templates from the strongest picks, for the owner to choose.
+- Draw two or three landing-page templates built around Exo Ape, for the owner to choose.
+- The new direction changes `DESIGN.md` (calm map, light motion). Owner to decide how far it reaches: the landing page only, or the map screens too.
