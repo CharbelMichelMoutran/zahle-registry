@@ -82,6 +82,8 @@ function usePanelNavigation() {
   return { nav, navRef, push, goTo };
 }
 
+const NONE: readonly string[] = [];
+
 /** What the top bar can ask of the map. */
 export type MapViewHandle = {
   /** Fly to a building, select it and open its preview tray, as if it had been tapped. */
@@ -90,10 +92,13 @@ export type MapViewHandle = {
 
 export default function MapView({
   ref,
+  highlighted = NONE,
   engineer,
   onDraftsChange,
 }: {
   ref?: Ref<MapViewHandle>;
+  /** Buildings from a search, outlined on the map. */
+  highlighted?: readonly string[];
   engineer: Engineer | null;
   onDraftsChange: (count: number) => void;
 }) {
@@ -261,6 +266,7 @@ export default function MapView({
     <div className="relative flex-1 overflow-hidden">
       <BuildingMap
         looks={looks}
+        highlighted={highlighted}
         selectedId={nav.buildingId}
         onSelect={selectBuilding}
         onEmptyClick={onEmptyMapClick}

@@ -34,7 +34,7 @@ const ACCENT = "#1E5A8C";
  * pointer events through (globals.css), so a red or selected building is
  * tapped through its base footprint like any other.
  */
-const PANES = { hillshade: 250, red: 410, selected: 430 } as const;
+const PANES = { hillshade: 250, red: 410, highlight: 420, selected: 430 } as const;
 
 /** "Not yet inspected": stone grey with a fine diagonal hatch (the only texture in the app). */
 let hatch: CanvasPattern | string | null = null;
@@ -58,6 +58,8 @@ function hatchFill(): CanvasPattern | string {
 type Props = {
   /** How each building is drawn: engineer fill, EMT outline, faded green (lib/record.ts). */
   looks: ReadonlyMap<string, MapLook>;
+  /** Buildings from a search ("Ask" or "Near me"), outlined in the accent colour. */
+  highlighted: readonly string[];
   selectedId: string | null;
   onSelect: (id: string) => void;
   onEmptyClick: () => void;
@@ -73,6 +75,7 @@ type Status = "loading" | "ready" | "error";
 
 export default function BuildingMap({
   looks,
+  highlighted,
   selectedId,
   onSelect,
   onEmptyClick,
@@ -84,7 +87,7 @@ export default function BuildingMap({
   const mapRef = useRef<L.Map | null>(null);
   const navRef = useRef<MapNavigation | null>(null);
   const layersRef = useRef(new Map<string, L.Polygon>());
-  const renderersRef = useRef<Record<"red" | "selected", L.Canvas> | null>(null);
+  const renderersRef = useRef<Record<"red" | "highlight" | "selected", L.Canvas> | null>(null);
   /** Red buildings (engineer fill or EMT outline), drawn above the rest. */
   const redRef = useRef(new Map<string, L.Layer>());
   const selectedLayerRef = useRef<L.LayerGroup | null>(null);
@@ -138,6 +141,7 @@ export default function BuildingMap({
     for (const [name, zIndex] of Object.entries(PANES)) map.createPane(name).style.zIndex = String(zIndex);
     renderersRef.current = {
       red: L.canvas({ pane: "red", padding: 0.25 }),
+      highlight: L.canvas({ pane: "highlight", padding: 0.25 }),
       selected: L.canvas({ pane: "selected", padding: 0.25 }),
     };
 
@@ -309,6 +313,26 @@ export default function BuildingMap({
       if (id === selectedRef.current) drawSelectedRef.current();
     }
   }, [looks]);
+
+  // Search results: an accent outline with a white halo, under the selection.
+  useEffect(() => {
+    const map = mapRef.current;
+    const renderers = renderersRef.current;
+    if (!map || !renderers || status !== "ready") return;
+    const shapes = highlighted.flatMap((id) => {
+      const base = layersRef.current.get(id);
+      if (!base) return [];
+      const shape = base.getLatLngs() as L.LatLng[][];
+      return [
+        L.polygon(shape, { renderer: renderers.highlight, interactive: false, fill: false, color: "#FFFFFF", weight: 6, opacity: 1 }),
+        L.polygon(shape, { renderer: renderers.highlight, interactive: false, fill: false, color: ACCENT, weight: 2.5, opacity: 1 }),
+      ];
+    });
+    const group = L.layerGroup(shapes).addTo(map);
+    return () => {
+      group.remove();
+    };
+  }, [highlighted, status]);
 
   // Outline the selected building; pan only if it would sit behind the panel.
   // A "Go to building" request flies to it instead, wherever it is.
