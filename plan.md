@@ -235,6 +235,7 @@ The project owner chose to leave adoption out of this project. **Later test:** o
     - **Placeholders until later**, each a labelled grey frame listed in `docs/STATUS.md`: photos (free-licence only), product clips, the confidence triage, the Claude sketch (real product output once the API key is set; never drawn by hand and passed off as Claude's).
     - **EMT map renamed the Volunteer map** (Red Cross volunteers, EMTs, rescuers), page `/volunteer`; `/emt` redirects. Internal name stays `emt`.
     - Vercel Web Analytics (no cookies).
+    - **Owner, 23 Nov 2026 (later):** no "How it's built" chapter, no Result chapter (numbers, Red Cross as owner) and no sources list at the bottom; the page goes from Claude straight to the author. Sources open from small numbered badges by each fact. More colour through photos.
     - Then: backup and cleanup of old reports (owner confirms right before), no new sample reports.
 
 ### Out (for a later version)
