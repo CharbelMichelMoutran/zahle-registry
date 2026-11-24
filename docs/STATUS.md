@@ -1,6 +1,6 @@
 # Status — Zahle on Record
 
-Last updated: 23 Nov 2026 (evening). Read this first, then `plan.md` (source of truth) and `DESIGN.md` (before UI work). Older detail is in git history.
+Last updated: 24 Nov 2026 (night). Read this first, then `plan.md` (source of truth) and `DESIGN.md` (before UI work). Older detail is in git history.
 
 ## Where it stands
 
@@ -58,6 +58,9 @@ Last updated: 23 Nov 2026 (evening). Read this first, then `plan.md` (source of 
 
 ## Open tasks
 
+00. **Plan item 29 (built 24 Nov, local only, not deployed):** Claude's confidence, downgrade warning and disagreement tags; the priority formula (`src/lib/priority.ts`); "Ask" on the engineer map (`src/components/engineer/AskPanel.tsx`, `src/app/api/engineer/query/route.ts`, `src/lib/query-filter.ts`); "Near me" on the volunteer map (`src/components/emt/NearMePanel.tsx`); real location in Zahle (`src/lib/location.ts`); "How buildings are ranked" on the landing page. Migration `20261126000000_claude_confidence.sql` **applied** to the live database (adds `assessments.claude_confidence`). On phones under 420px the top-bar logo is hidden so the buttons fit.
+    - Checked in the browser with Claude off: the ready-made searches, the ranked list, the map highlight, tap-to-fly, Near me (random-building path), the landing section, both top bars at 390px. The ranking was checked on 14 made-up buildings.
+    - **Not tested yet (needs the Anthropic key):** Claude's confidence numbers, typed questions in "Ask", the downgrade warning with a real Claude posting. Real GPS in Zahle not tested. Existing 2 assessments have no confidence (Claude was not used), so they rank first.
 000. **Portfolio landing page (plan item 28): live 24 Nov (owner's go), with the photo-rights issue below still open.** Files: `src/components/landing/` (`Landing.tsx`, `motion.tsx`, `landing.css`), words in `src/lib/landing-content.ts`, author photo `public/landing/author.webp`. Checked headless at 1440 and 390 px: no errors, no sideways scroll. Not yet checked: Safari, a real phone, hover effects. Owner to approve the wording section by section.
     - **Owner, 23 Nov (later):** removed "How it's built", the Result section (numbers, Red Cross as owner) and the sources list; sources now open from the small numbered badges. Next.js dev badge hidden (`next.config.ts`). Owner's photos placed: Zahle from the hill (Task, `public/landing/zahle.webp`) and a damaged building (Claude sketch, `public/landing/damaged-building.webp`).
     - **Photo rights to settle before deploy:** the damaged-building photo is UNDP Lebanon's on Flickr (UNDP209), marked **All rights reserved**: ask UNDP Lebanon for permission or swap for a free-licence photo. The Zahle photo's source is unknown (627 × 650 px, looks like a social-media repost): find its author or replace it with a larger free one.

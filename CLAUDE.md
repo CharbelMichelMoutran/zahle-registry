@@ -46,6 +46,12 @@ The owner writes no code. They direct, decide and review.
 - Decisions belong to the owner. Bring choices with a recommendation.
 - Report honestly. If something is broken, unfinished or skipped, say so.
 
+## Where key logic lives
+
+- **Priority formula:** `src/lib/priority.ts` ranks every list ("Priority list", "Ask" results). Change the ranking only there and keep `PRIORITY_STEPS` (shown on the landing page) in step with it.
+- **Location:** `src/lib/location.ts`. Real location inside Zahle; a random Zahle building anywhere else (demos).
+- **Claude calls:** `src/lib/claude.ts`. Map colours: `src/lib/record.ts`.
+
 ## Rules for everyone
 
 - Keys and secrets never go into code or git. They live in Vercel, Supabase and `.env.local`.
