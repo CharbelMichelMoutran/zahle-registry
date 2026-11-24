@@ -188,7 +188,7 @@ function Body({
                   <td className={`py-2 pr-3 ${e.condition ? CONDITION_TEXT[e.condition] : "text-muted"}`}>
                     {e.condition ? RATING_LABEL[e.condition] : "—"}
                   </td>
-                  <td dir="auto" className="py-2 whitespace-pre-wrap break-words text-ink">
+                  <td dir="auto" className="py-2 whitespace-pre-wrap [unicode-bidi:plaintext] break-words text-ink">
                     {e.note || <Empty />}
                   </td>
                 </tr>
@@ -214,7 +214,7 @@ function Body({
       {/* 5. Observations and remarks */}
       <Section n={5}>
         {r.final_observation?.trim() ? (
-          <p dir="auto" className="whitespace-pre-wrap break-words text-body text-ink">{r.final_observation}</p>
+          <p dir="auto" className="whitespace-pre-wrap [unicode-bidi:plaintext] break-words text-body text-ink">{r.final_observation}</p>
         ) : (
           <Empty />
         )}
@@ -285,7 +285,7 @@ function Facts({ rows }: { rows: [string, string | null | undefined][] }) {
       {rows.map(([label, value]) => (
         <div key={label} className="contents">
           <dt className="text-muted">{label}</dt>
-          <dd dir="auto" className="tabular min-w-0 break-words whitespace-pre-wrap text-ink">
+          <dd dir="auto" className="tabular min-w-0 break-words whitespace-pre-wrap [unicode-bidi:plaintext] text-ink">
             {value?.trim() ? value : <Empty />}
           </dd>
         </div>
