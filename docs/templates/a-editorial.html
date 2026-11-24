@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Template A · Editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Amiri:wght@700&display=swap" rel="stylesheet">
+<style>
+  /* Template A: after Exo Ape. Huge type, an image that opens up as you scroll, numbered chapters. */
+  :root {
+    --ground: #F3F2EE;
+    --ink: #14181F;
+    --muted: #6A707A;
+    --line: #D9D7D0;
+    --accent: #1E5A8C;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --gutter: clamp(16px, 4vw, 56px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; }
+  body { background: var(--ground); color: var(--ink); font-family: "Inter Tight", system-ui, sans-serif; font-size: 17px; line-height: 1.5; overflow-x: clip; }
+  a { color: inherit; text-decoration: none; }
+  .serif { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; }
+  .ar { font-family: "Amiri", serif; font-weight: 700; direction: rtl; }
+  .label { font-size: 13px; letter-spacing: 0.02em; color: var(--muted); }
+
+  /* Nav */
+  nav { position: fixed; inset: 0 0 auto; z-index: 20; display: flex; justify-content: space-between; align-items: center; padding: 20px var(--gutter); mix-blend-mode: difference; color: #fff; }
+  .brand { display: flex; align-items: baseline; gap: 10px; font-weight: 600; font-size: 18px; letter-spacing: -0.01em; white-space: nowrap; }
+  @media (max-width: 520px) { .brand > span:first-child { display: none; } .brand .ar { font-size: 30px; } .pill { height: 40px; padding: 0 16px; font-size: 14px; } }
+  .brand .ar { font-size: 24px; }
+  .nav-links { display: flex; gap: 8px; }
+  .pill { position: relative; overflow: hidden; display: inline-flex; align-items: center; height: 44px; padding: 0 20px; border: 1px solid currentColor; border-radius: 999px; font-size: 15px; font-weight: 500; isolation: isolate; }
+  .pill::before { content: ""; position: absolute; inset: 0; background: currentColor; border-radius: inherit; transform: translateY(101%); transition: transform 0.5s var(--ease); z-index: -1; }
+  .pill span { transition: color 0.5s var(--ease); }
+  @media (hover: hover) { .pill:hover::before { transform: translateY(0); } .pill:hover span { color: #000; } }
+
+  /* Hero */
+  .hero { padding: clamp(120px, 18vh, 180px) var(--gutter) 0; }
+  .hero h1 { font-size: clamp(52px, 11.2vw, 196px); line-height: 0.92; letter-spacing: -0.045em; font-weight: 500; }
+  .hero h1 .serif { font-style: italic; letter-spacing: -0.02em; }
+  .line { display: block; overflow: hidden; padding-bottom: 0.06em; }
+  .line > span { display: inline-block; transform: translateY(105%); animation: rise 1.2s var(--ease) forwards; }
+  .line:nth-child(2) > span { animation-delay: 0.08s; }
+  @keyframes rise { to { transform: none; } }
+  .hero-foot { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: clamp(32px, 6vh, 64px); opacity: 0; animation: fade 1s 0.5s var(--ease) forwards; }
+  .hero-foot p { max-width: 34rem; font-size: clamp(17px, 1.4vw, 20px); color: var(--muted); }
+  @keyframes fade { to { opacity: 1; } }
+  @media (min-width: 800px) { .hero-foot { grid-template-columns: 1fr 1fr; align-items: end; } .hero-foot .label { justify-self: end; } }
+
+  /* The map opens to full width as you scroll */
+  .reveal-wrap { margin-top: clamp(40px, 8vh, 96px); height: 160vh; }
+  .reveal { position: sticky; top: 0; height: 100svh; overflow: hidden; clip-path: inset(var(--inset, 8%) var(--inset-x, 6%) round var(--r, 24px)); }
+  .reveal img { width: 100%; height: 115%; object-fit: cover; transform: scale(var(--s, 1.25)) translateY(var(--y, 0)); transform-origin: 52% 50%; }
+  .reveal-cap { position: absolute; left: var(--gutter); bottom: 28px; display: flex; gap: 24px; font-size: 13px; color: var(--ink); }
+
+  /* Chapters */
+  section { padding: clamp(80px, 14vh, 160px) var(--gutter); }
+  .chapter-head { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--line); padding-top: 18px; margin-bottom: clamp(40px, 8vh, 96px); }
+  .statement { font-size: clamp(32px, 4.6vw, 76px); line-height: 1.04; letter-spacing: -0.03em; font-weight: 500; max-width: 18ch; }
+  .statement .w { opacity: 0.14; transition: opacity 0.4s linear; }
+  .statement .w.on { opacity: 1; }
+  .points { list-style: none; margin-top: clamp(56px, 10vh, 120px); display: grid; gap: 0; }
+  .points li { display: grid; grid-template-columns: 56px 1fr; gap: 16px; padding: 28px 0; border-top: 1px solid var(--line); }
+  .points li:last-child { border-bottom: 1px solid var(--line); }
+  .points h3 { font-size: clamp(22px, 2.2vw, 32px); font-weight: 500; letter-spacing: -0.02em; }
+  .points p { color: var(--muted); margin-top: 6px; max-width: 36rem; }
+  @media (min-width: 900px) { .points li { grid-template-columns: 120px 1fr 1fr; align-items: baseline; } .points p { margin-top: 0; } }
+
+  /* Two maps */
+  .maps { display: grid; gap: clamp(16px, 2vw, 28px); }
+  @media (min-width: 800px) { .maps { grid-template-columns: 1fr 1fr; } }
+  .card { display: block; }
+  .card-img { position: relative; aspect-ratio: 4 / 5; border-radius: 20px; overflow: hidden; background: #E6E5E0; }
+  .card-img img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); transition: transform 1.2s var(--ease); }
+  .card:nth-child(2) .card-img img { object-position: 75% 80%; }
+  .card:nth-child(1) .card-img img { object-position: 38% 40%; }
+  .card-tag { position: absolute; top: 16px; left: 16px; background: var(--ground); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 500; }
+  .card-meta { display: flex; justify-content: space-between; align-items: baseline; margin-top: 18px; }
+  .card-meta h3 { font-size: clamp(28px, 3vw, 44px); font-weight: 500; letter-spacing: -0.03em; }
+  .arrow { display: inline-block; transition: transform 0.6s var(--ease); }
+  @media (hover: hover) { .card:hover .card-img img { transform: scale(1); } .card:hover .arrow { transform: translateX(8px); } }
+
+  /* Numbers */
+  .numbers { display: grid; grid-template-columns: 1fr; border-top: 1px solid var(--line); }
+  .numbers div { padding: 28px 0; border-bottom: 1px solid var(--line); }
+  .numbers b { display: block; font-size: clamp(56px, 8vw, 128px); font-weight: 500; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+  @media (min-width: 800px) { .numbers { grid-template-columns: repeat(3, 1fr); } .numbers div { padding: 36px 24px 36px 0; border-bottom: 0; } .numbers div + div { border-left: 1px solid var(--line); padding-left: 24px; } }
+
+  /* Footer */
+  footer { background: var(--ink); color: var(--ground); padding: clamp(80px, 14vh, 140px) var(--gutter) 28px; border-radius: 32px 32px 0 0; overflow: hidden; }
+  footer .big { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  footer .big h2 { font-size: clamp(44px, 8vw, 132px); line-height: 0.95; letter-spacing: -0.045em; font-weight: 500; }
+  footer .big .ar { font-size: clamp(96px, 20vw, 320px); line-height: 0.8; color: var(--accent); filter: brightness(1.6); }
+  footer .row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-top: 64px; padding-top: 20px; border-top: 1px solid #ffffff22; font-size: 13px; color: #ffffff99; }
+  footer .pill { color: var(--ground); }
+  @media (hover: hover) { footer .pill:hover span { color: var(--ink); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .line > span, .hero-foot { animation: none; transform: none; opacity: 1; }
+    .statement .w { opacity: 1; }
+    .reveal-wrap { height: auto; }
+    .reveal { position: relative; height: 80svh; clip-path: none; }
+    .reveal img { transform: none; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="#"><span>Zahle on Record</span><span class="ar">زحلة</span></a>
+  <div class="nav-links">
+    <a class="pill" href="#maps"><span>Engineer</span></a>
+    <a class="pill" href="#maps"><span>EMT</span></a>
+  </div>
+</nav>
+
+<header class="hero">
+  <h1>
+    <span class="line"><span>Every building</span></span>
+    <span class="line"><span>in Zahle, <span class="serif">inspected.</span></span></span>
+  </h1>
+  <div class="hero-foot">
+    <p>In Lebanon, building records sit on paper no one can reach. Every inspection starts from scratch. We made records accessible so Zahle could be the first city to adequately meet its citizens' needs.</p>
+    <span class="label">Zahle · Bekaa · Lebanon — scroll</span>
+  </div>
+</header>
+
+<div class="reveal-wrap">
+  <div class="reveal" id="reveal">
+    <img src="../../public/landing/zahle-map-2400.webp" alt="Map of Zahle: the Berdawni valley and its buildings">
+    <div class="reveal-cap"><span>33.85° N, 35.90° E</span><span>945 m</span></div>
+  </div>
+</div>
+
+<section>
+  <div class="chapter-head"><span class="label">01 — The record</span><span class="label">Add-only</span></div>
+  <p class="statement" id="statement">No engineer has to start from scratch. Every inspection is added to the building's history, and nothing is ever overwritten.</p>
+  <ul class="points">
+    <li><span class="label">01</span><h3>One history</h3><p>Every inspection is added to the building's history. Nothing is overwritten.</p></li>
+    <li><span class="label">02</span><h3>Colour with words</h3><p>A rating always comes with its word and the engineer's remarks.</p></li>
+    <li><span class="label">03</span><h3>Each role its own view</h3><p>Engineers see every building. A resident sees only their own.</p></li>
+  </ul>
+</section>
+
+<section id="maps">
+  <div class="chapter-head"><span class="label">02 — Two maps</span><span class="label">One shared record</span></div>
+  <div class="maps">
+    <a class="card" href="#">
+      <div class="card-img"><img src="../../public/landing/zahle-map-2400.webp" alt=""><span class="card-tag">For civil engineers</span></div>
+      <div class="card-meta"><h3>Engineer map</h3><span class="arrow">→</span></div>
+    </a>
+    <a class="card" href="#">
+      <div class="card-img"><img src="../../public/landing/zahle-map-2400.webp" alt=""><span class="card-tag">For the Red Cross</span></div>
+      <div class="card-meta"><h3>EMT map</h3><span class="arrow">→</span></div>
+    </a>
+  </div>
+</section>
+
+<section>
+  <div class="chapter-head"><span class="label">03 — Zahle</span><span class="label">From OpenStreetMap</span></div>
+  <div class="numbers">
+    <div><b data-count="4595">0</b><span class="label">Buildings on the map</span></div>
+    <div><b data-count="945">0</b><span class="label">Metres above sea level</span></div>
+    <div><b data-count="2">0</b><span class="label">Maps, one record</span></div>
+  </div>
+</section>
+
+<footer>
+  <div class="big">
+    <h2>A lasting record,<br>made by engineers.</h2>
+    <span class="ar" aria-hidden="true">زحلة</span>
+  </div>
+  <div style="display:flex; gap:8px; margin-top:40px;">
+    <a class="pill" href="#"><span>Open the engineer map</span></a>
+    <a class="pill" href="#"><span>Open the EMT map</span></a>
+  </div>
+  <div class="row"><span>Zahle on Record</span><span>Map data © OpenStreetMap contributors · Terrain: SRTM (USGS) via Mapzen</span></div>
+</footer>
+
+<script>
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Split the statement into words that light up as it scrolls past.
+  const st = document.getElementById("statement");
+  st.innerHTML = st.textContent.split(" ").map(w => `<span class="w">${w}</span>`).join(" ");
+  const words = [...st.querySelectorAll(".w")];
+
+  const reveal = document.getElementById("reveal");
+  const wrap = reveal.parentElement;
+
+  function frame() {
+    const vh = innerHeight;
+    // Map: the frame opens from inset to full bleed, the picture settles from 1.25 to 1.
+    const r = wrap.getBoundingClientRect();
+    const p = Math.min(1, Math.max(0, -r.top / (r.height - vh)));
+    const e = 1 - Math.pow(1 - p, 3);
+    reveal.style.setProperty("--inset", `${8 * (1 - e)}%`);
+    reveal.style.setProperty("--inset-x", `${6 * (1 - e)}%`);
+    reveal.style.setProperty("--r", `${24 * (1 - e)}px`);
+    reveal.style.setProperty("--s", 1.25 - 0.25 * e);
+    reveal.style.setProperty("--y", `${-6 * p}%`);
+    // Statement: words turn on between 85% and 35% of the screen height.
+    const sr = st.getBoundingClientRect();
+    const sp = Math.min(1, Math.max(0, (vh * 0.85 - sr.top) / (sr.height + vh * 0.5)));
+    const n = Math.round(sp * words.length);
+    words.forEach((w, i) => w.classList.toggle("on", i < n));
+  }
+  if (!reduce) { addEventListener("scroll", () => requestAnimationFrame(frame), { passive: true }); frame(); }
+
+  // Numbers count up once, when they come into view.
+  const io = new IntersectionObserver(es => es.forEach(en => {
+    if (!en.isIntersecting) return;
+    const el = en.target, to = +el.dataset.count;
+    io.unobserve(el);
+    if (reduce) { el.textContent = to.toLocaleString("en"); return; }
+    const t0 = performance.now(), d = 1400;
+    (function tick(t) {
+      const k = Math.min(1, (t - t0) / d), v = Math.round(to * (1 - Math.pow(1 - k, 4)));
+      el.textContent = v.toLocaleString("en");
+      if (k < 1) requestAnimationFrame(tick);
+    })(t0);
+  }), { threshold: 0.6 });
+  document.querySelectorAll("[data-count]").forEach(el => io.observe(el));
+</script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches && window.Lenis) {
+    const lenis = new Lenis({ lerp: 0.1 });
+    (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
+  }
+</script>
+</body>
+</html>

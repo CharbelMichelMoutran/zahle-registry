@@ -15,6 +15,8 @@ Family's springy, friendly trays and Raycast's crisp precision, in light and war
 
 ### Heavy inspiration: the Beirut Urban Lab family (owner, 16 Nov 2026)
 
+> **Dropped by the owner, 23 Nov 2026.** The Beirut Urban Lab family is no longer a reference. The new references are in `docs/inspiration.md` (award-level studio sites, led by Exo Ape). Rules below that are already built (the hatch for "not yet inspected", micro-labels, the map as hero) stay until the new UI pass replaces them.
+
 The owner wants these relied on heavily: the **Beirut Built Environment Database**, **Precarious Homes**, and the **Beirut Urban Lab** home page (the lab behind the post-blast damage maps). They are Lebanese, built by researchers and engineers, and they take buildings seriously. Reviewed in a browser on 16 Nov 2026. What they teach us:
 
 | Seen on | What we take | What we leave |
@@ -224,7 +226,7 @@ New references from the owner: Open Map Lebanon's Beirut Recovery Map, Beirut Ur
 | Map base | **Terrain feel, like Stamen Terrain, from a free source with no account** (for example a tinted hillshade under a pale base, or OpenTopoMap toned down). Sannine and the valley should be felt, but the map stays quiet so the footprints carry the colour. No Stadia account. |
 | Attention on the engineer map | **Red (imminent risk) buildings stand out**: stronger outline, still visible when zoomed out. Everything else calmer. |
 | Engineer side panel | **Removed by the owner, 17 Nov 2026; on the Later list in `plan.md`. Do not build.** Was: Laptop: a slim left panel with (1) a **status summary**: counts per rating plus "Not yet inspected", tap a count to filter the map; (2) **recent activity**: the latest 5 to 8 reports by **all engineers** (building, rating chip with word, engineer, date), click to fly there; (3) an **always-on legend** (colours, hatch, Claude's orange ring) at the bottom. The building tray opens over the panel. Phone: the panel becomes a bottom sheet. |
-| Landing page (new, public) | Calm and serious, like Beirut Urban Lab. Serif headline (draft: "Every building in Zahle, remembered."), one line on the problem, a map-visual hero (terrain and footprints, no real ratings or building data), product visuals, then "Sign in as engineer" and "Sign in as resident". No photographs. No demo wording. |
+| Landing page (new, public) | *(Superseded 23 Nov 2026: the landing page follows `docs/inspiration.md`.)* Calm and serious, like Beirut Urban Lab. Serif headline (draft: "Every building in Zahle, remembered."), one line on the problem, a map-visual hero (terrain and footprints, no real ratings or building data), product visuals, then "Sign in as engineer" and "Sign in as resident". No photographs. No demo wording. |
 | Arabic type | **Free fonts close in spirit to Lebanese type design.** A calligraphic-rooted Google font (for example Noto Naskh Arabic or Readex Pro; proposed in the mockup) for the wordmark and display. IBM Plex Sans Arabic stays for body text. |
 | Accent | A **deeper, calmer river blue** replaces `#2F7CF6`; it must read well on terrain and pass contrast. Exact hex chosen in the mockup. |
 | Motion | Springy but restrained (section 6). One hero entrance on the landing page. Nothing loops (except Claude's flag pulse, which stops under reduced motion). |

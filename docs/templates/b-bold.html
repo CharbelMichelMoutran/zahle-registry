@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Template B · Bold</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Amiri:wght@700&display=swap" rel="stylesheet">
+<style>
+  /* Template B: after Lando Norris and basement. Dark, loud, condensed type, a torch over the map, a ticker. */
+  :root {
+    --bg: #0D1014;
+    --ink: #F2F1EC;
+    --muted: #8D939C;
+    --line: #262B33;
+    --hi: #D7F25B;           /* highlight, the one loud colour */
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --gutter: clamp(16px, 4vw, 48px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; }
+  body { background: var(--bg); color: var(--ink); font-family: "Inter Tight", system-ui, sans-serif; font-size: 17px; line-height: 1.5; overflow-x: clip; }
+  a { color: inherit; text-decoration: none; }
+  .display { font-family: "Anton", Impact, sans-serif; text-transform: uppercase; font-weight: 400; letter-spacing: -0.005em; line-height: 0.86; }
+  .mono { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+  .ar { font-family: "Amiri", serif; font-weight: 700; direction: rtl; }
+
+  nav { position: fixed; inset: 0 0 auto; z-index: 20; background: linear-gradient(var(--bg) 55%, transparent); display: flex; justify-content: space-between; align-items: center; padding: 18px var(--gutter); }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.01em; }
+  .brand .ar { font-size: 26px; color: var(--hi); line-height: 1; }
+  .cta { position: relative; display: inline-flex; align-items: center; gap: 10px; height: 46px; padding: 0 22px; border-radius: 999px; background: var(--hi); color: var(--bg); font-weight: 600; font-size: 15px; overflow: hidden; transition: transform 0.4s var(--ease); }
+  .cta .t { display: grid; overflow: hidden; height: 1.3em; }
+  .cta .t span { transition: transform 0.45s var(--ease); line-height: 1.3; }
+  @media (hover: hover) { .cta:hover .t span { transform: translateY(-100%); } }
+  .cta:active { transform: scale(0.97); }
+  .ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+
+  /* Hero: dark map, lit up under the cursor */
+  .hero { position: relative; height: 100svh; min-height: 620px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 var(--gutter) 28px; }
+  .map { position: absolute; inset: 0; }
+  .map img { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover; filter: invert(1) hue-rotate(180deg) brightness(0.8) contrast(1.3); transform: translate(var(--mx, 0), var(--my, 0)); transition: transform 1.4s var(--ease); }
+  .map .lit { filter: invert(1) hue-rotate(180deg) brightness(1.15) contrast(1.5) saturate(0); -webkit-mask-image: radial-gradient(circle var(--rad, 220px) at var(--cx, 60%) var(--cy, 45%), #000 0%, transparent 100%); mask-image: radial-gradient(circle var(--rad, 220px) at var(--cx, 60%) var(--cy, 45%), #000 0%, transparent 100%); }
+  .map::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg) 4%, transparent 55%), linear-gradient(to bottom, var(--bg), transparent 22%); }
+  .hero h1 { position: relative; font-size: clamp(76px, 15.5vw, 280px); }
+  .hero h1 .hl { color: var(--hi); }
+  .hero h1 .row { display: block; overflow: hidden; padding-bottom: 0.05em; margin-bottom: -0.05em; }
+  .hero h1 .row span { display: inline-block; transform: translateY(100%) skewY(6deg); animation: up 1s var(--ease) forwards; }
+  .hero h1 .row:nth-child(2) span { animation-delay: 0.09s; }
+  .hero h1 .row:nth-child(3) span { animation-delay: 0.18s; }
+  @keyframes up { to { transform: none; } }
+  .hero-bar { position: relative; display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .hero-bar p { max-width: 30rem; color: var(--muted); font-size: 16px; }
+
+  /* Ticker */
+  .ticker { border-block: 1px solid var(--line); overflow: hidden; padding: 18px 0; }
+  .ticker-track { display: flex; gap: 48px; width: max-content; animation: tick 38s linear infinite; }
+  .ticker-track span { font-family: "Anton", sans-serif; text-transform: uppercase; font-size: clamp(28px, 4vw, 56px); line-height: 1; white-space: nowrap; display: flex; align-items: center; gap: 48px; }
+  .ticker-track i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+  @keyframes tick { to { transform: translateX(-50%); } }
+
+  section { padding: clamp(80px, 14vh, 150px) var(--gutter); }
+  .head { display: flex; justify-content: space-between; margin-bottom: 40px; }
+
+  /* Big list rows that fill on hover */
+  .rows { list-style: none; border-top: 1px solid var(--line); }
+  .rows a { position: relative; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; padding: clamp(20px, 3vw, 36px) 0; border-bottom: 1px solid var(--line); overflow: hidden; isolation: isolate; }
+  .rows a::before { content: ""; position: absolute; inset: 0 calc(var(--gutter) * -1); background: var(--hi); transform: scaleY(0); transform-origin: bottom; transition: transform 0.55s var(--ease); z-index: -1; }
+  .rows .display { font-size: clamp(56px, 10vw, 170px); transition: color 0.4s var(--ease), transform 0.6s var(--ease); }
+  .rows .mono { transition: color 0.4s var(--ease); text-align: right; }
+  @media (hover: hover) {
+    .rows a:hover::before { transform: scaleY(1); }
+    .rows a:hover .display { color: var(--bg); transform: translateX(clamp(8px, 2vw, 28px)); }
+    .rows a:hover .mono { color: var(--bg); }
+  }
+
+  /* Three cards */
+  .grid { display: grid; gap: 12px; }
+  @media (min-width: 860px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  .tile { background: #14181E; border: 1px solid var(--line); border-radius: 20px; padding: 28px; min-height: 300px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.6s var(--ease), border-color 0.4s; }
+  @media (hover: hover) { .tile:hover { transform: translateY(-6px) rotate(-0.6deg); border-color: var(--hi); } }
+  .tile .display { font-size: clamp(40px, 4vw, 60px); }
+  .tile p { color: var(--muted); max-width: 28ch; }
+
+  .stat { display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .stat div { display: flex; justify-content: space-between; align-items: baseline; padding: 20px 0; border-bottom: 1px solid var(--line); }
+  .stat b { font-family: "Anton", sans-serif; font-weight: 400; font-size: clamp(64px, 11vw, 190px); line-height: 0.9; font-variant-numeric: tabular-nums; }
+
+  footer { padding: 0 var(--gutter) 24px; overflow: hidden; }
+  footer .ar { display: block; font-size: clamp(160px, 40vw, 640px); line-height: 0.75; color: var(--hi); text-align: center; margin-top: 40px; }
+  footer .row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-top: 18px; border-top: 1px solid var(--line); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero h1 .row span { animation: none; transform: none; }
+    .ticker-track { animation: none; }
+    .map img { transition: none; transform: none; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="#"><span class="ar">زحلة</span><span>Zahle on Record</span></a>
+  <a class="cta" href="#maps"><span class="t"><span>Open a map</span><span>Open a map</span></span></a>
+</nav>
+
+<header class="hero" id="hero">
+  <div class="map" aria-hidden="true">
+    <img src="../../public/landing/zahle-map-2400.webp" alt="">
+    <img class="lit" src="../../public/landing/zahle-map-2400.webp" alt="">
+  </div>
+  <h1 class="display">
+    <span class="row"><span>Every building</span></span>
+    <span class="row"><span>in Zahle,</span></span>
+    <span class="row"><span class="hl">inspected.</span></span>
+  </h1>
+  <div class="hero-bar">
+    <p>In Lebanon, building records sit on paper no one can reach. Every inspection starts from scratch. We made records accessible so Zahle could be the first city to adequately meet its citizens' needs.</p>
+    <span class="mono">33.85° N · 35.90° E · 945 m</span>
+  </div>
+</header>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>Good condition <i style="background:#1FA971"></i> Needs some work <i style="background:#F5A524"></i> Imminent risk <i style="background:#D6402B"></i> Not yet inspected <i style="background:#A3A8B3"></i></span>
+    <span>Good condition <i style="background:#1FA971"></i> Needs some work <i style="background:#F5A524"></i> Imminent risk <i style="background:#D6402B"></i> Not yet inspected <i style="background:#A3A8B3"></i></span>
+  </div>
+</div>
+
+<section id="maps">
+  <div class="head"><span class="mono">Choose a map</span><span class="mono">One shared record</span></div>
+  <ul class="rows">
+    <li><a href="#"><span class="display">Engineer</span><span class="mono">For civil<br>engineers →</span></a></li>
+    <li><a href="#"><span class="display">EMT</span><span class="mono">For the<br>Red Cross →</span></a></li>
+  </ul>
+</section>
+
+<section>
+  <div class="head"><span class="mono">The record</span><span class="mono">No engineer starts from scratch</span></div>
+  <div class="grid">
+    <div class="tile"><span class="mono">01</span><div><h3 class="display">One history</h3><p>Every inspection is added to the building's history. Nothing is overwritten.</p></div></div>
+    <div class="tile"><span class="mono">02</span><div><h3 class="display">Colour with words</h3><p>A rating always comes with its word and the engineer's remarks.</p></div></div>
+    <div class="tile"><span class="mono">03</span><div><h3 class="display">Its own view</h3><p>Engineers see every building. A resident sees only their own.</p></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="stat">
+    <div><b data-count="4595">0</b><span class="mono">Buildings</span></div>
+    <div><b data-count="945">0</b><span class="mono">Metres up</span></div>
+  </div>
+</section>
+
+<footer>
+  <span class="ar" aria-hidden="true">زحلة</span>
+  <div class="row"><span class="mono">Zahle on Record</span><span class="mono">Map data © OpenStreetMap contributors · Terrain: SRTM (USGS) via Mapzen</span></div>
+</footer>
+
+<script>
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const hero = document.getElementById("hero");
+  const map = hero.querySelector(".map");
+  const imgs = map.querySelectorAll("img");
+
+  // The torch follows the pointer; the map drifts a little the other way.
+  if (!reduce && matchMedia("(hover: hover)").matches) {
+    let tx = 0.6, ty = 0.45, x = tx, y = ty;
+    hero.addEventListener("pointermove", e => { const r = hero.getBoundingClientRect(); tx = (e.clientX - r.left) / r.width; ty = (e.clientY - r.top) / r.height; });
+    (function loop() {
+      x += (tx - x) * 0.12; y += (ty - y) * 0.12;
+      map.style.setProperty("--cx", `${x * 100}%`);
+      map.style.setProperty("--cy", `${y * 100}%`);
+      imgs.forEach(i => { i.style.setProperty("--mx", `${(0.5 - x) * 24}px`); i.style.setProperty("--my", `${(0.5 - y) * 24}px`); });
+      requestAnimationFrame(loop);
+    })();
+  } else {
+    // Touch: the torch slowly wanders on its own.
+    if (!reduce) (function wander(t) {
+      map.style.setProperty("--cx", `${50 + Math.sin(t / 2200) * 22}%`);
+      map.style.setProperty("--cy", `${42 + Math.cos(t / 2900) * 12}%`);
+      requestAnimationFrame(wander);
+    })(0);
+  }
+
+  const io = new IntersectionObserver(es => es.forEach(en => {
+    if (!en.isIntersecting) return;
+    const el = en.target, to = +el.dataset.count; io.unobserve(el);
+    if (reduce) { el.textContent = to.toLocaleString("en"); return; }
+    const t0 = performance.now();
+    (function tick(t) { const k = Math.min(1, (t - t0) / 1300); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 4))).toLocaleString("en"); if (k < 1) requestAnimationFrame(tick); })(t0);
+  }), { threshold: 0.5 });
+  document.querySelectorAll("[data-count]").forEach(el => io.observe(el));
+</script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches && window.Lenis) {
+    const lenis = new Lenis({ lerp: 0.1 });
+    (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
+  }
+</script>
+</body>
+</html>
