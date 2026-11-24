@@ -17,9 +17,10 @@ A running list of websites the owner likes, for the portfolio UI pass. Each entr
 ## Owner's verdicts
 
 - **Liked (23 Nov):** [basement.studio](https://basement.studio/) and [Locomotive](https://locomotive.ca/en): bold, playful, motion-heavy studio sites with big type. This is the direction for the landing page.
+- **Liked from batch 2 (23 Nov):** [Exo Ape](https://exoape.com) (**the favourite**), [Lusion](https://lusion.co), [Unseen Studio](https://unseen.co), [14islands](https://14islands.com). Not picked: Active Theory, Igloo Inc, darkroom.engineering, Obys, Cuberto, Dogstudio.
 - **Rejected (23 Nov), "ugly":** Beirut Urban Lab, Public Works Studio, Arab Center for Architecture, Forensic Architecture, Hashim Sarkis Studios, Lina Ghotmeh, Felt, Rauno. Plain, archive-style and quiet looks are out for the portfolio landing page. (Beirut Urban Lab is still in `DESIGN.md` section 1; owner to decide whether to drop it there too.)
 
-## Batch 2, in the basement / Locomotive vein (opened 23 Nov, waiting on verdicts)
+## Batch 2, in the basement / Locomotive vein (opened 23 Nov)
 
 | Site | What it is |
 |---|---|
@@ -33,6 +34,21 @@ A running list of websites the owner likes, for the portfolio UI pass. Each entr
 | [Unseen Studio](https://unseen.co) | Brand and digital studio, Bristol. |
 | [14islands](https://14islands.com) | Stockholm studio: playful, smooth. |
 | [Exo Ape](https://exoape.com) | Amsterdam studio: big type, image transitions. |
+
+## Batch 3, final round, in the Exo Ape vein (opened 23 Nov, waiting on verdicts)
+
+| Site | What it is |
+|---|---|
+| [Dennis Snellenberg](https://dennissnellenberg.com) | Amsterdam designer's portfolio: big type, magnetic buttons, smooth page changes. |
+| [Lando Norris](https://www.landonorris.com) | F1 driver's site, a recent award winner: bold type and motion. |
+| [Cappen](https://www.cappen.com) | Studio site: huge type, image reveals. |
+| [Aristide Benoist](https://aristidebenoist.com) | Developer portfolio known for silky WebGL image transitions. |
+| [Shed](https://shed.design) | Awwwards Site of the Day: spatial storytelling and fluid motion. |
+| [Immersive Garden](https://immersive-g.com) | Paris studio: cinematic 3D. |
+| [Oddcommon](https://www.oddcommon.com) | Studio site: playful, editorial. |
+| [Aino](https://aino.agency) | Studio site: clean, big-type, motion-led. |
+| [Studio Size](https://studio-size.com) | Studio site. |
+| [Joffrey Spitzer](https://www.joffreyspitzer.com) | Designer portfolio: editorial layout, smooth transitions. |
 
 ## Next
 
