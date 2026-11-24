@@ -14,25 +14,25 @@ A running list of websites the owner likes, for the portfolio UI pass. Each entr
 | [MakeReign](https://www.makereign.com/) | "A digital interface company", Cape Town, Ireland, Amsterdam. | Aeonik in three weights. Soft greys (`#D9DEDC`, `#EEF1EF`) with near-black `#202023` and one pale yellow highlight `#FBFDA4`. Smooth scrolling (Lenis). | — | Read, 23 Nov. No "Academy" page found: owner to send the link. |
 | [TB.D](https://tbd.studio/) | Multidisciplinary studio: interiors, furniture, identity, print, digital. | Akzidenz-Grotesk only, regular and italic. A tiny, quiet site. Owner to confirm this is the right "TBD". | — | Read, 23 Nov |
 
-## Suggested: Beirut, buildings and cities
+## Owner's verdicts
 
-| Site | Why it fits |
+- **Liked (23 Nov):** [basement.studio](https://basement.studio/) and [Locomotive](https://locomotive.ca/en): bold, playful, motion-heavy studio sites with big type. This is the direction for the landing page.
+- **Rejected (23 Nov), "ugly":** Beirut Urban Lab, Public Works Studio, Arab Center for Architecture, Forensic Architecture, Hashim Sarkis Studios, Lina Ghotmeh, Felt, Rauno. Plain, archive-style and quiet looks are out for the portfolio landing page. (Beirut Urban Lab is still in `DESIGN.md` section 1; owner to decide whether to drop it there too.)
+
+## Batch 2, in the basement / Locomotive vein (opened 23 Nov, waiting on verdicts)
+
+| Site | What it is |
 |---|---|
-| [Beirut Urban Lab](https://beiruturbanlab.com/) | Already our main reference (`DESIGN.md` section 1). |
-| [Public Works Studio](https://publicworksstudio.com/) | Beirut urban-justice studio. Arabic-first, bilingual site about housing and the city. Closest in spirit to us. |
-| [Arab Center for Architecture](https://arab-architecture.org/) | Beirut archive of modern Arab buildings: how to present buildings as a serious record. |
-| [Forensic Architecture](https://forensic-architecture.org/) | Did the Beirut port explosion investigation. Evidence, timelines and models presented with authority. |
-| [Hashim Sarkis Studios](https://www.hashimsarkis.com/) | Lebanese architect, curated the 2021 Venice Architecture Biennale. Calm architecture portfolio. |
-| [Lina Ghotmeh](https://www.linaghotmeh.com/) | Lebanese architect (Stone Garden, Beirut). Material and stone, very restrained. |
-
-## Suggested: modern craft and maps
-
-| Site | Why it fits |
-|---|---|
-| [Felt](https://felt.com/) | The most polished modern map product. Map controls, panels and layers done well. |
-| [Rauno Freiberg](https://rauno.me/) | Interaction designer (Vercel). Small, precise motion and detail. |
-| [basement.studio](https://basement.studio/) | Award-level studio site: bold, playful, technical. Good for the landing page only. |
-| [Locomotive](https://locomotive.ca/en) | Montreal agency: smooth scrolling and editorial layout. Landing page only. |
+| [Lusion](https://lusion.co) | 3D and WebGL studio, Bristol. |
+| [Active Theory](https://activetheory.net) | Immersive web studio, Los Angeles. |
+| [Igloo Inc](https://igloo.inc) | Full 3D scrolling site, widely awarded. |
+| [darkroom.engineering](https://darkroom.engineering) | Formerly Studio Freight, makers of Lenis smooth scroll. |
+| [Obys](https://obys.agency) | Ukrainian agency: editorial type and bold motion. |
+| [Cuberto](https://cuberto.com) | Agency known for cursor and hover effects. |
+| [Dogstudio](https://dogstudio.co) | Studio with a 3D dog hero. |
+| [Unseen Studio](https://unseen.co) | Brand and digital studio, Bristol. |
+| [14islands](https://14islands.com) | Stockholm studio: playful, smooth. |
+| [Exo Ape](https://exoape.com) | Amsterdam studio: big type, image transitions. |
 
 ## Next
 
