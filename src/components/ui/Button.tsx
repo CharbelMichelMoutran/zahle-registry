@@ -2,7 +2,7 @@
 
 import { motion, type HTMLMotionProps } from "motion/react";
 import { springSnappy } from "@/lib/motion";
-import { buttonClass, type ButtonVariant } from "./button-styles";
+import { buttonProps, type ButtonVariant } from "./button-styles";
 
 /** Every button presses to 0.97 and springs back (DESIGN.md section 6). Looks: ./button-styles.ts. */
 export function Button({
@@ -15,7 +15,7 @@ export function Button({
       type="button"
       whileTap={props.disabled ? undefined : { scale: 0.97 }}
       transition={springSnappy}
-      className={buttonClass(variant, className)}
+      {...buttonProps(variant, className)}
       {...props}
     />
   );

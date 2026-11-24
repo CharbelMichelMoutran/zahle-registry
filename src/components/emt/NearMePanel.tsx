@@ -106,9 +106,10 @@ export function NearMePanel({
   }, [windowId, onResult]);
 
   if (folded && found) {
+    // Under the building tray (z-1100), so a full-screen tray covers it.
     return (
-      <div className="absolute top-3 right-3 z-[1100] md:top-4 md:right-4">
-        <Button variant="secondary" onClick={() => setFolded(false)} className="shadow-soft">
+      <div className="absolute top-3 right-3 z-[1050] md:top-4 md:right-4">
+        <Button variant="secondary" onClick={() => setFolded(false)}>
           Back to the list ({found.rows.length})
         </Button>
       </div>
@@ -148,9 +149,7 @@ export function NearMePanel({
                 role="radio"
                 aria-checked={windowId === w.id}
                 onClick={() => setWindowId(w.id)}
-                className={`min-h-9 rounded-chip border px-3 text-micro font-medium text-ink transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
-                  windowId === w.id ? "border-accent bg-accent-soft" : "border-line bg-surface hover:bg-surface-soft"
-                }`}
+                className="zr-chip"
               >
                 {w.label}
               </button>

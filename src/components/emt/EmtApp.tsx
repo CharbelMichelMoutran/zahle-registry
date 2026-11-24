@@ -13,7 +13,7 @@ import { LocateMenu } from "./LocateMenu";
 import MapView, { type MapViewHandle } from "./MapView";
 import { NearMePanel } from "./NearMePanel";
 import { Button, IconButton } from "../ui/Button";
-import { buttonClass } from "../ui/button-styles";
+import { buttonProps } from "../ui/button-styles";
 import { LinkButton } from "../ui/LinkButton";
 import { Logo } from "../ui/Logo";
 
@@ -75,7 +75,7 @@ export default function EmtApp() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="flex h-dvh flex-col overflow-hidden bg-ground">
-        <header className="z-[1200] flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface px-4">
+        <header className="z-[1200] flex h-16 shrink-0 items-center gap-3 border-b border-line bg-surface px-4 md:px-6">
           {/* Below 420px the buttons need the room: the logo is kept for screen readers only. */}
           <h1 className="shrink-0 max-[419px]:sr-only">
             <Logo cut="small" className="h-8" />
@@ -86,14 +86,14 @@ export default function EmtApp() {
               type="button"
               aria-expanded={nearOpen}
               onClick={() => (nearOpen ? closeNear() : setNearOpen(true))}
-              className={buttonClass("secondary", "shrink-0")}
+              {...buttonProps("secondary")}
             >
               Near me
             </button>
             <LocateMenu onLocate={locate} />
             {LOGIN_FROZEN ? (
               <>
-                <span className="hidden text-body font-medium whitespace-nowrap text-ink sm:inline">{MAP_LABEL.emt}</span>
+                <span className="hidden px-2 text-micro whitespace-nowrap text-muted sm:inline">{MAP_LABEL.emt}</span>
                 <LinkButton href="/" variant="secondary">Switch map</LinkButton>
               </>
             ) : (

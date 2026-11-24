@@ -46,7 +46,7 @@ export default function LoginForm() {
     <form onSubmit={submit} noValidate className="space-y-4">
       <div>
         <p className="micro-label">Engineer</p>
-        <h1 className="mt-1 font-serif text-heading font-medium text-ink">Sign in</h1>
+        <h1 className="mt-1 font-serif text-[34px]/[38px] text-ink">Sign in</h1>
       </div>
       {expired && (
         <p role="status" className="rounded-control bg-surface-soft px-3 py-2.5 text-body text-ink">

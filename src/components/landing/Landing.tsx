@@ -110,6 +110,18 @@ function Placeholder({ label, ratio = "4 / 3", className = "" }: { label: string
   );
 }
 
+/** A real screen from the product on a soft panel, with what it shows under it. */
+function Shot({ src, alt, width, height, credit, phone = false }: { src: string; alt: string; width: number; height: number; credit: string; phone?: boolean }) {
+  return (
+    <figure className="lp-shot" data-phone={phone || undefined}>
+      <div className="lp-shot-panel">
+        <Image src={src} alt={alt} width={width} height={height} sizes={phone ? "300px" : "400px"} />
+      </div>
+      <figcaption>{credit}</figcaption>
+    </figure>
+  );
+}
+
 /** A small numbered badge that opens the source of the fact beside it. */
 function Src({ n }: { n: number }) {
   const s = SOURCES.find((x) => x.id === n);
@@ -299,6 +311,16 @@ function Solution() {
           </Reveal>
         ))}
       </div>
+      <div className="lp-triage lp-triage-rev">
+        <Reveal delay={110}>
+          <Shot {...SOLUTION.nearMe.shot} phone />
+        </Reveal>
+        <Reveal className="lp-triage-text">
+          <span className="lp-label">{SOLUTION.nearMe.label}</span>
+          <h3>{SOLUTION.nearMe.title}</h3>
+          <p>{SOLUTION.nearMe.text}</p>
+        </Reveal>
+      </div>
       <Reveal className="lp-key">
         <span>
           <i className="lp-key-fill" /> Engineer report fills the building
@@ -347,12 +369,13 @@ function ClaudeSection() {
 
       <div className="lp-triage">
         <Reveal className="lp-triage-text">
-          <span className="lp-tag">{c.triage.tag}</span>
           <h3>{c.triage.title}</h3>
-          <p>{c.triage.text}</p>
+          {c.triage.text.map((t) => (
+            <p key={t}>{t}</p>
+          ))}
         </Reveal>
         <Reveal delay={110}>
-          <Placeholder label={c.triage.placeholder} ratio="16 / 10" />
+          <Shot {...c.triage.shot} />
         </Reveal>
       </div>
 
@@ -368,6 +391,22 @@ function ClaudeSection() {
             ))}
           </ol>
           <p className="lp-ranking-note">{PRIORITY_NOTE}</p>
+        </Reveal>
+      </div>
+
+      <div className="lp-ranking">
+        <Reveal className="lp-triage-text">
+          <h3>{c.ranking.bias.title}</h3>
+          <p>{c.ranking.bias.lead}</p>
+        </Reveal>
+        <Reveal delay={110}>
+          <ul className="lp-bias">
+            {c.ranking.bias.points.map((b) => (
+              <li key={b.title}>
+                <strong>{b.title}</strong> {b.text}
+              </li>
+            ))}
+          </ul>
         </Reveal>
       </div>
     </Chapter>

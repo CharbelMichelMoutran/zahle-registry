@@ -78,9 +78,10 @@ export function AskPanel({
   }
 
   if (folded && result) {
+    // Under the building tray (z-1100), so a full-screen tray covers it.
     return (
-      <div className="absolute top-3 right-3 z-[1100] md:top-4 md:right-4">
-        <Button variant="secondary" onClick={() => setFolded(false)} className="shadow-soft">
+      <div className="absolute top-3 right-3 z-[1050] md:top-4 md:right-4">
+        <Button variant="secondary" onClick={() => setFolded(false)}>
           Back to results ({result.total})
         </Button>
       </div>
@@ -132,7 +133,7 @@ export function AskPanel({
                 type="button"
                 onClick={() => run({ preset: p.id })}
                 disabled={status.kind === "busy"}
-                className="min-h-9 rounded-chip border border-line bg-surface px-3 text-micro font-medium text-ink transition-colors hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-50"
+                className="zr-chip"
               >
                 {p.label}
               </button>

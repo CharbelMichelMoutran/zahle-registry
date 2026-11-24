@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { requireEngineer } from "@/lib/api-auth";
 import { loadBuildingFacts } from "@/lib/building-facts";
 import { claude, claudeAllowed, readQuery } from "@/lib/claude";
+import { debriefLines } from "@/lib/debrief";
 import type { BuildingFacts } from "@/lib/priority";
 import { isQueryPreset, type QueryResult } from "@/lib/query";
 import { describeFilter, fromClaude, PRESET_FILTERS, runFilter, type Filter } from "@/lib/query-filter";
@@ -76,7 +77,13 @@ export async function POST(req: NextRequest) {
         .map((b) => ({ id: b.id, name: "", report: null, emt: null, reportCount: 0, assessmentCount: 0 }));
     }
     const { total, rows } = runFilter(facts, filter, () => others);
-    const result: QueryResult = { reading: describeFilter(filter), total, rows };
+    // Claude's summary of each building's past reports rides along; the order stays the formula's.
+    const lines = await debriefLines(rows.map((r) => r.id)).catch(() => new Map<string, string>());
+    const result: QueryResult = {
+      reading: describeFilter(filter),
+      total,
+      rows: rows.map((r) => ({ ...r, claude: lines.get(r.id) ?? null })),
+    };
     return json({ result, claudeStatus: "ok" });
   } catch (err) {
     console.error("query failed:", err instanceof Error ? err.message : err);

@@ -205,7 +205,7 @@ function Progress({ step, onGo }: { step: Step; onGo: (s: Step) => void }) {
 function Heading({ title, lead }: { title: string; lead?: string }) {
   return (
     <div>
-      <h2 className="font-serif text-title font-medium text-ink">{title}</h2>
+      <h2 className="font-serif text-[26px]/[30px] text-ink">{title}</h2>
       {lead && <p className="mt-1 text-body text-muted">{lead}</p>}
     </div>
   );
@@ -454,7 +454,7 @@ function StopScreen({ draft, onUndo, onSaved }: { draft: Draft; onUndo: () => vo
   return (
     <div role="alert" className="space-y-5 py-2">
       <div className="space-y-2 rounded-card bg-rooftile px-4 py-5 text-white">
-        <p className="font-serif text-[28px]/[32px] font-medium">{STOP_ORDER}</p>
+        <p className="text-[28px]/[32px] font-semibold">{STOP_ORDER}</p>
         <p className="text-body">Danger: {draft.stopped!.check.replace(/^[A-Z]\d+: /, "")}</p>
       </div>
       <ul className="space-y-1 rounded-card border border-line px-4 py-3">

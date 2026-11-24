@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import { springSnappy } from "@/lib/motion";
-import { buttonClass, type ButtonVariant } from "./button-styles";
+import { buttonProps, type ButtonVariant } from "./button-styles";
 
 const MotionLink = motion.create(Link);
 
@@ -20,7 +20,7 @@ export function LinkButton({
   children: React.ReactNode;
 }) {
   return (
-    <MotionLink href={href} whileTap={{ scale: 0.97 }} transition={springSnappy} className={buttonClass(variant, className)}>
+    <MotionLink href={href} whileTap={{ scale: 0.97 }} transition={springSnappy} {...buttonProps(variant, className)}>
       {children}
     </MotionLink>
   );

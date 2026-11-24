@@ -320,7 +320,7 @@ function Preview({ record, debrief, onMaximize, celebrateKey }: Props & { record
       ) : (
         <div className="space-y-3">
           <NotYetInspectedBadge size="large" />
-          <h2 className="font-serif text-title font-medium text-ink">Not assessed yet. Start the first assessment.</h2>
+          <h2 className="font-serif text-[26px]/[30px] text-ink">Not assessed yet. Start the first assessment.</h2>
         </div>
       )}
       {debrief && <DebriefCard text={debrief.text} />}
@@ -396,7 +396,7 @@ function FullView(
     return (
       <div className="flex flex-col items-center py-8 text-center">
         <ArchMark className="h-10 w-9 text-muted" />
-        <p className="mt-3 font-serif text-title font-medium text-ink">Not assessed yet. Start the first assessment.</p>
+        <p className="mt-3 font-serif text-[26px]/[30px] text-ink">Not assessed yet. Start the first assessment.</p>
         <Button className="mt-5" onClick={() => props.onTab("create")}>
           Start assessment
         </Button>

@@ -7,12 +7,12 @@
  */
 @theme {
   /* Colours */
-  --color-ground: #f6f7f8; /* cool off-white (DESIGN.md 15) */
+  --color-ground: #ffffff; /* the landing page's white (plan item 28, owner 23 Nov) */
   --color-surface: #ffffff;
-  --color-surface-soft: #eff1f4;
-  --color-line: #e2e5e9;
+  --color-surface-soft: #f3f5f7;
+  --color-line: #e3e7ec;
   --color-line-strong: #cfd4da; /* secondary button edge */
-  --color-ink: #1f2a37;
+  --color-ink: #0f1720;
   --color-muted: #5b6472;
   --color-accent: #1e5a8c; /* Berdawni dusk: 7.25:1 with white text */
   --color-accent-strong: #174a70; /* pressed and hover */
@@ -30,10 +30,11 @@
   --color-attention-soft: #fdf1e7;
 
   /* Type: 13 / 15 / 17 / 20 / 24 / 32 */
-  /* IBM Plex Sans for UI and body, IBM Plex Serif for display (DESIGN.md 15). Arabic falls back to Plex Sans Arabic. */
-  --font-sans: var(--nf-plex-sans), var(--nf-arabic), system-ui, sans-serif;
-  --font-heading: var(--nf-plex-sans), var(--nf-arabic), system-ui, sans-serif;
-  --font-serif: var(--nf-plex-serif), var(--nf-arabic), Georgia, serif;
+  /* The landing page's type, for the whole product (owner, 23 Nov): Inter Tight for UI and body,
+     Instrument Serif for display lines. Arabic falls back to Plex Sans Arabic. */
+  --font-sans: var(--nf-inter-tight), var(--nf-arabic), system-ui, sans-serif;
+  --font-heading: var(--nf-inter-tight), var(--nf-arabic), system-ui, sans-serif;
+  --font-serif: var(--nf-instrument), var(--nf-arabic), Georgia, serif;
   --font-arabic: var(--nf-arabic), system-ui, sans-serif;
   --text-micro: 13px;
   --text-micro--line-height: 18px;
@@ -53,9 +54,9 @@
 
   /* Shape and depth: shadows stay under 0.08 alpha */
   --radius-tray: 24px;
-  --radius-card: 12px;
+  --radius-card: 16px;
   --radius-chip: 6px; /* rating chips, small tags */
-  --radius-control: 8px; /* buttons, inputs, segmented controls */
+  --radius-control: 10px; /* inputs, segmented controls; buttons are pills (.zr-btn) */
   --shadow-tray: 0 8px 32px rgb(31 42 55 / 0.07), 0 1px 2px rgb(31 42 55 / 0.04);
   --shadow-soft: 0 2px 8px rgb(31 42 55 / 0.05);
 }
@@ -76,6 +77,119 @@ h3 {
 
 p {
   text-wrap: pretty;
+}
+
+/*
+ * Buttons: the landing page's pills (landing.css .lp-pill), for the whole
+ * product. 44px tall, a fine ink ring, and the fill sweeps up from below on
+ * hover. Primary is ink, its sweep river blue. In a layer, so a caller's
+ * utilities (w-full, h-9) still win.
+ */
+@layer components {
+  .zr-btn {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    user-select: none;
+    touch-action: manipulation;
+    color: var(--color-ink);
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-ink);
+    transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .zr-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--color-ink);
+    transform: translateY(101%);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .zr-btn[data-variant="primary"] {
+    background: var(--color-ink);
+    color: #fff;
+  }
+  .zr-btn[data-variant="primary"]::before {
+    background: var(--color-accent);
+  }
+  .zr-btn[data-variant="ghost"] {
+    background: transparent;
+    box-shadow: none;
+    color: var(--color-muted);
+  }
+  .zr-btn[data-variant="ghost"]::before {
+    background: var(--color-surface-soft);
+  }
+  .zr-btn[aria-expanded="true"] {
+    background: var(--color-ink);
+    color: #fff;
+  }
+  @media (hover: hover) {
+    .zr-btn:not(:disabled):hover::before {
+      transform: translateY(0);
+    }
+    .zr-btn:not(:disabled):hover {
+      color: #fff;
+    }
+    .zr-btn[data-variant="ghost"]:not(:disabled):hover {
+      color: var(--color-ink);
+    }
+  }
+  .zr-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  /* Small pills for ready-made searches and choices; the chosen one is ink. */
+  .zr-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-ink);
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-line-strong);
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+  }
+  .zr-chip[aria-checked="true"] {
+    background: var(--color-ink);
+    color: #fff;
+    box-shadow: none;
+  }
+  @media (hover: hover) {
+    .zr-chip:not(:disabled):not([aria-checked="true"]):hover {
+      box-shadow: inset 0 0 0 1px var(--color-ink);
+    }
+  }
+  .zr-chip:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .zr-chip:disabled {
+    opacity: 0.5;
+  }
+  .zr-btn:disabled {
+    cursor: not-allowed;
+    background: var(--color-surface-soft);
+    color: var(--color-muted);
+    box-shadow: inset 0 0 0 1px var(--color-line);
+  }
 }
 
 /* Dates, years and counts never shift width. */

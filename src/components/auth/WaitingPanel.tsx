@@ -32,7 +32,7 @@ export default function WaitingPanel() {
   return (
     <div className="space-y-4 text-center">
       <ArchMark className="mx-auto h-11 w-10 text-accent" />
-      <h1 className="font-serif text-heading font-medium text-ink">{WAITING.title}</h1>
+      <h1 className="font-serif text-[34px]/[38px] text-ink">{WAITING.title}</h1>
       {WAITING.body.map((p) => (
         <p key={p} className="text-body text-muted">
           {p}

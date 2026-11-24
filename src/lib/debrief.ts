@@ -63,6 +63,30 @@ export async function latestDebrief(buildingId: string): Promise<Debrief | null>
   return data;
 }
 
+/**
+ * One line of each building's latest debrief, for the ranked lists (owner, 23 Nov):
+ * Claude's "Next:" step when it wrote one, else its first line. Reads stored
+ * debriefs only, so a list never waits on Claude or costs a call.
+ */
+export async function debriefLines(buildingIds: string[]): Promise<Map<string, string>> {
+  const lines = new Map<string, string>();
+  if (buildingIds.length === 0) return lines;
+  const { data, error } = await createServerSupabase()
+    .from("building_debriefs")
+    .select("building_id, text, created_at")
+    .in("building_id", buildingIds)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`debriefLines: ${error.message}`);
+  for (const d of data as { building_id: string; text: string }[]) {
+    if (lines.has(d.building_id)) continue;
+    const all = d.text.split("\n").map((l) => l.trim()).filter(Boolean);
+    const next = all.find((l) => /^next:/i.test(l));
+    const line = (next ? next.replace(/^next:\s*/i, "") : all[0]) ?? "";
+    if (line) lines.set(d.building_id, line.charAt(0).toUpperCase() + line.slice(1));
+  }
+  return lines;
+}
+
 /** True when the record has grown since the last debrief, and Claude is connected. */
 export function debriefIsStale(debrief: Debrief | null, recordCount: number) {
   return recordCount > 0 && claude() !== null && (debrief === null || debrief.record_count !== recordCount);

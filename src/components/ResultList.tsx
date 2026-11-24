@@ -47,6 +47,12 @@ export function ResultList({
                 </span>
               )}
               {r.note && <span className="block text-micro text-muted">{r.note}</span>}
+              {r.claude && (
+                <span className="mt-1 block rounded-control bg-accent-soft px-2 py-1 text-micro text-ink">
+                  <span className="font-semibold text-accent">Claude </span>
+                  {r.claude}
+                </span>
+              )}
             </span>
           </button>
         </li>

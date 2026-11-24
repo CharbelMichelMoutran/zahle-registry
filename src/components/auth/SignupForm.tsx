@@ -81,7 +81,7 @@ export default function SignupForm() {
     <form onSubmit={submit} noValidate className="space-y-5">
       <div>
         <p className="micro-label">Engineer</p>
-        <h1 className="mt-1 font-serif text-heading font-medium text-ink">Create account</h1>
+        <h1 className="mt-1 font-serif text-[34px]/[38px] text-ink">Create account</h1>
       </div>
 
       {field("fullName", { dir: "auto", autoComplete: "name", maxLength: 120 })}

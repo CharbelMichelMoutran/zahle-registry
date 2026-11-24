@@ -135,6 +135,18 @@ export const SOLUTION = {
       clip: "Clip: volunteer assessment on a phone, step by step",
     },
   ],
+  nearMe: {
+    label: "On a mission",
+    title: "Near me.",
+    text: "A volunteer team picks how long is too long: a week, a month, six months, a year. The map lists the 20 nearest buildings nobody has visited in that time, or ever, nearest first, and outlines them. A team in the street knows which door is next.",
+    shot: {
+      src: "/landing/near-me.webp",
+      width: 780,
+      height: 1688,
+      alt: "The volunteer map on a phone: the nearest buildings not visited in six months, outlined in blue, and one building open",
+      credit: "The volunteer map on a phone, live.",
+    },
+  },
 } as const;
 
 export const CLAUDE = {
@@ -161,15 +173,33 @@ export const CLAUDE = {
     output: "Claude's sketch of this photo: real product output, generated once the API key is set",
   },
   triage: {
-    tag: "In progress",
-    title: "It says how sure it is.",
-    text: "Claude gives a confidence for each reading. Postings it is unsure about go to engineers first, and every correction an engineer makes is kept, so Claude gets more accurate over time.",
-    placeholder: "Screen: the triage list, sorted by Claude's confidence",
+    title: "It reads every past report, then hands over the list.",
+    text: [
+      "Before anyone opens a building, Claude has read its whole record, every engineer report and every volunteer posting, and written what to do next. That line sits beside each building in the priority list.",
+      "Engineers can also just ask, in plain words. Claude turns the question into filters, and the app shows exactly how it read it. Claude never sets the order: the formula below does.",
+    ],
+    shot: {
+      src: "/landing/ask.webp",
+      width: 800,
+      height: 1152,
+      alt: "The engineer map's Ask panel: a typed question, how Claude read it, and a ranked list with Claude's next step for the first building",
+      credit: "The engineer map, live. Claude's line is its summary of the building's record.",
+    },
   },
   /** The steps themselves come from src/lib/priority.ts, the formula the app runs (plan.md item 29). */
   ranking: {
     title: "How buildings are ranked.",
     lead: "One written formula orders every list in the app, from the priority list to an engineer's question. Nothing is hidden. These are its steps, in order.",
+    bias: {
+      title: "Where it could be unfair",
+      lead: "Any ranking of people's homes can carry bias. These are the ones we know about, so nobody has to guess.",
+      points: [
+        { title: "It only ranks what's on record.", text: "A building nobody has inspected isn't ranked at all, so a neighbourhood that gets fewer visits shows up less. Asking for “not yet inspected” brings them back." },
+        { title: "Uncounted people count for less.", text: "When nobody counted the people inside, the building ranks below one where even a few were counted. A full building nobody counted can sit below a half-empty one." },
+        { title: "Claude's confidence is its own guess.", text: "It isn't a measured accuracy. It only orders buildings inside one group, and only where the volunteer agreed with Claude." },
+        { title: "Decisions made alone go up, not down.", text: "A posting made without Claude, or against it, is checked before one Claude agreed with. A single opinion gets a second one first." },
+      ],
+    },
   },
 } as const;
 

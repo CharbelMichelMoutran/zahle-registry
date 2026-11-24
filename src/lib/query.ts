@@ -29,6 +29,8 @@ export type QueryRow = {
   people: number | null;
   /** The volunteer chose a lower posting than Claude: shown as a warning. */
   downgraded: boolean;
+  /** Claude's next step from its debrief of the building's whole record, if it wrote one. */
+  claude?: string | null;
 };
 
 export type QueryResult = {

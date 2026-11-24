@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { LOCATE } from "@/lib/content";
 import { springSnappy } from "@/lib/motion";
+import { buttonProps } from "../ui/button-styles";
 
 const ROW =
   "flex min-h-11 w-full items-center gap-3 rounded-control px-3 text-left text-body focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent";
@@ -75,7 +76,7 @@ export function LocateMenu({ onLocate }: { onLocate: () => void }) {
             setOpen(true);
           }
         }}
-        className="relative flex h-10 items-center justify-center rounded-control px-3 whitespace-nowrap after:-inset-x-0.5 border border-line-strong bg-surface text-body font-medium text-ink shadow-[0_1px_2px_rgb(31_42_55/0.05)] transition-[background-color,border-color] duration-150 ease-out hover:border-[#bcc3cb] hover:bg-surface-soft after:absolute after:-inset-y-0.5 after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        {...buttonProps("secondary")}
       >
         {LOCATE.button}
       </motion.button>

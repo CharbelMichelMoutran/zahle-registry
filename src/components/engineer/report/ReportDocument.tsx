@@ -74,7 +74,7 @@ export default function ReportDocument({
             <header className="mb-6 flex items-end justify-between border-b-2 border-ink pb-2">
               <div>
                 <p className="text-micro tracking-[0.08em] text-muted uppercase">Zahle on Record</p>
-                <h1 className="font-serif text-title font-medium text-ink">Building condition report</h1>
+                <h1 className="font-serif text-[26px]/[30px] text-ink">Building condition report</h1>
               </div>
               <p className="tabular text-right text-body text-ink">
                 <span className="font-semibold">{report.report_number}</span>
