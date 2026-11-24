@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { requireEngineer } from "@/lib/api-auth";
-import { ASSESSMENT_LIMITS, POSTINGS, type Assessment, type Draft, type Posting } from "@/lib/atc20";
+import { ASSESSMENT_LIMITS, cleanConfidence, POSTINGS, type Assessment, type Draft, type Posting } from "@/lib/atc20";
 import { createServerSupabase } from "@/lib/supabase-server";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -80,6 +80,7 @@ export async function POST(req: NextRequest, ctx: RouteContext<"/api/buildings/[
       inspector_name: engineer.fullName,
       posting,
       claude_posting: claudePosting,
+      claude_confidence: claudePosting ? cleanConfidence(draft.claudePosting?.confidence) : null,
       overrode_claude: claudePosting !== null && claudePosting !== posting,
       stopped_reason: draft.stopped ? String(draft.stopped.check).slice(0, 300) : null,
       data: saved,

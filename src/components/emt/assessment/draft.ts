@@ -101,7 +101,7 @@ const SEVERITY: Record<Rating, number> = { unseen: 0, none: 1, moderate: 2, seve
 
 export type PhotoClaude = {
   caption: string;
-  suggestions: { id: string; rating: "none" | "moderate" | "severe"; reason: string }[];
+  suggestions: { id: string; rating: "none" | "moderate" | "severe"; reason: string; confidence: number }[];
   facts: {
     floors: string | null;
     addedOnRoof: string | null;
@@ -129,6 +129,7 @@ export function applyClaude(d: Draft, photoNumber: number, c: PhotoClaude): Draf
     items[s.id] = {
       ...prev,
       claude,
+      confidence: worse ? s.confidence : (prev.confidence ?? null),
       rating: prev.by === "emt" ? prev.rating : claude,
       by: prev.by === "emt" ? "emt" : "claude",
       reason: worse ? s.reason : prev.reason,

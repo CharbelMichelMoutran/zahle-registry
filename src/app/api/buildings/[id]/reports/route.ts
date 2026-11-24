@@ -49,7 +49,7 @@ export async function GET(req: NextRequest, ctx: RouteContext<"/api/buildings/[i
       .order("changed_at", { ascending: false }),
     supabase
       .from("assessments")
-      .select("id, building_id, inspector_name, posting, claude_posting, overrode_claude, stopped_reason, data, photos, created_at")
+      .select("id, building_id, inspector_name, posting, claude_posting, claude_confidence, overrode_claude, stopped_reason, data, photos, created_at")
       .eq("building_id", id)
       .order("created_at", { ascending: false }),
     latestDebrief(id).catch((err: Error) => {

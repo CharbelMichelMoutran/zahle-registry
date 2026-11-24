@@ -41,6 +41,41 @@ export const POSTING_MEANING: Record<Posting, string> = {
 
 export const POSTING_COLOUR = { inspected: "green", restricted: "yellow", unsafe: "red" } as const;
 
+/** How serious each posting is, for comparing two postings. */
+export const POSTING_SEVERITY: Record<Posting, number> = { inspected: 0, restricted: 1, unsafe: 2 };
+
+/**
+ * The volunteer saved a lower posting than Claude proposed (owner, 23 Nov 2026,
+ * plan.md item 29): always allowed, never blocked, but shown as a warning.
+ */
+export const isDowngrade = (claude: Posting | null | undefined, saved: Posting) =>
+  !!claude && POSTING_SEVERITY[saved] < POSTING_SEVERITY[claude];
+
+// ---------------------------------------------------------------------------
+// Claude's confidence (owner, 23 Nov 2026, plan.md item 29)
+// ---------------------------------------------------------------------------
+
+/**
+ * Claude's own estimate, 0 to 100, of how sure it is of its own answer. A
+ * person's answer has no score: the person decides. It is a hint, not a
+ * measured accuracy (checking it against engineer reviews is on the Later list).
+ */
+export const CONFIDENCE_ANCHORS = `Confidence is 0 to 100: how sure you are of your own answer. 90 to 100: the photos clearly and directly show it. 60 to 89: likely, but part is unclear or not visible. Below 60: a guess from weak or indirect evidence. Do not inflate it; a low number tells the person where to look twice.`;
+
+export function confidenceWord(n: number): string {
+  if (n >= 90) return "Very sure";
+  if (n >= 60) return "Fairly sure";
+  return "Unsure";
+}
+
+/** "Fairly sure · 84%". */
+export const confidenceText = (n: number) => `${confidenceWord(n)} · ${n}%`;
+
+/** A score from Claude or from a stored draft: a whole number 0 to 100, or null. */
+export function cleanConfidence(v: unknown): number | null {
+  return typeof v === "number" && Number.isFinite(v) ? Math.max(0, Math.min(100, Math.round(v))) : null;
+}
+
 // ---------------------------------------------------------------------------
 // Scene safety (owner's form, page 2). Any Yes stops the assessment.
 // ---------------------------------------------------------------------------
@@ -309,6 +344,8 @@ export type ItemAnswer = {
   /** Who set `rating`. */
   by: "claude" | "emt" | null;
   claude: Rating | null;
+  /** Claude's confidence in its own `claude` rating (absent in assessments saved before 23 Nov 2026). */
+  confidence?: number | null;
   reason: string;
   /** Photo numbers that show it. */
   photos: number[];
@@ -383,7 +420,7 @@ export type Draft = {
   gate: "enter" | "do-not-enter" | null;
   floorsWalked: string;
   areasNotInspected: string;
-  claudePosting: { posting: Posting; because: string[]; reason: string } | null;
+  claudePosting: { posting: Posting; because: string[]; reason: string; confidence?: number | null } | null;
   posting: Posting | null;
   restrictions: string;
   actions: { barricade: string; engineer: string[]; shutOff: string[]; neighbours: boolean; notify: string[]; other: string };
@@ -408,7 +445,7 @@ export const STEP_LABEL: Record<Step, string> = {
   review: "Save",
 };
 
-export const emptyAnswer = (): ItemAnswer => ({ rating: null, by: null, claude: null, reason: "", photos: [] });
+export const emptyAnswer = (): ItemAnswer => ({ rating: null, by: null, claude: null, confidence: null, reason: "", photos: [] });
 
 export const EMPTY_FACTS: Facts = {
   buildingName: "", governorate: "", district: "", municipality: "", street: "", landmark: "",
@@ -434,6 +471,8 @@ export type Assessment = {
   inspector_name: string;
   posting: Posting;
   claude_posting: Posting | null;
+  /** Claude's confidence in its own proposed posting; null when Claude was not used. */
+  claude_confidence: number | null;
   overrode_claude: boolean;
   stopped_reason: string | null;
   data: Draft;

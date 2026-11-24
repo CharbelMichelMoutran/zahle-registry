@@ -1,5 +1,7 @@
 import {
+  confidenceText,
   GROUP_LABEL,
+  isDowngrade,
   ITEMS,
   POSTING_COLOUR,
   POSTING_LABEL,
@@ -38,6 +40,23 @@ export function PostingBadge({ posting, size = "small" }: { posting: Posting; si
       <RatingArches colour={colour} large={size === "large"} className={STATUS_TEXT[colour]} />
       {POSTING_LABEL[posting]}
     </span>
+  );
+}
+
+/**
+ * When the volunteer and Claude disagreed on the posting (plan.md item 29):
+ * a warning if the volunteer went lower than Claude, a plain tag otherwise.
+ * Kept visible for future training. Nothing when they agreed or Claude was not used.
+ */
+export function ClaudeAgreement({ assessment: a }: { assessment: Assessment }) {
+  if (!a.claude_posting || a.claude_posting === a.posting) return null;
+  const claude = `Claude proposed ${POSTING_LABEL[a.claude_posting]}${a.claude_confidence != null ? ` (${a.claude_confidence}%)` : ""}`;
+  return isDowngrade(a.claude_posting, a.posting) ? (
+    <p className="rounded-control bg-attention-soft px-2.5 py-1 text-micro font-medium text-attention">
+      Volunteer downgraded Claude&apos;s posting · {claude}
+    </p>
+  ) : (
+    <p className="text-micro text-muted">Volunteer and Claude disagreed · {claude}</p>
   );
 }
 
@@ -138,6 +157,7 @@ export function AssessmentView({ assessment: a }: { assessment: Assessment }) {
         <PostingBadge posting={a.posting} size="large" />
         <p className="text-body text-ink">{POSTING_MEANING[a.posting]}</p>
         <EmtLabel />
+        <ClaudeAgreement assessment={a} />
         {a.stopped_reason && (
           <p className="rounded-control bg-rooftile/10 px-3 py-2 text-body text-ink">
             Stopped at a danger: {a.stopped_reason}. Evacuation ordered.
@@ -147,8 +167,9 @@ export function AssessmentView({ assessment: a }: { assessment: Assessment }) {
         <p className="text-micro text-muted">
           {formatDate(a.created_at.slice(0, 10))} · {a.inspector_name}
           {d.organization && ` · ${d.organization}`}
-          {a.claude_posting && ` · Claude suggested ${POSTING_LABEL[a.claude_posting]}`}
-          {a.overrode_claude && " · Volunteer overrode Claude"}
+          {a.claude_posting === a.posting &&
+            ` · Claude suggested the same${a.claude_confidence != null ? ` (${confidenceText(a.claude_confidence)})` : ""}`}
+          {!a.claude_posting && " · Claude not used"}
           {changedByEmt > 0 && ` · Volunteer changed ${changedByEmt} of Claude's answers`}
         </p>
       </div>
@@ -172,8 +193,15 @@ export function AssessmentView({ assessment: a }: { assessment: Assessment }) {
                       <span className="text-ink">{i.label}</span>
                       <span className={RATING_TEXT[x.rating!]}>
                         {RATING_LABEL[x.rating!]}
+                        {x.claude && x.claude === x.rating && x.confidence != null && (
+                          <span className="font-normal text-muted not-italic"> · Claude {x.confidence}%</span>
+                        )}
                         {x.claude && x.claude !== x.rating && (
-                          <span className="font-normal text-muted not-italic"> (Claude: {RATING_LABEL[x.claude]})</span>
+                          <span className="font-normal text-muted not-italic">
+                            {" "}
+                            (Claude: {RATING_LABEL[x.claude]}
+                            {x.confidence != null && ` · ${x.confidence}%`})
+                          </span>
                         )}
                       </span>
                       {x.reason && <span dir="auto" className="w-full text-micro text-muted">{x.reason}</span>}

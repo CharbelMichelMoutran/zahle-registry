@@ -5,6 +5,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import {
   ACTIONS,
   AGES,
+  cleanConfidence,
+  confidenceText,
   CONSTRUCTION,
   DAMAGE_ESTIMATES,
   EMERGENCY_NUMBERS,
@@ -14,6 +16,7 @@ import {
   GOVERNORATES,
   GROUP_LABEL,
   INSIDE_CHECKS,
+  isDowngrade,
   itemsFor,
   OCCUPANCY,
   ORGANIZATIONS,
@@ -667,7 +670,11 @@ function Items({ items, draft, update }: { items: Item[]; draft: Draft; update: 
                 <li key={i.id} className="space-y-2 rounded-card border border-line px-3 py-2.5">
                   <div className="flex flex-wrap items-baseline justify-between gap-x-2">
                     <span className="text-body font-medium text-ink">{i.label}</span>
-                    {a.by === "claude" && <span className="text-micro font-medium text-accent">Claude</span>}
+                    {a.claude && a.by === "claude" && (
+                      <span className="text-micro font-medium text-accent">
+                        Claude{a.confidence != null && ` · ${a.confidence}%`}
+                      </span>
+                    )}
                   </div>
                   <div className="grid grid-cols-4 gap-1" role="radiogroup" aria-label={i.label}>
                     {RATINGS.map((r) => (
@@ -704,6 +711,12 @@ function Items({ items, draft, update }: { items: Item[]; draft: Draft; update: 
                         </li>
                       ))}
                     </ul>
+                  )}
+                  {a.claude && a.by === "emt" && a.rating !== a.claude && (
+                    <p className="text-micro text-muted">
+                      Claude said {RATING_LABEL[a.claude]}
+                      {a.confidence != null && ` · ${a.confidence}%`}
+                    </p>
                   )}
                   {a.reason && (
                     <p dir="auto" className="text-micro text-ink">
@@ -833,7 +846,7 @@ function PostingStep({ draft, update }: { draft: Draft; update: Update }) {
     setStatus("idle");
     update((d) => ({
       ...d,
-      claudePosting: { posting: r.posting, because: r.because, reason: r.reason },
+      claudePosting: { posting: r.posting, because: r.because, reason: r.reason, confidence: cleanConfidence(r.confidence) },
       // Claude's proposal fills only what the EMT has not set.
       posting: d.posting ?? r.posting,
       restrictions: d.restrictions || r.restrictions,
@@ -871,7 +884,8 @@ function PostingStep({ draft, update }: { draft: Draft; update: Update }) {
       {c && (
         <div className="space-y-2">
           <ClaudeLine>
-            I suggest <strong>{POSTING_LABEL[c.posting]}</strong>. {c.reason}
+            I suggest <strong>{POSTING_LABEL[c.posting]}</strong>
+            {c.confidence != null && ` (${confidenceText(c.confidence)})`}. {c.reason}
             {c.because.length > 0 && ` (items ${c.because.join(", ")})`}
           </ClaudeLine>
           <button type="button" onClick={ask} disabled={status === "busy"} className="min-h-11 text-micro text-accent underline underline-offset-2">
@@ -896,6 +910,11 @@ function PostingStep({ draft, update }: { draft: Draft; update: Update }) {
           </button>
         ))}
       </div>
+      {c && draft.posting && isDowngrade(c.posting, draft.posting) && (
+        <p className="rounded-control bg-attention-soft px-3 py-2 text-body text-attention">
+          Claude proposed {POSTING_LABEL[c.posting]}. You chose {POSTING_LABEL[draft.posting]}.
+        </p>
+      )}
       <Field label="Placard restrictions" hint="exactly as written on the placard">
         {(id) => (
           <AutoTextarea id={id} dir="auto" value={draft.restrictions} maxLength={600} onChange={(e) => update((d) => ({ ...d, restrictions: e.target.value }))} />

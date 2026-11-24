@@ -5,6 +5,8 @@ import { z } from "zod";
 import {
   ACTIONS,
   AGES,
+  CONFIDENCE_ANCHORS,
+  cleanConfidence,
   CONSTRUCTION,
   DAMAGE_ESTIMATES,
   FEATURES,
@@ -110,6 +112,7 @@ const PhotoSchema = z.object({
       id: z.string().describe("ATC item id from the list"),
       rating: z.enum(["none", "moderate", "severe"]),
       reason: z.string().describe("One short sentence the EMT can check against the photo"),
+      confidence: z.number().describe("0 to 100: how sure you are of this rating"),
     }),
   ),
   facts: z.object({
@@ -156,6 +159,8 @@ ${itemList(input.walk)}
 What is already recorded (do not repeat unless this photo changes it):
 ${input.known || "Nothing yet."}
 
+${CONFIDENCE_ANCHORS}
+
 Also fill the building facts you can see. ${SKETCH_RULES} Return sketch null if the photo is too unclear to sketch.`,
           },
         ],
@@ -166,7 +171,12 @@ Also fill the building facts you can see. ${SKETCH_RULES} Return sketch null if 
   const out = response.parsed_output;
   if (!out) return null;
   const allowed = new Set(itemsFor(input.walk).map((i) => i.id));
-  return { ...out, suggestions: out.suggestions.filter((s) => allowed.has(s.id)) };
+  return {
+    ...out,
+    suggestions: out.suggestions
+      .filter((s) => allowed.has(s.id))
+      .map((s) => ({ ...s, confidence: cleanConfidence(s.confidence) ?? 0 })),
+  };
 }
 
 /** Redraw the sketch for one stored photo. */
@@ -203,6 +213,7 @@ const PostingSchema = z.object({
   posting: z.enum(POSTINGS),
   because: z.array(z.string()).describe("ATC item ids behind the posting"),
   reason: z.string().describe("One or two plain sentences"),
+  confidence: z.number().describe("0 to 100: how sure you are of this posting"),
   restrictions: z.string().describe("For Restricted use: what is restricted, exactly as it would be written on the placard. Else empty"),
   damage: z.enum(DAMAGE_ESTIMATES),
   actions: z.object({
@@ -226,7 +237,7 @@ export function draftSummary(d: Draft): string {
   lines.push(`Sides seen: ${d.sidesSeen.join(", ") || "not recorded"}. Not seen: ${d.sidesNotSeen || "-"}. Went inside: ${d.gate ?? "not decided"}.`);
   for (const i of ITEMS) {
     const a = d.items[i.id];
-    if (a?.rating) lines.push(`${i.id} ${i.label}: ${RATING_LABEL[a.rating]}${a.reason ? ` (${a.reason})` : ""}`);
+    if (a?.rating) lines.push(`${i.id} ${i.label}: ${RATING_LABEL[a.rating]}${a.by === "emt" ? " (set by the EMT)" : ""}${a.reason ? ` (${a.reason})` : ""}`);
   }
   for (const p of d.photos) lines.push(`Photo ${p.number} (${p.walk}): ${p.caption}`);
   if (d.comments) lines.push(`EMT comments: ${d.comments}`);
@@ -246,13 +257,15 @@ export async function suggestPosting(d: Draft): Promise<PostingResult | null> {
         role: "user",
         content: `Recommend the ATC-20 posting for this building from the assessment below.
 ATC-20 guidance: Unsafe when there is an extreme hazard (collapse, a clear lean, severe structural damage, a severe falling or ground hazard). Restricted use when there is a hazard that limits use of part of the building, or when key parts could not be seen. Inspected when no apparent hazard was found. Also recommend the follow-up actions and the damage estimate.
+${CONFIDENCE_ANCHORS} Answers marked "(set by the EMT)" are the EMT's own judgement.
 
 ${draftSummary(d)}`,
       },
     ],
   });
   if (response.stop_reason === "refusal") return null;
-  return response.parsed_output ?? null;
+  const out = response.parsed_output;
+  return out ? { ...out, confidence: cleanConfidence(out.confidence) ?? 0 } : null;
 }
 
 // ---------------------------------------------------------------------------

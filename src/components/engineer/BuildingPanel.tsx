@@ -9,7 +9,7 @@ import { fadeFast, springSnappy, springTray, staggerDelay } from "@/lib/motion";
 import { reportConstructionDate, type ConstructionDateChange, type Report, type ReportInput } from "@/lib/report";
 import type { Assessment } from "@/lib/atc20";
 import { mergedRecord, type Debrief, type RecordEntry } from "@/lib/record";
-import { AssessmentView, DebriefCard, EmtLabel, PostingBadge } from "../report/AssessmentParts";
+import { AssessmentView, ClaudeAgreement, DebriefCard, EmtLabel, PostingBadge } from "../report/AssessmentParts";
 import { ColourBadge, NotYetInspectedBadge } from "../report/ColourBadge";
 import ReportForm, { INITIAL_SAVE_STATE, type SaveState } from "./report/ReportForm";
 import ReportView from "./report/ReportView";
@@ -490,6 +490,7 @@ function AssessmentSummary({ assessment: a, large = false }: { assessment: Asses
         )}
         <EmtLabel />
       </p>
+      <ClaudeAgreement assessment={a} />
     </div>
   );
 }
